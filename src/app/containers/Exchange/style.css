@@ -150,8 +150,13 @@
 .tx_box_li{
     cursor: pointer;
 }
+.tx_pending{
+    opacity: .5;
+    font-style: italic;
+}
 .tx_box_li td{
     padding: 10px 4px;
+    text-align: center;
 }
 .tx_box_li:hover{
     background-color: rgba(0,0,0,.2);

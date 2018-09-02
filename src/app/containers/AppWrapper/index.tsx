@@ -53,7 +53,6 @@ class AppWrapper extends React.Component<any, any>{
     slideLeft: false,
   } 		
   componentDidMount(){
-   
     const { exchangeStore } = this.props;
     const { currency } = exchangeStore;
     const regex = /^\/markets\/(\w{3,5})/;
@@ -173,12 +172,12 @@ class AppWrapper extends React.Component<any, any>{
                       <FaDiv vcenter>
                         <Div className={cx(styles.rel)}>{o.ticker}</Div>
                       </FaDiv>
+                     <FaDiv vcenter>
+                        <Div className={cx(styles.vol)}>{exchangeStore.fiat.symbol}{o.priceusd}</Div>
+                      </FaDiv>                      
                     </Fa>
                     <FaDiv fs c style={{width: "86px"}}>
-                        <Div className={cx(styles.price,
-                            {[styles.pos]: o.last_price < o.price},
-                            {[styles.neg]: o.last_price > o.price},
-                          )}>${o.priceusd}</Div>                   
+                        <Div className={cx(styles.price)}>{exchangeStore.balance}</Div>
                     </FaDiv>
                     <FaDiv vcenter fs c style={{width: "70px"}}>
                         <Div className={cx(styles.change,

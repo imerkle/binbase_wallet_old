@@ -1,4 +1,6 @@
-import { Address } from 'bitcore-lib';
+import WAValidator from 'wallet-address-validator';
+
+
 import Web3 from 'web3';
 
 var options = {
@@ -13,14 +15,14 @@ export const apiEndPoints = {
   "BTC": "https://api.blockcypher.com/v1/btc/main",
   "ETH": "https://api.etherscan.io/api",
 }
+
 export const etherscan_api_key = "8FISWFNZET4P2J451BY5I5GERA5MZG34S2";
 //?module=account&action=txlist&address=0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae&startblock=0&endblock=99999999&sort=asc&apikey=YourApiKeyToken
-export const explorers = {
-  "BTC": "https://blocktrail.com/BTC",
-  "ETH": "https://etherscan.io",
-}
+
 export const atomicValue = {
   "BTC": 10**8,
+  "DASH": 10**8,
+  "LTC": 10**8,
   "ETH": 10**18,
 }
 export const getAtomicValue = (rel) => {
@@ -68,16 +70,19 @@ export const stringToColour = (str) =>  {
   return colour;
 }
 
-export const pair_decimals = {
-  "BTC" : {
-    "ETH" : 2
-  }
-};
+//to disable testnet make all null 
+export const testnet = {
+  suffix: "-TEST",
+  //networkType: "prod",
+  networkType: "testnet"
+}
 
 export const isValidAddress = (address, coin) => {
   switch(coin){
     case 'BTC':
-      if (Address.isValid(address)){
+    case 'DASH':
+    case 'LTC':
+      if(WAValidator.validate(address, coin,testnet.networkType)){
         return true;
       }
     break;
@@ -88,4 +93,30 @@ export const isValidAddress = (address, coin) => {
     break;
   }
   return false;
+}
+
+export const explorers = {
+  /*
+  "BTC": "https://blocktrail.com/BTC",
+  "ETH": "https://etherscan.io",
+  "LTC": "https://insight.litecore.io",
+  "DASH": "https://insight.dash.org",  
+  */
+
+  "BTC": "https://test-insight.bitpay.com",
+  "LTC": "https://testnet.litecore.io",
+  "DASH": "https://testnet-insight.dashevo.org",
+}
+
+export const apiInsight = {
+  /*
+  "BTC": "https://insight.bitpay.com/api",
+  "LTC": "https://insight.litecore.io/api",
+  "DASH": "https://insight.dash.org/api",
+  */
+
+  //testnet explorers below
+  "BTC": "https://test-insight.bitpay.com/api",
+  "LTC": "https://testnet.litecore.io/api",
+  "DASH": "https://testnet-insight.dashevo.org/insight-api-dash",
 }

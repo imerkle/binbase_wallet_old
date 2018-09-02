@@ -3,7 +3,7 @@ import { observer, inject } from 'mobx-react';
 
 //@ts-ignore
 import { TabContainer, Fa, FaDiv, Avatar, Div, Span, AButton, Link, TextField } from 'app/components';
-import { Switch, IconButton, Icon } from '@material-ui/core';
+import { CircularProgress, Switch, IconButton, Icon } from '@material-ui/core';
 import Slider from '@material-ui/lab/Slider';
 //@ts-ignore
 import * as styles from './style.css';
@@ -13,7 +13,6 @@ import { compose } from 'recompose';
 import { StyleRules, Theme, withStyles } from '@material-ui/core/styles';
 import { getAtomicValue, explorers, isValidAddress } from 'app/constants';
 
-
 var moment = require('moment');
 
 //import SwipeableViews from 'react-swipeable-views';
@@ -21,7 +20,7 @@ var moment = require('moment');
 //import Buy from './buy';
 //import Sell from './sell';
 
-
+const btc_forks = ['LTC', 'DASH', 'DOGE', 'VTC', 'BTG'];
 
 
 const styleSheet = (theme: Theme): StyleRules => ({
@@ -93,11 +92,31 @@ const numberWithCommas = (x) => {
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return parts.join(".");
 }
+const smartTrim = (string, maxLength) => {
+    if (!string) return string;
+    if (maxLength < 1) return string;
+    if (string.length <= maxLength) return string;
+    if (maxLength == 1) return string.substring(0,1) + '...';
+
+    var midpoint = Math.ceil(string.length / 2);
+    var toremove = string.length - maxLength;
+    var lstrip = Math.ceil(toremove/2);
+    var rstrip = toremove - lstrip;
+    return string.substring(0, midpoint-lstrip) + '...' 
+    + string.substring(midpoint+rstrip);
+}   
+
 @compose(withStyles(styleSheet))
 @inject('langStore','exchangeStore','appStore')
 @observer
 class Exchange extends React.Component<any, any>{
+  componentWillReceiveProps(){
+    this.init()
+  }
   componentDidMount(){
+    this.init()
+  }
+  init = () => {
     const { exchangeStore } = this.props;
     const regex2 = /^\/exchange\/(\w{5,12})/;
     const str = window.location.pathname;
@@ -110,18 +129,33 @@ class Exchange extends React.Component<any, any>{
       exchangeStore.setBase(_base);
       exchangeStore.setRel(_rel);
       exchangeStore.generatePKey();
-    }    
+
+      switch(_rel){
+        case 'LTC':
+        case 'DASH':
+        case 'DOGE':
+        case 'VTC':
+        case 'BTG':
+          this.setState({advanceToggleDisabled: true, showAdvanced: true});
+        break;
+        default:
+          this.setState({advanceToggleDisabled: false});
+        break;
+      }
+    }
   }
   state = {
     addressField: "",
     amountField: "",
     addressError: false,
     showAdvanced: false,
+    advanceToggleDisabled: false,
+
   }
   render(){
     const { classes, exchangeStore, appStore } = this.props;
     const { address, txs } = exchangeStore;
-    const { showAdvanced, addressField, amountField, addressError } = this.state;
+    const { advanceToggleDisabled, showAdvanced, addressField, amountField, addressError } = this.state;
   	return (
       <FaDiv c>
         <FaDiv>
@@ -189,14 +223,17 @@ class Exchange extends React.Component<any, any>{
                 type="text"
                 fullWidth />             
                 <IconButton onClick={()=>{
-                  this.setState({amountField: exchangeStore.balance - (exchangeStore.fees/getAtomicValue(exchangeStore.rel)) })
-                }} color="primary" ><Icon style={{fontSize: 14}} className={cx(classes.icon)}>call_made</Icon></IconButton>
+
+                 const divide_by = (btc_forks.indexOf(exchangeStore.rel) != -1) ? 1 : getAtomicValue(exchangeStore.rel);
+                 this.setState({amountField: exchangeStore.balance - (exchangeStore.fees/divide_by)})
+              }} color="primary" ><Icon style={{fontSize: 14}} className={cx(classes.icon)}>call_made</Icon></IconButton>
             </FaDiv>
           </FaDiv>
           <FaDiv vcenter>
             <Fa fs></Fa>
             <Fa className={cx(styles.feelabel)}>Advanced Options</Fa>
             <Switch
+              disabled = {advanceToggleDisabled}
               checked={showAdvanced}
               onChange={()=>{ 
                 exchangeStore.estimateFee(exchangeStore.feeSlider);
@@ -227,9 +264,17 @@ class Exchange extends React.Component<any, any>{
               fullWidth />
           </FaDiv>
           }
-          {
-            showAdvanced &&
-            exchangeStore.rel == "BTC" &&
+          {showAdvanced && btc_forks.indexOf(exchangeStore.rel)!= -1 &&
+
+           <TextField
+            className={cx(stylesg.mar_20_0)}
+            value={exchangeStore.fees}
+            onChange={(e)=>{ exchangeStore.setFees(e.target.value) }}
+            label={`Network Fees (${exchangeStore.rel})`}
+            type="text"
+            fullWidth />
+          }
+          {showAdvanced && exchangeStore.rel == "BTC" &&
 
            <TextField
             className={cx(stylesg.mar_20_0)}
@@ -278,11 +323,11 @@ class Exchange extends React.Component<any, any>{
             </tr>
           {txs.map((o,i)=>{ 
             return (
-            <tr key={i} className={cx(styles.tx_box_li)} onClick={()=>{
+            <tr key={i} className={cx(styles.tx_box_li, {[styles.tx_pending]: o.confirmations == 0})} onClick={()=>{
                   window.open(`${explorers[exchangeStore.rel]}/tx/${o.hash}`,"_blank");
                }}>
-                <td>{o.hash}</td>
-                <td>{moment.unix(o.timestamp).fromNow()}</td>
+                <td>{smartTrim(o.hash, 20)}</td>
+                <td>{o.confirmations == 0 ? <CircularProgress size={18} color="primary" /> : moment.unix(o.timestamp).fromNow()}</td>
                 <td className={cx(stylesg.tcenter)}><span className={cx({[styles.got]: o.kind == "got"},
                 {[styles.sent]: o.kind == "sent"})}>{o.kind == "got" ? "IN": "OUT" }</span></td>
                 <td>{o.value} {exchangeStore.rel}</td>
@@ -302,7 +347,8 @@ class Exchange extends React.Component<any, any>{
     const { addressError, addressField, amountField } = this.state;
       return new Promise((resolve, reject) => {
         const amt = parseFloat(amountField);
-        let fees = exchangeStore.fees/getAtomicValue(exchangeStore.rel);
+        const divide_by = (btc_forks.indexOf(exchangeStore.rel) != -1) ? 1 : getAtomicValue(exchangeStore.rel);
+        let fees = exchangeStore.fees/divide_by;
           
         if(addressError || !addressField){
           appStore.setSnackMsg("Invalid Bitcoin Address");
@@ -320,7 +366,9 @@ class Exchange extends React.Component<any, any>{
           appStore.setSnackMsg("Not enough balance to cover network fees");
           return false;
         }
-        exchangeStore.send(addressField, amt )
+        exchangeStore.send(addressField, amt)
+        appStore.setSnackMsg("Transaction will be broadcasted!");
+        exchangeStore.syncBalance(false)
       });    
     }
 }

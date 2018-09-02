@@ -2,12 +2,32 @@ import { observable, action, runInAction } from 'mobx';
 import hdkey from 'ethereumjs-wallet/hdkey';
 import bip39 from 'bip39';
 import bitcore from 'bitcore-lib';
-import { web3, getAtomicValue, etherscan_api_key, apiEndPoints } from 'app/constants';
+import { web3, getAtomicValue, etherscan_api_key, apiEndPoints, apiInsight, testnet } from 'app/constants';
 import axios from 'axios';
+import bitcoin from 'bitcoinjs-lib';
+import coininfo from 'coininfo';
+
 const Tx = require('ethereumjs-tx')
 
-var explorers = require('bitcore-explorers');
-const insight = new explorers.Insight();
+function toFixed(x) {
+  if (Math.abs(x) < 1.0) {
+    var e = parseInt(x.toString().split('e-')[1]);
+    if (e) {
+        x *= Math.pow(10,e-1);
+        x = '0.' + (new Array(e)).join('0') + x.toString().substring(2);
+    }
+  } else {
+    var e = parseInt(x.toString().split('+')[1]);
+    if (e > 20) {
+        e -= 20;
+        x /= Math.pow(10,e);
+        x += (new Array(e+1)).join('0');
+    }
+  }
+  return x;
+}
+var Insight = require('app/utils/insight');
+const insight = new Insight();
 export class ExchangeStore {
   @observable balance = 0;
   @observable n_tx = 0;
@@ -32,10 +52,15 @@ export class ExchangeStore {
   @observable sorter = {value: 0, dir: 1};
   @observable currency = [
     {base: "BTC", name: "Bitcoin", index: 1, rel: [
-      {ticker: "BTC",index: 1, vol: 4050, priceusd: 463.24, price: 0.00014, last_price: 0.0014, change: -2.3},
+      {ticker: "BTC",index: 1, priceusd: 0, price: 0, last_price: 0, change: 0},
+      {ticker: "DASH",index: 2, priceusd: 0, price: 0, last_price: 0, change: 0},
+      {ticker: "LTC",index: 3, priceusd: 0, price: 0, last_price: 0, change: 0},
+      {ticker: "DOGE",index: 4, priceusd: 0, price: 0, last_price: 0, change: 0},
+      {ticker: "VTC",index: 5, priceusd: 0, price: 0, last_price: 0, change: 0},
+      {ticker: "BTG",index: 6, priceusd: 0, price: 0, last_price: 0, change: 0},
     ]},
     {base: "ETH", name: "Ethereum", index: 2, rel: [
-      {ticker: "ETH",index: 1, vol: 4050, priceusd: 463.24, price: 0.00014, last_price: 0.0014, change: -2.3},
+      {ticker: "ETH",index: 1, priceusd: 0, price: 0, last_price: 0, change: 0},
     ]},
   ];
 
@@ -70,21 +95,29 @@ export class ExchangeStore {
     if(!this.seed){
       this.generateSeed();
     }
+    let hash;
     switch(this.rel){
       case 'BTC':
-        const value = Buffer.from(this.seed);
-        const hash = bitcore.crypto.Hash.sha256(value);
-        const bn = bitcore.crypto.BN.fromBuffer(hash);
-        this.pkey= new bitcore.PrivateKey(bn).toWIF();
-        this.address = new bitcore.PrivateKey(bn).toAddress();
-        //this.address = "1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD";s
+      case 'LTC':
+      case 'DASH':
+      case 'DOGE':
+      case 'VTC':
+      case 'BTG':
+        hash = bitcoin.crypto.sha256(Buffer.from(this.seed))
+        const keyPair = bitcoin.ECPair.fromPrivateKey(hash)
+
+        const derivedWallet = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey, network: coininfo(`${this.rel}${testnet.suffix}`).toBitcoinJS() });
+        this.pkey= keyPair.toWIF();
+        this.address = derivedWallet.address;
+        //this.address = "1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD";
       break;
       //eth and rest of its shitcoins
       default:
         const wallet = hdkey.fromMasterSeed(this.seed);
-        const address = wallet.getWallet().getAddressString()
-        this.address = address;
-        this.address = "0xddbd2b932c763ba5b1b7ae3b362eac3e8d40121a";
+        const w = wallet.getWallet();
+        this.address = w.getAddressString();
+        this.pkey = w.getPrivateKeyString().substr(2);
+        //this.address = "0xddbd2b932c763ba5b1b7ae3b362eac3e8d40121a";
       break;
     }
     this.syncBalance();
@@ -93,41 +126,56 @@ export class ExchangeStore {
   }
 
   @action 
-  syncBalance = async () => {
-    let data;
+  syncBalance = async (timeout = true) => {
+    //@ts-ignore
+    let data, data2 = null;
     switch(this.rel){
       case 'BTC':
-        data =  await axios.get(`${apiEndPoints[this.rel]}/addrs/${this.address}/full?limit=20`);
+      case 'LTC':
+      case 'DASH':
+      case 'DOGE':
+      case 'VTC':
+      case 'BTG':
+        data = await axios.get(`${apiInsight[this.rel]}/addr/${this.address}`);
+        //@ts-ignore
+        data2 = await axios.get(`${apiInsight[this.rel]}/txs/?address=${this.address}`);
+
+        if (timeout) {
+          setTimeout(() => {
+            this.syncBalance();
+          },60000)
+        }
+
         runInAction(() => {
-          this.balance = data.data.balance/getAtomicValue(this.rel);
-          this.n_tx = data.data.n_tx;
+          this.balance = data.data.balance;
+          this.n_tx = data.data.txAppearances;
 
           const txs = [];
-          data.data.txs.map(o=>{
-            const from = o.inputs[0].addresses[0];
+          data2.data.txs.map(o=>{
+            const from = o.vin[0].addr;
             let value = 0;
             let kind = "got";
-            let fee = o.fees/getAtomicValue(this.rel);
+            let fee = o.fees;
 
             if(from!= this.address){
               kind = "got";
-              o.outputs.map(o=>{ 
-                if(o.addresses[0]  == this.address){
-                  value += o.value/getAtomicValue(this.rel);
+              o.vout.map(o=>{ 
+                if(o.scriptPubKey.addresses[0]  == this.address){
+                  value += o.value;
                 }
               })
             }else{
               kind = "sent";
-              value = o.total/getAtomicValue(this.rel);
+              value = o.valueOut;
             }
             const tx = {
-              from: o.inputs[0].addresses[0],
-              hash: o.hash,
+              from,
+              hash: o.txid,
               confirmations: o.confirmations,
               value,
               kind,
               fee,
-              timestamp: new Date(o.received).getTime()/1000,
+              timestamp: o.blocktime,
             };
             txs.push(tx);
           })
@@ -180,11 +228,21 @@ export class ExchangeStore {
   }
   @action
   syncFee = async () => {
-    let estimatedFees, data;
+    let estimatedFees, data, fees = 0;
     switch (this.rel) {
-      case "BTC":
+      case 'BTC':
         data =  await axios.get(`https://bitcoinfees.earn.com/api/v1/fees/list`);
-        estimatedFees = data.data.fees;
+        estimatedFees = data.data.fees;      
+      break;
+      case 'LTC':
+      case 'DASH':
+      case 'DOGE':
+      case 'VTC':
+      case 'BTG':
+        const nstr = ""+Array.from({length: 25}, (_, n) => n+2);
+        data = await axios.get(`${apiInsight[this.rel]}/utils/estimatefee?nbBlocks=${nstr}`);        
+        estimatedFees = data.data;
+        fees = estimatedFees[3];
       break;
       case "ETH":
         data =  await axios.get(`https://ethgasstation.info/json/ethgasAPI.json`);
@@ -196,12 +254,18 @@ export class ExchangeStore {
     runInAction(() => {
       this.estimatedFees = estimatedFees;
       this.estimateFee(this.feeSlider);
+      this.fees = fees;
     });    
   }
   @action
   setFees = (fees, kind = 0) => {
     switch(this.rel){
       case "BTC":
+      case 'LTC':
+      case 'DASH':
+      case 'DOGE':
+      case 'VTC':
+      case 'BTG':      
         this.fees = fees;
       break;
       default:
@@ -221,7 +285,7 @@ export class ExchangeStore {
   estimateFee = (percent) => {
     let max_time = 0,fees = 0, gasLimit = 0, gasPrice = 0;
     switch (this.rel) {
-      case "BTC":
+      case 'BTC':
         const bytes = 400; // 400 bytes approx
         let estimation = 50 - Math.round(percent/100*50);
         if(estimation < 1) estimation = 1;
@@ -232,7 +296,6 @@ export class ExchangeStore {
         
         max_time = this.estimatedFees[4].maxMinutes/4*estimation * 60; // in seconds
         fees = sat_per_byte * bytes;
-
       break;
       case "ETH":
       //https://ethgasstation.info/json/ethgasAPI.json
@@ -259,17 +322,23 @@ export class ExchangeStore {
   }
 
   send = (address, amount, _data = "") => {
-
     switch(this.rel){
-      case "BTC":
-        insight.getUnspentUtxos(this.address, (err, utxos) => {
+      case 'BTC':
+      case 'LTC':
+      case 'DASH':
+      case 'DOGE':
+      case 'VTC':
+      case 'BTG':
+        const multiply_by = (this.rel  == "BTC") ? 1 : getAtomicValue(this.rel);
+        insight.getUtxos(this.address, (err, utxos) => {
           var tx = bitcore.Transaction();
           tx.from(utxos);
           tx.to(address, amount*10**8);
           tx.change(this.address);
           tx.sign(this.pkey);
-          tx.fee(this.fees);
+          tx.fee(this.fees*multiply_by);
           tx.serialize();
+
 
           insight.broadcast(tx, function(err, txId) {
               if (err) {
@@ -285,9 +354,13 @@ export class ExchangeStore {
             
               const txData = {
                 nonce: web3.utils.toHex(txCount.toString()),
-            }
-            
-            console.log(txCount)
+                gasLimit: web3.utils.toHex(this.gasLimit.toString()),
+                gasPrice: web3.utils.toHex(this.gasPrice.toString()), 
+                to: address,
+                from: this.address,
+                //@ts-ignore
+                value: web3.utils.toHex(toFixed(amount*10**18).toString())
+            }           
             
             this.sendSignedWeb3(txData, (err, result) => {
               if (err) return console.log('error', err)
