@@ -11,16 +11,9 @@ import * as stylesg from '../../style.css';
 import * as cx from 'classnames';
 import { compose } from 'recompose';
 import { StyleRules, Theme, withStyles } from '@material-ui/core/styles';
-import { getAtomicValue, explorers, isValidAddress } from 'app/constants';
+import { no_fee, btc_forks, no_advanced_fee, getAtomicValue, explorers, isValidAddress } from 'app/constants';
 
 var moment = require('moment');
-
-//import SwipeableViews from 'react-swipeable-views';
-
-//import Buy from './buy';
-//import Sell from './sell';
-
-const btc_forks = ['LTC', 'DASH', 'DOGE', 'VTC', 'BTG'];
 
 
 const styleSheet = (theme: Theme): StyleRules => ({
@@ -56,37 +49,7 @@ const styleSheet = (theme: Theme): StyleRules => ({
     color: "#a7a7a7"
   },  
 });
-/*
-const maxWidths = {
-  "BTC": 0.5,
-  "ETH": 4,
-  "USDT": 3000,
-};
-const normalizeWidth = (width) => {
-  const max = 100;
-  const min = 15;
-  if(width > max){
-    return max;
-  }else if(width < min){
-    return min + width;
-  }
-  return width;
-}
 
-const dim = (price) => {
-  price = price.toFixed(decimals).toString();
-  if(price.substr(-1) != "0"){ 
-    return (
-      <Span>
-        <Span className={cx(styles.dim)}>{price.substr(0,price.length-2)}</Span>
-        <Span>{price.substr(-2)}</Span>
-      </Span>
-   );
-  }else{
-    return price;
-  }
-}
-*/
 const numberWithCommas = (x) => {
   var parts = x.toString().split(".");
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -130,17 +93,12 @@ class Exchange extends React.Component<any, any>{
       exchangeStore.setRel(_rel);
       exchangeStore.generatePKey();
 
-      switch(_rel){
-        case 'LTC':
-        case 'DASH':
-        case 'DOGE':
-        case 'VTC':
-        case 'BTG':
-          this.setState({advanceToggleDisabled: true, showAdvanced: true});
-        break;
-        default:
-          this.setState({advanceToggleDisabled: false});
-        break;
+      if(no_advanced_fee.indexOf(_rel) != -1){
+        this.setState({advanceToggleDisabled: true, showAdvanced: true});
+      }else if(no_fee.indexOf(_rel) != -1){
+        this.setState({advanceToggleDisabled: true, showAdvanced: false});
+      }else{
+       this.setState({advanceToggleDisabled: false});
       }
     }
   }

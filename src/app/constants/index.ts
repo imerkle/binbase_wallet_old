@@ -105,7 +105,7 @@ export const explorers = {
 
   "BTC": "https://test-insight.bitpay.com",
   "LTC": "https://testnet.litecore.io",
-  "DASH": "https://testnet-insight.dashevo.org",
+  "DASH": "https://testnet-insight.dashevo.org/insight",
 }
 
 export const apiInsight = {
@@ -113,10 +113,26 @@ export const apiInsight = {
   "BTC": "https://insight.bitpay.com/api",
   "LTC": "https://insight.litecore.io/api",
   "DASH": "https://insight.dash.org/api",
+  "NEO": "https://api.neoscan.io/api/main_net/v1",
   */
 
   //testnet explorers below
   "BTC": "https://test-insight.bitpay.com/api",
   "LTC": "https://testnet.litecore.io/api",
   "DASH": "https://testnet-insight.dashevo.org/insight-api-dash",
+  "NEO": "https://api.neoscan.io/api/test_net/v1",
 }
+
+
+export const networkCode44 =  {
+  "BTC": 0,
+  "LTC": 2,
+  "DASH": 5,
+  "VTC": 28,
+  "BTG": 156,
+}
+
+
+export const btc_forks = ['LTC', 'DASH', 'VTC', 'BTG'];
+export const no_advanced_fee = ["LTC","DASH","VTC","BTG"];
+export const no_fee = ["NEO","NANO"];

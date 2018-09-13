@@ -1,11 +1,14 @@
 import { observable, action, runInAction } from 'mobx';
 import hdkey from 'ethereumjs-wallet/hdkey';
 import bip39 from 'bip39';
-import bitcore from 'bitcore-lib';
-import { web3, getAtomicValue, etherscan_api_key, apiEndPoints, apiInsight, testnet } from 'app/constants';
+import bip32 from 'bip32';
+import { btc_forks, web3, getAtomicValue, etherscan_api_key, apiEndPoints, apiInsight, testnet, networkCode44 } from 'app/constants';
 import axios from 'axios';
 import bitcoin from 'bitcoinjs-lib';
 import coininfo from 'coininfo';
+import { broadcastTx, getUtxos } from  'app/utils/insight';
+import  bitcoinSecp256r1 from "bitcoinjs-lib-secp256r1";
+import {wallet as NeoWallet} from "@cityofzion/neon-js";
 
 const Tx = require('ethereumjs-tx')
 
@@ -26,8 +29,6 @@ function toFixed(x) {
   }
   return x;
 }
-var Insight = require('app/utils/insight');
-const insight = new Insight();
 export class ExchangeStore {
   @observable balance = 0;
   @observable n_tx = 0;
@@ -37,7 +38,9 @@ export class ExchangeStore {
   @observable address = "";
   @observable fiat = {name: "USD", symbol: "$"};
   @observable fiat_price = 0;
-  @observable seed = "connect ritual news sand rapid scale behind swamp damp brief explain ankle";
+  @observable seed = "";
+  @observable passphrase = "";
+  @observable mnemonic = "connect ritual news sand rapid scale behind swamp damp brief explain ankle";
   
   @observable feeSlider = 85;
   @observable estimatedFees = null;
@@ -55,12 +58,14 @@ export class ExchangeStore {
       {ticker: "BTC",index: 1, priceusd: 0, price: 0, last_price: 0, change: 0},
       {ticker: "DASH",index: 2, priceusd: 0, price: 0, last_price: 0, change: 0},
       {ticker: "LTC",index: 3, priceusd: 0, price: 0, last_price: 0, change: 0},
-      {ticker: "DOGE",index: 4, priceusd: 0, price: 0, last_price: 0, change: 0},
-      {ticker: "VTC",index: 5, priceusd: 0, price: 0, last_price: 0, change: 0},
-      {ticker: "BTG",index: 6, priceusd: 0, price: 0, last_price: 0, change: 0},
+      {ticker: "VTC",index: 4, priceusd: 0, price: 0, last_price: 0, change: 0},
+      {ticker: "BTG",index: 5, priceusd: 0, price: 0, last_price: 0, change: 0},
     ]},
     {base: "ETH", name: "Ethereum", index: 2, rel: [
       {ticker: "ETH",index: 1, priceusd: 0, price: 0, last_price: 0, change: 0},
+    ]},
+    {base: "NEO", name: "Ethereum", index: 3, rel: [
+      {ticker: "NEO",index: 1, priceusd: 0, price: 0, last_price: 0, change: 0},
     ]},
   ];
 
@@ -79,7 +84,10 @@ export class ExchangeStore {
   }
   @action 
   generateSeed = () => {
-    this.seed = bip39.generateMnemonic();
+    if(!this.mnemonic){
+      this.mnemonic = bip39.generateMnemonic();
+    }
+    this.seed = bip39.mnemonicToSeed(this.mnemonic, this.passphrase)
   }
   @action 
   setRel = (rel) => {
@@ -92,24 +100,33 @@ export class ExchangeStore {
 
   @action 
   generatePKey = () => {
-    if(!this.seed){
-      this.generateSeed();
-    }
-    let hash;
+    this.generateSeed();
+    let rootNode, firstAccount, firstKey;
     switch(this.rel){
       case 'BTC':
-      case 'LTC':
-      case 'DASH':
-      case 'DOGE':
-      case 'VTC':
-      case 'BTG':
-        hash = bitcoin.crypto.sha256(Buffer.from(this.seed))
-        const keyPair = bitcoin.ECPair.fromPrivateKey(hash)
+      case (btc_forks.indexOf(this.rel)+1 && this.rel):
+        const network = coininfo(`${this.rel}${testnet.suffix}`).toBitcoinJS();
+        const networkCode = testnet.suffix ? 1 : networkCode44[this.rel];
+        rootNode = bip32.fromSeed(this.seed, network)
+        firstAccount = rootNode.derivePath(`m/44'/${networkCode}'/0'`)
+        //let xpub = firstAccount.neutered().toBase58();
+        firstKey = firstAccount.derivePath("0/0")
+        const derivedWallet = bitcoin.payments.p2pkh({ pubkey: firstKey.publicKey, network: network});
+        let firstKeyECPair = bitcoin.ECPair.fromPrivateKey(firstKey.privateKey, { network })
 
-        const derivedWallet = bitcoin.payments.p2pkh({ pubkey: keyPair.publicKey, network: coininfo(`${this.rel}${testnet.suffix}`).toBitcoinJS() });
-        this.pkey= keyPair.toWIF();
+        this.pkey= firstKeyECPair.toWIF();
         this.address = derivedWallet.address;
         //this.address = "1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD";
+      break;
+      case 'NEO':
+        const bip44path = `m/44'/888'/0'`;
+        rootNode = bitcoinSecp256r1.HDNode.fromSeedBuffer(this.seed, bitcoinSecp256r1.bitcoin);
+        firstAccount = rootNode.derivePath(bip44path);
+        firstKey = firstAccount.derivePath("0/0")
+
+        this.pkey = firstKey.keyPair.toWIF();
+        const account = new NeoWallet.Account(this.pkey);
+        this.address = account.address;
       break;
       //eth and rest of its shitcoins
       default:
@@ -131,11 +148,7 @@ export class ExchangeStore {
     let data, data2 = null;
     switch(this.rel){
       case 'BTC':
-      case 'LTC':
-      case 'DASH':
-      case 'DOGE':
-      case 'VTC':
-      case 'BTG':
+      case (btc_forks.indexOf(this.rel)+1 && this.rel):
         data = await axios.get(`${apiInsight[this.rel]}/addr/${this.address}`);
         //@ts-ignore
         data2 = await axios.get(`${apiInsight[this.rel]}/txs/?address=${this.address}`);
@@ -166,7 +179,8 @@ export class ExchangeStore {
               })
             }else{
               kind = "sent";
-              value = o.valueOut;
+              value = o.vout[0].value;
+
             }
             const tx = {
               from,
@@ -216,6 +230,10 @@ export class ExchangeStore {
           this.txs = txs;
         });
       break;
+      case 'NEO':
+        data =  await axios.get(`${apiEndPoints[this.rel]}/get_address_abstracts/{this.address}/0`);
+      break;
+
     }
   }
 
@@ -234,11 +252,7 @@ export class ExchangeStore {
         data =  await axios.get(`https://bitcoinfees.earn.com/api/v1/fees/list`);
         estimatedFees = data.data.fees;      
       break;
-      case 'LTC':
-      case 'DASH':
-      case 'DOGE':
-      case 'VTC':
-      case 'BTG':
+      case (btc_forks.indexOf(this.rel)+1 && this.rel):
         const nstr = ""+Array.from({length: 25}, (_, n) => n+2);
         data = await axios.get(`${apiInsight[this.rel]}/utils/estimatefee?nbBlocks=${nstr}`);        
         estimatedFees = data.data;
@@ -261,11 +275,7 @@ export class ExchangeStore {
   setFees = (fees, kind = 0) => {
     switch(this.rel){
       case "BTC":
-      case 'LTC':
-      case 'DASH':
-      case 'DOGE':
-      case 'VTC':
-      case 'BTG':      
+      case (btc_forks.indexOf(this.rel)+1 && this.rel):     
         this.fees = fees;
       break;
       default:
@@ -321,33 +331,27 @@ export class ExchangeStore {
     });
   }
 
-  send = (address, amount, _data = "") => {
+  send = async (address, amount, _data = "") => {
     switch(this.rel){
       case 'BTC':
-      case 'LTC':
-      case 'DASH':
-      case 'DOGE':
-      case 'VTC':
-      case 'BTG':
+      case (btc_forks.indexOf(this.rel)+1 && this.rel):
         const multiply_by = (this.rel  == "BTC") ? 1 : getAtomicValue(this.rel);
-        insight.getUtxos(this.address, (err, utxos) => {
-          var tx = bitcore.Transaction();
-          tx.from(utxos);
-          tx.to(address, amount*10**8);
-          tx.change(this.address);
-          tx.sign(this.pkey);
-          tx.fee(this.fees*multiply_by);
-          tx.serialize();
-
-
-          insight.broadcast(tx, function(err, txId) {
-              if (err) {
-                  console.log('Error!:'+err);
-              } else {
-                  console.log('Successfully sent: '+txId);
-              }
-          });
-        });
+        const utxos = await getUtxos({rel: this.rel, address: this.address});
+        try{
+          //@ts-ignore
+          const txId = await broadcastTx({
+            utxos,
+            from: this.address,
+            to: address,
+            amount: amount*getAtomicValue(this.rel),
+            wif: this.pkey,
+            fee: this.fees*multiply_by,
+            testnet,
+            rel: this.rel,
+          })
+        }catch(e){
+          console.log("Error Occured: ",e)
+        }
       break;
       case "ETH":
           web3.eth.getTransactionCount(this.address).then(txCount => {
