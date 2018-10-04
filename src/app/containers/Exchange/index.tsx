@@ -11,10 +11,10 @@ import * as stylesg from '../../style.css';
 import * as cx from 'classnames';
 import { compose } from 'recompose';
 import { StyleRules, Theme, withStyles } from '@material-ui/core/styles';
-import { no_fee, btc_forks, no_advanced_fee, getAtomicValue, explorers, isValidAddress } from 'app/constants';
+import { no_fee, btc_forks, no_advanced_fee, getAtomicValue, getConfig, isValidAddress } from 'app/constants';
 
-var moment = require('moment');
-
+//@ts-ignore
+import formatDistance from 'date-fns/formatDistance';
 
 const styleSheet = (theme: Theme): StyleRules => ({
   root: {
@@ -114,6 +114,15 @@ class Exchange extends React.Component<any, any>{
     const { classes, exchangeStore, appStore } = this.props;
     const { address, txs } = exchangeStore;
     const { advanceToggleDisabled, showAdvanced, addressField, amountField, addressError } = this.state;
+
+    let fee_label = "";
+    if (btc_forks.indexOf(exchangeStore.rel) != -1){
+      fee_label = `Network Fees (${exchangeStore.rel})`;
+    } else if (exchangeStore.rel == "BTC"){
+      fee_label = `Network Fees(in sats)`;
+    } else if (exchangeStore.rel == "NEO"){
+      fee_label = `Network Fees(in GAS)`;
+    }
   	return (
       <FaDiv c>
         <FaDiv>
@@ -222,26 +231,15 @@ class Exchange extends React.Component<any, any>{
               fullWidth />
           </FaDiv>
           }
-          {showAdvanced && btc_forks.indexOf(exchangeStore.rel)!= -1 &&
-
+          {showAdvanced && exchangeStore.rel != "ETH" &&
            <TextField
             className={cx(stylesg.mar_20_0)}
             value={exchangeStore.fees}
             onChange={(e)=>{ exchangeStore.setFees(e.target.value) }}
-            label={`Network Fees (${exchangeStore.rel})`}
+            label={fee_label}
             type="text"
             fullWidth />
-          }
-          {showAdvanced && exchangeStore.rel == "BTC" &&
-
-           <TextField
-            className={cx(stylesg.mar_20_0)}
-            value={exchangeStore.fees}
-            onChange={(e)=>{ exchangeStore.setFees(e.target.value) }}
-            label={`Network Fees (in sats)`}
-            type="text"
-            fullWidth />
-          }          
+          }             
           {
           !showAdvanced &&
           <FaDiv c>
@@ -282,18 +280,21 @@ class Exchange extends React.Component<any, any>{
           {txs.map((o,i)=>{ 
             return (
             <tr key={i} className={cx(styles.tx_box_li, {[styles.tx_pending]: o.confirmations == 0})} onClick={()=>{
-                  window.open(`${explorers[exchangeStore.rel]}/tx/${o.hash}`,"_blank");
+                window.open(`${getConfig("explorer", exchangeStore.rel, exchangeStore.isTestnet)}/tx/${o.hash}`,"_blank");
                }}>
                 <td>{smartTrim(o.hash, 20)}</td>
-                <td>{o.confirmations == 0 ? <CircularProgress size={18} color="primary" /> : moment.unix(o.timestamp).fromNow()}</td>
+                <td>{o.confirmations == 0 ? <CircularProgress size={18} color="primary" /> : 
+                  formatDistance(new Date(o.timestamp*1000), new Date(), { addSuffix: true })
+                  //moment.unix(o.timestamp).fromNow()
+                }</td>
                 <td className={cx(stylesg.tcenter)}><span className={cx({[styles.got]: o.kind == "got"},
                 {[styles.sent]: o.kind == "sent"})}>{o.kind == "got" ? "IN": "OUT" }</span></td>
-                <td>{o.value} {exchangeStore.rel}</td>
+                <td>{o.value} {o.asset ? o.asset.ticker : exchangeStore.rel}</td>
                 <td>{o.fee}</td>
             </tr>
             )
           })}
-          <tr><td><a href={`${explorers[exchangeStore.rel]}/address/${exchangeStore.address}`}>View all Transactions</a></td></tr>
+            <tr><td><a href={`${getConfig("explorer", exchangeStore.rel, exchangeStore.isTestnet)}/address/${exchangeStore.address}`}>View all Transactions</a></td></tr>
           </tbody>
          </table>
         }

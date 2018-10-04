@@ -1,35 +1,10 @@
 import { observable, action, runInAction } from 'mobx';
-import hdkey from 'ethereumjs-wallet/hdkey';
-import bip39 from 'bip39';
-import bip32 from 'bip32';
-import { btc_forks, web3, getAtomicValue, etherscan_api_key, apiEndPoints, apiInsight, testnet, networkCode44 } from 'app/constants';
+import { config, btc_forks ,web3, getConfig} from 'app/constants';
 import axios from 'axios';
-import bitcoin from 'bitcoinjs-lib';
-import coininfo from 'coininfo';
-import { broadcastTx, getUtxos } from  'app/utils/insight';
-import  bitcoinSecp256r1 from "bitcoinjs-lib-secp256r1";
-import {wallet as NeoWallet} from "@cityofzion/neon-js";
+import OmniJs from "app/omnijs/omnijs";
 
-const Tx = require('ethereumjs-tx')
-
-function toFixed(x) {
-  if (Math.abs(x) < 1.0) {
-    var e = parseInt(x.toString().split('e-')[1]);
-    if (e) {
-        x *= Math.pow(10,e-1);
-        x = '0.' + (new Array(e)).join('0') + x.toString().substring(2);
-    }
-  } else {
-    var e = parseInt(x.toString().split('+')[1]);
-    if (e > 20) {
-        e -= 20;
-        x /= Math.pow(10,e);
-        x += (new Array(e+1)).join('0');
-    }
-  }
-  return x;
-}
 export class ExchangeStore {
+  @observable omni = new OmniJs();
   @observable balance = 0;
   @observable n_tx = 0;
   @observable txs = [];
@@ -50,7 +25,7 @@ export class ExchangeStore {
   
   @observable gasLimit = 0;
   @observable gasPrice = 0;
-
+  @observable isTestnet = false;
 
   @observable sorter = {value: 0, dir: 1};
   @observable currency = [
@@ -68,7 +43,7 @@ export class ExchangeStore {
       {ticker: "NEO",index: 1, priceusd: 0, price: 0, last_price: 0, change: 0},
     ]},
   ];
-
+  
   @action
   toggleSort = (value) => {  
     if(value == this.sorter.value){
@@ -83,15 +58,9 @@ export class ExchangeStore {
     this.base = base;
   }
   @action 
-  generateSeed = () => {
-    if(!this.mnemonic){
-      this.mnemonic = bip39.generateMnemonic();
-    }
-    this.seed = bip39.mnemonicToSeed(this.mnemonic, this.passphrase)
-  }
-  @action 
   setRel = (rel) => {
     this.rel = rel;
+    this.omni.set(this.rel, this.isTestnet, config);
   }
   @action 
   setFeeSlider = (value) => {
@@ -100,43 +69,15 @@ export class ExchangeStore {
 
   @action 
   generatePKey = () => {
-    this.generateSeed();
-    let rootNode, firstAccount, firstKey;
-    switch(this.rel){
-      case 'BTC':
-      case (btc_forks.indexOf(this.rel)+1 && this.rel):
-        const network = coininfo(`${this.rel}${testnet.suffix}`).toBitcoinJS();
-        const networkCode = testnet.suffix ? 1 : networkCode44[this.rel];
-        rootNode = bip32.fromSeed(this.seed, network)
-        firstAccount = rootNode.derivePath(`m/44'/${networkCode}'/0'`)
-        //let xpub = firstAccount.neutered().toBase58();
-        firstKey = firstAccount.derivePath("0/0")
-        const derivedWallet = bitcoin.payments.p2pkh({ pubkey: firstKey.publicKey, network: network});
-        let firstKeyECPair = bitcoin.ECPair.fromPrivateKey(firstKey.privateKey, { network })
-
-        this.pkey= firstKeyECPair.toWIF();
-        this.address = derivedWallet.address;
-        //this.address = "1DEP8i3QJCsomS4BSMY2RpU1upv62aGvhD";
-      break;
-      case 'NEO':
-        const bip44path = `m/44'/888'/0'`;
-        rootNode = bitcoinSecp256r1.HDNode.fromSeedBuffer(this.seed, bitcoinSecp256r1.bitcoin);
-        firstAccount = rootNode.derivePath(bip44path);
-        firstKey = firstAccount.derivePath("0/0")
-
-        this.pkey = firstKey.keyPair.toWIF();
-        const account = new NeoWallet.Account(this.pkey);
-        this.address = account.address;
-      break;
-      //eth and rest of its shitcoins
-      default:
-        const wallet = hdkey.fromMasterSeed(this.seed);
-        const w = wallet.getWallet();
-        this.address = w.getAddressString();
-        this.pkey = w.getPrivateKeyString().substr(2);
-        //this.address = "0xddbd2b932c763ba5b1b7ae3b362eac3e8d40121a";
-      break;
-    }
+    const seed = this.omni.generateSeed(this.mnemonic, this.passphrase)
+    this.mnemonic = seed.mnemonic;
+    this.seed = seed.seed;
+    const k = this.omni.generatePKey(seed.seed)
+    this.pkey = k.wif;
+    this.address = k.address;
+    
+    //this.address = "AJAf8TbEc6zA3Vire3piNeG5dM3WAwzZY6";
+    
     this.syncBalance();
     this.getFiatPrice();
     this.syncFee();
@@ -146,94 +87,17 @@ export class ExchangeStore {
   syncBalance = async (timeout = true) => {
     //@ts-ignore
     let data, data2 = null;
-    switch(this.rel){
-      case 'BTC':
-      case (btc_forks.indexOf(this.rel)+1 && this.rel):
-        data = await axios.get(`${apiInsight[this.rel]}/addr/${this.address}`);
-        //@ts-ignore
-        data2 = await axios.get(`${apiInsight[this.rel]}/txs/?address=${this.address}`);
-
-        if (timeout) {
-          setTimeout(() => {
-            this.syncBalance();
-          },60000)
-        }
-
-        runInAction(() => {
-          this.balance = data.data.balance;
-          this.n_tx = data.data.txAppearances;
-
-          const txs = [];
-          data2.data.txs.map(o=>{
-            const from = o.vin[0].addr;
-            let value = 0;
-            let kind = "got";
-            let fee = o.fees;
-
-            if(from!= this.address){
-              kind = "got";
-              o.vout.map(o=>{ 
-                if(o.scriptPubKey.addresses[0]  == this.address){
-                  value += o.value;
-                }
-              })
-            }else{
-              kind = "sent";
-              value = o.vout[0].value;
-
-            }
-            const tx = {
-              from,
-              hash: o.txid,
-              confirmations: o.confirmations,
-              value,
-              kind,
-              fee,
-              timestamp: o.blocktime,
-            };
-            txs.push(tx);
-          })
-          this.txs = txs;
-        });
-      break;
-      case 'ETH':
-        data =  await axios.get(`${apiEndPoints[this.rel]}/?module=account&action=balance&address=${this.address}&tag=latest&apikey=${etherscan_api_key}`);
-        const data2 =  await axios.get(`${apiEndPoints[this.rel]}/?module=account&action=txlist&address=${this.address}&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=${etherscan_api_key}`);
-
-        runInAction(() => {
-          this.balance = data.data.result/getAtomicValue(this.rel);
-          this.n_tx = data.data.result.length;
-
-          const txs = [];
-          data2.data.result.map(o=>{
-            const from = o.from;
-            const value = o.value/getAtomicValue(this.rel);
-            let kind = "got";
-            let fee = (o.gas*o.gasPrice)/getAtomicValue(this.rel);
-
-            if(from!= this.address){
-              kind = "got";
-            }else{
-              kind = "sent";
-            }
-            const tx = {
-              from,
-              hash: o.hash,
-              confirmations: o.confirmations,
-              value,
-              kind,
-              fee,
-              timestamp: o.timeStamp,
-            };
-            txs.push(tx);
-          })
-          this.txs = txs;
-        });
-      break;
-      case 'NEO':
-        data =  await axios.get(`${apiEndPoints[this.rel]}/get_address_abstracts/{this.address}/0`);
-      break;
-
+    //@ts-ignore
+    const { txs } = await this.omni.getTxs(this.address);
+    const balance: any = await this.omni.getBalance(this.address);
+    runInAction(() => {
+      this.txs = txs;
+      this.balance = balance;
+    });
+    if (timeout) {
+      setTimeout(() => {
+        this.syncBalance();
+      },60000)
     }
   }
 
@@ -254,7 +118,7 @@ export class ExchangeStore {
       break;
       case (btc_forks.indexOf(this.rel)+1 && this.rel):
         const nstr = ""+Array.from({length: 25}, (_, n) => n+2);
-        data = await axios.get(`${apiInsight[this.rel]}/utils/estimatefee?nbBlocks=${nstr}`);        
+        data = await axios.get(`${getConfig("api", this.rel, this.isTestnet)}/utils/estimatefee?nbBlocks=${nstr}`);        
         estimatedFees = data.data;
         fees = estimatedFees[3];
       break;
@@ -276,6 +140,7 @@ export class ExchangeStore {
     switch(this.rel){
       case "BTC":
       case (btc_forks.indexOf(this.rel)+1 && this.rel):     
+      case "NEO":
         this.fees = fees;
       break;
       default:
@@ -330,59 +195,32 @@ export class ExchangeStore {
       this.gasPrice = gasPrice;      
     });
   }
-
   send = async (address, amount, _data = "") => {
     switch(this.rel){
       case 'BTC':
       case (btc_forks.indexOf(this.rel)+1 && this.rel):
-        const multiply_by = (this.rel  == "BTC") ? 1 : getAtomicValue(this.rel);
-        const utxos = await getUtxos({rel: this.rel, address: this.address});
-        try{
-          //@ts-ignore
-          const txId = await broadcastTx({
-            utxos,
-            from: this.address,
-            to: address,
-            amount: amount*getAtomicValue(this.rel),
-            wif: this.pkey,
-            fee: this.fees*multiply_by,
-            testnet,
-            rel: this.rel,
-          })
-        }catch(e){
-          console.log("Error Occured: ",e)
-        }
+        this.omni.send(
+        this.address,
+        address,
+        amount,
+        this.pkey,
+        {
+          fees: this.fees
+        });
       break;
       case "ETH":
-          web3.eth.getTransactionCount(this.address).then(txCount => {
-            
-              const txData = {
-                nonce: web3.utils.toHex(txCount.toString()),
-                gasLimit: web3.utils.toHex(this.gasLimit.toString()),
-                gasPrice: web3.utils.toHex(this.gasPrice.toString()), 
-                to: address,
-                from: this.address,
-                //@ts-ignore
-                value: web3.utils.toHex(toFixed(amount*10**18).toString())
-            }           
-            
-            this.sendSignedWeb3(txData, (err, result) => {
-              if (err) return console.log('error', err)
-              console.log('sent', result)
-            })
-            
-          }).catch(e=>{
-            console.log(e)
-          })
+        this.omni.send(
+          this.address,
+          address,
+          amount,
+          this.pkey,
+          {
+            fees: this.fees,
+            gasLimit: web3.utils.toHex(this.gasLimit.toString()),
+            gasPrice: web3.utils.toHex(this.gasPrice.toString()),
+          });
       break;
     }
-  }
-  sendSignedWeb3 = (txData, cb) => {
-    const privateKey = new Buffer(this.pkey, 'hex')
-    const transaction = new Tx(txData)
-    transaction.sign(privateKey)
-    const serializedTx = transaction.serialize().toString('hex')
-    web3.eth.sendSignedTransaction('0x' + serializedTx, cb)
   }
 }
 
