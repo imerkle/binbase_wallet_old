@@ -25,7 +25,7 @@ export class ExchangeStore {
   
   @observable gasLimit = 0;
   @observable gasPrice = 0;
-  @observable isTestnet = false;
+  @observable isTestnet = true; //change to false in prod
 
   @observable sorter = {value: 0, dir: 1};
   @observable currency = [

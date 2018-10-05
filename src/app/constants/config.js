@@ -54,7 +54,7 @@ const a =  {
         },
         "api": {
             "main": "https://api.neoscan.io/api/main_net/v1",
-            "test": "https://api.neoscan.io/api/test_net/v1"
+            "test": "http://0.0.0.0:30333/api/main_net/v1"
         },
         "code": 888,
         "assets": {

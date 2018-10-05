@@ -4,7 +4,7 @@ import { broadcastTx, getUtxos } from './insight'
 const Tx = require('ethereumjs-tx')
 import axios from 'axios';
 
-import Neon, { api, rpc } from "@cityofzion/neon-js";
+import Neon, { api as neo_api, rpc as neo_rpc } from "@cityofzion/neon-js";
 import {
   btc_forks,
   web3,
@@ -14,7 +14,7 @@ import {
   neopriv_config
 } from 'app/constants'
 
-const neo_privateNet = new rpc.Network(neopriv_config)
+const neo_privateNet = new neo_rpc.Network(neopriv_config)
 Neon.add.network(neo_privateNet)
 
 
@@ -120,14 +120,14 @@ class OmniJs {
         break
         case "NEO":
           //@ts-ignore
-          const intent = api.makeIntent( 
+          const intent = neo_api.makeIntent( 
             { [this.rel]: amount},
             address
           );
-          const balance = await api.neoscan.getBalance('PrivateNet', address)
+          const balance = await neo_api.neoscan.getBalance('PrivateNet', address)
           console.log(balance)
           //@ts-ignore
-          const apiProvider = new api.neoscan.instance("PrivateNet");
+          const apiProvider = new neo_api.neoscan.instance("PrivateNet");
         break
       }
     })
