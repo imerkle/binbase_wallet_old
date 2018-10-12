@@ -4,19 +4,13 @@ import { broadcastTx, getUtxos } from './insight'
 const Tx = require('ethereumjs-tx')
 import axios from 'axios';
 
-import Neon, { api as neo_api, rpc as neo_rpc } from "@cityofzion/neon-js";
 import {
   btc_forks,
   web3,
   getAtomicValue,
   etherscan_api_key,
-  getConfig,
-  neopriv_config
+  getConfig
 } from 'app/constants'
-
-const neo_privateNet = new neo_rpc.Network(neopriv_config)
-Neon.add.network(neo_privateNet)
-
 
 
 
@@ -61,8 +55,8 @@ class OmniJs {
   ) => {
     const rootNode = getRootNode(seed, this.rel, this.isTestnet)
     const key = deriveAccount(rootNode, account, change, index, this.config, this.rel, this.isTestnet)
-    const { wif, address } = getWallet(key, this.rel, this.isTestnet)
-    return { wif, address }
+    const { wif, address, publicKey } = getWallet(key, this.rel, this.isTestnet)
+    return { wif, address, publicKey }
   }
   send = (
     from: string,
@@ -117,18 +111,25 @@ class OmniJs {
             .catch(e => {
               reject(e)
             })
-        break
         case "NEO":
-          //@ts-ignore
-          const intent = neo_api.makeIntent( 
-            { [this.rel]: amount},
-            address
-          );
-          const balance = await neo_api.neoscan.getBalance('PrivateNet', address)
-          console.log(balance)
-          //@ts-ignore
-          const apiProvider = new neo_api.neoscan.instance("PrivateNet");
-        break
+
+          const api = getConfig("api", this.rel, this.isTestnet);
+          console.log(api)
+          console.log(this.isTestnet)
+          const balance = (await axios.get(`${api}/get_balance/${address}`)).data;
+          const ne = require("./neo")
+          try{
+            const a = await ne.sendTransaction([{ amount, address, symbol: this.rel }],
+             { balances: balance,
+               wif,
+               address: from,
+               publicKey: options.publicKey,
+               fees: options.fees,
+               isTestnet: this.isTestnet,
+              })
+            console.log(a)
+          }catch(e){ console.log(e) }
+         break
       }
     })
   }
@@ -181,7 +182,7 @@ class OmniJs {
                   txs.push(tx);
                 })
             break;                  
-            case 'NEO':
+            case 'NEOT':
                 data = await axios.get(`${api}/get_address_abstracts/${address}/0`);
 
                 n_tx = data.data.total_entries;

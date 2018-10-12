@@ -45,7 +45,7 @@ export const deriveAccount = (
   return rootNode.derivePath(bip44path)
 }
 export const getWallet = (key: any, rel: string, isTestnet?: boolean) => {
-  let wif, address
+  let wif, address, publicKey
   switch (rel) {
     case 'BTC':
     case btc_forks.indexOf(rel) + 1 && rel:
@@ -60,11 +60,13 @@ export const getWallet = (key: any, rel: string, isTestnet?: boolean) => {
 
       wif = firstKeyECPair.toWIF()
       address = derivedWallet.address
+      publicKey = key.publicKey
       break
     case 'NEO':
       wif = key.keyPair.toWIF()
       const account = new NeoWallet.Account(wif)
       address = account.address
+      publicKey = account.publicKey 
       break
     default:
       //eth and rest of its shitcoins
@@ -79,5 +81,5 @@ export const getWallet = (key: any, rel: string, isTestnet?: boolean) => {
 
       break
   }
-  return { wif, address }
+  return { wif, address, publicKey }
 }

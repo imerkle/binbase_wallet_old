@@ -11,6 +11,7 @@ export class ExchangeStore {
   @observable base = "";
   @observable rel = "";
   @observable address = "";
+  @observable publicKey = "";
   @observable fiat = {name: "USD", symbol: "$"};
   @observable fiat_price = 0;
   @observable seed = "";
@@ -75,6 +76,7 @@ export class ExchangeStore {
     const k = this.omni.generatePKey(seed.seed)
     this.pkey = k.wif;
     this.address = k.address;
+    this.publicKey = k.publicKey;
     
     //this.address = "AJAf8TbEc6zA3Vire3piNeG5dM3WAwzZY6";
     
@@ -198,6 +200,7 @@ export class ExchangeStore {
   send = async (address, amount, _data = "") => {
     switch(this.rel){
       case 'BTC':
+      case 'NEO':
       case (btc_forks.indexOf(this.rel)+1 && this.rel):
         this.omni.send(
         this.address,
@@ -205,6 +208,7 @@ export class ExchangeStore {
         amount,
         this.pkey,
         {
+          publicKey: this.publicKey,
           fees: this.fees
         });
       break;
