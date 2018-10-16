@@ -128,11 +128,11 @@ export const sendTransaction = async (sendEntries: Array<SendEntryType>, opts) =
                 signingFunction: null,
                 api: opts.isTestnet ? privNetNeoscan : mainNetNeoscan,
             })
-
-
+            console.log(response)
             if (!response.result) {
-                throw new Error('Transaction failed')
+                reject("Failed")
             }
+            resolve(response)
         } catch (err) {
             reject(err)
         }

@@ -114,8 +114,7 @@ class OmniJs {
         case "NEO":
 
           const api = getConfig("api", this.rel, this.isTestnet);
-          console.log(api)
-          console.log(this.isTestnet)
+
           const balance = (await axios.get(`${api}/get_balance/${address}`)).data;
           const ne = require("./neo")
           try{

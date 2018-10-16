@@ -89,6 +89,6 @@ export const getConfig = (key: string, rel: string, isTestnet: boolean) => {
 export const neopriv_config = {
   name: 'PrivateNet',
   extra: {
-    neoscan: 'http://0.0.0.0:30333/api/main_net'
+    neoscan: 'http://0.0.0.0:4000/api/main_net'
   }
 }
