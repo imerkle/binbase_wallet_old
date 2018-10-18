@@ -72,8 +72,7 @@ class OmniJs {
           const multiply_by = this.rel == 'BTC' ? 1 : getAtomicValue(this.rel)
           const utxos = await getUtxos({ isTestnet: this.isTestnet, rel: this.rel, address: from })
           try {
-            //@ts-ignore
-            const txId = await broadcastTx({
+            const txid = await broadcastTx({
               utxos,
               from: from,
               to: address,
@@ -83,8 +82,7 @@ class OmniJs {
               isTestnet: this.isTestnet,
               rel: this.rel
             })
-            //@ts-ignore
-            resolve(txId)
+            resolve(txid)
           } catch (e) {
             reject(e)
           }
@@ -118,16 +116,16 @@ class OmniJs {
           const balance = (await axios.get(`${api}/get_balance/${address}`)).data;
           const ne = require("./neo")
           try{
-            const a = await ne.sendTransaction([{ amount, address, symbol: this.rel }],
+            const result = await ne.sendTransaction([{ amount, address, symbol: this.rel }],
              { balances: balance,
                wif,
                address: from,
                publicKey: options.publicKey,
                fees: options.fees,
                isTestnet: this.isTestnet,
-              })
-            console.log(a)
-          }catch(e){ console.log(e) }
+              });
+              resolve(result.txid);
+          }catch(e){ reject(e); }
          break
       }
     })

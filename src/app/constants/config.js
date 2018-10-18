@@ -10,6 +10,7 @@ const a =  {
         },
         "code": 0,
         "decimals": 10**8,
+        "forks": ["LTC", "DASH"]
     },
     "LTC": {
         "explorer": {

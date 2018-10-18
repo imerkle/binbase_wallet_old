@@ -6,6 +6,7 @@ import OmniJs from "app/omnijs/omnijs";
 export class ExchangeStore {
   @observable omni = new OmniJs();
   @observable balance = 0;
+  @observable balances = {};
   @observable n_tx = 0;
   @observable txs = [];
   @observable base = "";
@@ -31,17 +32,14 @@ export class ExchangeStore {
   @observable sorter = {value: 0, dir: 1};
   @observable currency = [
     {base: "BTC", name: "Bitcoin", index: 1, rel: [
-      {ticker: "BTC",index: 1, priceusd: 0, price: 0, last_price: 0, change: 0},
-      {ticker: "DASH",index: 2, priceusd: 0, price: 0, last_price: 0, change: 0},
-      {ticker: "LTC",index: 3, priceusd: 0, price: 0, last_price: 0, change: 0},
-      {ticker: "VTC",index: 4, priceusd: 0, price: 0, last_price: 0, change: 0},
-      {ticker: "BTG",index: 5, priceusd: 0, price: 0, last_price: 0, change: 0},
+      {ticker: "BTC",index: 1, priceusd: 0},
+      ...btc_forks.map((o, i) => { return { ticker: o, index: i+2, priceusd: 0} })
     ]},
     {base: "ETH", name: "Ethereum", index: 2, rel: [
-      {ticker: "ETH",index: 1, priceusd: 0, price: 0, last_price: 0, change: 0},
+      {ticker: "ETH",index: 1, priceusd: 0},
     ]},
     {base: "NEO", name: "Ethereum", index: 3, rel: [
-      {ticker: "NEO",index: 1, priceusd: 0, price: 0, last_price: 0, change: 0},
+      {ticker: "NEO",index: 1, priceusd: 0},
     ]},
   ];
   
@@ -197,34 +195,40 @@ export class ExchangeStore {
       this.gasPrice = gasPrice;      
     });
   }
-  send = async (address, amount, _data = "") => {
-    switch(this.rel){
-      case 'BTC':
-      case 'NEO':
-      case (btc_forks.indexOf(this.rel)+1 && this.rel):
-        this.omni.send(
-        this.address,
-        address,
-        amount,
-        this.pkey,
-        {
-          publicKey: this.publicKey,
-          fees: this.fees
-        });
-      break;
-      case "ETH":
-        this.omni.send(
-          this.address,
-          address,
-          amount,
-          this.pkey,
-          {
-            fees: this.fees,
-            gasLimit: web3.utils.toHex(this.gasLimit.toString()),
-            gasPrice: web3.utils.toHex(this.gasPrice.toString()),
-          });
-      break;
-    }
+  send = (address, amount, _data = "") => {
+    let result;
+    return new Promise(async(resolve, reject) => {
+      try{
+          switch(this.rel){
+            case 'BTC':
+            case 'NEO':
+            case (btc_forks.indexOf(this.rel)+1 && this.rel):
+              result = await this.omni.send(
+              this.address,
+              address,
+              amount,
+              this.pkey,
+              {
+                publicKey: this.publicKey,
+                fees: this.fees
+              });
+            break;
+            case "ETH":
+              result = await this.omni.send(
+                this.address,
+                address,
+                amount,
+                this.pkey,
+                {
+                  fees: this.fees,
+                  gasLimit: web3.utils.toHex(this.gasLimit.toString()),
+                  gasPrice: web3.utils.toHex(this.gasPrice.toString()),
+                });
+            break;
+          }
+          resolve(result)
+      }catch(e){reject(e)}
+   });
   }
 }
 

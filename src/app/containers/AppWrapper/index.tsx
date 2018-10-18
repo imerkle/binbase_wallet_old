@@ -40,7 +40,7 @@ const sortByChangeDesc = (a,b) => { return b.change - a.change }
 
 
 
-const arrows = ["Coin","Price", "24h Chg%"];
+const arrows = ["Coin","Price"];
 @compose(withStyles(styleSheet))
 @inject('appStore','langStore','exchangeStore')
 @observer
@@ -173,17 +173,11 @@ class AppWrapper extends React.Component<any, any>{
                         <Div className={cx(styles.rel)}>{o.ticker}</Div>
                       </FaDiv>
                      <FaDiv vcenter>
-                        <Div className={cx(styles.vol)}>{exchangeStore.fiat.symbol}{o.priceusd}</Div>
+                            <Div className={cx(styles.vol)}>{exchangeStore.fiat.symbol}{o.priceusd * (exchangeStore.balances[o.ticker] || 0)}</Div>
                       </FaDiv>                      
                     </Fa>
                     <FaDiv fs c style={{width: "86px"}}>
-                        <Div className={cx(styles.price)}>{exchangeStore.balance}</Div>
-                    </FaDiv>
-                    <FaDiv vcenter fs c style={{width: "70px"}}>
-                        <Div className={cx(styles.change,
-                            {[styles.pos]: o.change > 0},
-                            {[styles.neg]: o.change < 0}
-                          )}>{o.change > 0 ? "+": ""}{o.change}%</Div> 
+                        <Div className={cx(styles.price)}>{exchangeStore.balances[o.ticker] || 0}</Div>
                     </FaDiv>
                       
                     </FaDiv>

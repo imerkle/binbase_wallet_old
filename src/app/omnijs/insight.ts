@@ -25,7 +25,7 @@ export const broadcastTx = ({
   fee,
   isTestnet
 }) => {
-  new Promise(async (resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       const network = coininfo(
         `${rel}${isTestnet ? testnet.suffix : ''}`
@@ -48,7 +48,7 @@ export const broadcastTx = ({
       const data = await axios.post(`${getConfig("api", rel, isTestnet)}/tx/send`, {
         rawtx
       })
-      resolve(data.data)
+      resolve(data.data.txid)
     } catch (e) {
       reject(e)
     }

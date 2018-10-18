@@ -304,29 +304,40 @@ class Exchange extends React.Component<any, any>{
   send = () => {
     const {exchangeStore, appStore} = this.props;
     const { addressError, addressField, amountField } = this.state;
-      return new Promise((resolve, reject) => {
+      return new Promise(async (resolve, reject) => {
         const amt = parseFloat(amountField);
         const divide_by = (btc_forks.indexOf(exchangeStore.rel) != -1) ? 1 : getAtomicValue(exchangeStore.rel);
         let fees = exchangeStore.fees/divide_by;
           
         if(addressError || !addressField){
           appStore.setSnackMsg("Invalid Bitcoin Address");
-          return false;
+          reject();
         }
         if(isNaN(amt)){
           appStore.setSnackMsg("Invalid Amount");
-          return false;
+          reject();
         }
         if(exchangeStore.balance < amt){
           appStore.setSnackMsg("Not enough balance");
-          return false;
+          reject();
         }
         if(exchangeStore.balance < fees + amt){
           appStore.setSnackMsg("Not enough balance to cover network fees");
-          return false;
+          reject();
         }
-        exchangeStore.send(addressField, amt)
-        appStore.setSnackMsg("Transaction will be broadcasted!");
+        appStore.setSnackMsg("Transaction is being broadcasted!");
+        try{
+          const txid = await exchangeStore.send(addressField, amt)
+          appStore.setSnackMsg(`Transaction broadcast completed. tx: ${txid}`);
+          this.setState({
+            addressField: "",
+            amountField: "",
+          });
+          resolve();
+        }catch(e){
+          appStore.setSnackMsg("Transaction Failed to broadcast!");
+          reject(e);
+        }
         exchangeStore.syncBalance(false)
       });    
     }

@@ -75,7 +75,7 @@ export const apiEndPoints = {
   "ETH": "https://api.etherscan.io/api",
 }
 
-export const btc_forks = ['LTC', 'DASH', 'VTC', 'BTG'];
+export const btc_forks = config["BTC"]["forks"];
 export const no_advanced_fee = ["LTC", "DASH", "VTC", "BTG", "NEO"];
 export const no_fee = ["NANO"];
 
