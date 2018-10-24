@@ -66,7 +66,19 @@ const a =  {
             "main": require("./neo_assets.json")
         },
         "decimals": 10 ** 0,
-    }
+    },
+    "NANO": {
+        "explorer": {
+            "main": "https://www.nanode.co/",
+            "test": "https://www.nanode.co/"
+        },
+        "api": {
+            "main": "https://api.nanode.co",
+            "test": "https://api.nanode.co"
+        },
+        "code": 165,
+        "decimals": 10 ** 18,
+    }    
 }
 
 export default a;

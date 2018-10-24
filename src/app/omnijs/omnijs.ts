@@ -3,6 +3,8 @@ import { getRootNode, deriveAccount, getWallet } from './keys'
 import { broadcastTx, getUtxos } from './insight'
 const Tx = require('ethereumjs-tx')
 import axios from 'axios';
+var pbkdf2 = require('pbkdf2').pbkdf2Sync
+var unorm = require('unorm')
 
 import {
   btc_forks,
@@ -12,6 +14,33 @@ import {
   getConfig
 } from 'app/constants'
 
+function uint8ToHex(uintValue) {
+  let hex = "";
+  let aux;
+  for (let i = 0; i < uintValue.length; i++) {
+    aux = uintValue[i].toString(16).toUpperCase();
+    if (aux.length == 1)
+      aux = '0' + aux;
+    hex += aux;
+    aux = '';
+  }
+
+  return (hex);
+}
+function salt(password) {
+  return 'mnemonic' + (password || '')
+}
+
+function mnemonicToSeed(mnemonic, password) {
+  var mnemonicBuffer = Buffer.from(unorm.nfkd(mnemonic), 'utf8')
+  var saltBuffer = Buffer.from(salt(unorm.nfkd(password)), 'utf8')
+
+  return pbkdf2(mnemonicBuffer, saltBuffer, 2048, 64, 'sha512')
+}
+
+function mnemonicToSeedHex(mnemonic, password) {
+  return mnemonicToSeed(mnemonic, password).toString('hex')
+}
 
 
 /**
@@ -22,7 +51,6 @@ class OmniJs {
   public rel: string
   public  isTestnet: boolean
   public config: any
-  write
 
   constructor(rel?: string, isTestnet?: boolean, config?: any) {
     this.rel = rel || ''
@@ -44,7 +72,17 @@ class OmniJs {
    */
   generateSeed = (_mnemonic?: string, passphrase: string = '') => {
     const mnemonic = _mnemonic ? _mnemonic : bip39.generateMnemonic()
-    const seed = bip39.mnemonicToSeed(mnemonic, passphrase)
+    const seed = bip39.mnemonicToSeed(mnemonic, passphrase).slice(0,32)
+    return { mnemonic, seed }
+  }
+  generateSeedNano = (_mnemonic?: string, passphrase: string = '') => {
+    if (!_mnemonic){
+      var randomBytes = require('random-bytes')
+      const seed = uint8ToHex(randomBytes.sync(32))
+      var new_mnemonic = bip39.entropyToMnemonic(seed)
+    }
+    const mnemonic = _mnemonic ? _mnemonic : new_mnemonic;
+    const seed = mnemonicToSeedHex(mnemonic, passphrase);
     return { mnemonic, seed }
   }
   generatePKey = (
@@ -56,6 +94,7 @@ class OmniJs {
     const rootNode = getRootNode(seed, this.rel, this.isTestnet)
     const key = deriveAccount(rootNode, account, change, index, this.config, this.rel, this.isTestnet)
     const { wif, address, publicKey } = getWallet(key, this.rel, this.isTestnet)
+    
     return { wif, address, publicKey }
   }
   send = (

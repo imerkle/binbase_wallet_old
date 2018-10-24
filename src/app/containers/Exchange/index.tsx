@@ -132,7 +132,7 @@ class Exchange extends React.Component<any, any>{
           </FaDiv>
           <FaDiv c>
             <Fa className={cx(stylesg.uppercase)}>{exchangeStore.fiat.name} Value</Fa>
-            <Fa className={cx(styles.balance)}>{exchangeStore.fiat.symbol}{numberWithCommas(exchangeStore.fiat_price*exchangeStore.balance)}</Fa>
+            <Fa className={cx(styles.balance)}>{exchangeStore.fiat.symbol}{numberWithCommas((exchangeStore.fiat_price*exchangeStore.balance).toFixed(2))}</Fa>
           </FaDiv>
         </FaDiv>      
         <FaDiv vcenter>

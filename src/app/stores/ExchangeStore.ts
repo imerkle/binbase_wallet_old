@@ -27,7 +27,7 @@ export class ExchangeStore {
   
   @observable gasLimit = 0;
   @observable gasPrice = 0;
-  @observable isTestnet = true; //change to false in prod
+  @observable isTestnet = false; //change to false in prod
 
   @observable sorter = {value: 0, dir: 1};
   @observable currency = [
@@ -41,6 +41,10 @@ export class ExchangeStore {
     {base: "NEO", name: "Ethereum", index: 3, rel: [
       {ticker: "NEO",index: 1, priceusd: 0},
     ]},
+    {base: "NANO", name: "Nano", index: 4, rel: [
+      { ticker: "NANO", index: 1, priceusd: 0 },
+      ]
+    },    
   ];
   
   @action
@@ -68,7 +72,12 @@ export class ExchangeStore {
 
   @action 
   generatePKey = () => {
-    const seed = this.omni.generateSeed(this.mnemonic, this.passphrase)
+    let seed;
+    if(this.rel == "NANOx"){
+      seed = this.omni.generateSeedNano(this.mnemonic, this.passphrase)
+    }else{
+      seed = this.omni.generateSeed(this.mnemonic, this.passphrase)
+    }
     this.mnemonic = seed.mnemonic;
     this.seed = seed.seed;
     const k = this.omni.generatePKey(seed.seed)

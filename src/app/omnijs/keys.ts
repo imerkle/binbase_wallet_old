@@ -5,11 +5,12 @@ import bitcoin from 'bitcoinjs-lib'
 import bitcoinSecp256r1 from 'bitcoinjs-lib-secp256r1'
 import { wallet as NeoWallet } from '@cityofzion/neon-core'
 import ethUtil from 'ethereumjs-util'
+import * as nanocurrency from 'nanocurrency';
 
 export const getNetwork = (rel: string, isTestnet?: boolean) => {
   return coininfo(`${rel}${isTestnet ? '-TEST' : ''}`).toBitcoinJS()
 }
-export const getRootNode = (seed: Buffer, rel: string, isTestnet?: boolean) => {
+export const getRootNode = (seed: any, rel: string, isTestnet?: boolean) => {
   let rootNode
   switch (rel) {
     case 'BTC':
@@ -24,6 +25,8 @@ export const getRootNode = (seed: Buffer, rel: string, isTestnet?: boolean) => {
         bitcoinSecp256r1.bitcoin
       )
       break
+    case 'NANO':
+      return seed.toString("hex");
     default:
       //eth and rest of its shitcoins
       rootNode = bip32.fromSeed(seed, bitcoin.networks.bitcoin)
@@ -42,7 +45,7 @@ export const deriveAccount = (
 ) => {
   const networkCode = isTestnet ? 1 : config[rel].code
   const bip44path = `m/44'/${networkCode}'/${account}'/${change}/${index}`
-  return rootNode.derivePath(bip44path)
+  return typeof rootNode == "object" ? rootNode.derivePath(bip44path) : rootNode;
 }
 export const getWallet = (key: any, rel: string, isTestnet?: boolean) => {
   let wif, address, publicKey
@@ -68,6 +71,11 @@ export const getWallet = (key: any, rel: string, isTestnet?: boolean) => {
       address = account.address
       publicKey = account.publicKey 
       break
+    case 'NANO':
+      wif = nanocurrency.deriveSecretKey(key, 0)
+      publicKey = nanocurrency.derivePublicKey(wif)
+      address = nanocurrency.deriveAddress(publicKey)
+      break      
     default:
       //eth and rest of its shitcoins
       var privKeyBuffer = key.keyPair.d.toBuffer(32)
