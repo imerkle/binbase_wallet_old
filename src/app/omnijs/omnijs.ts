@@ -5,7 +5,7 @@ const Tx = require('ethereumjs-tx')
 import axios from 'axios';
 var pbkdf2 = require('pbkdf2').pbkdf2Sync
 var unorm = require('unorm')
-
+import * as nanocurrency  from 'nanocurrency';
 import {
   btc_forks,
   web3,
@@ -297,12 +297,22 @@ class OmniJs {
           balance = data.data.result / this.config[this.rel].decimals;
           break;
           case 'NEO':
-            data = await axios.get(`${api}/get_balance/${address}`);
-            data.data.balance.map(o=>{
-              if(o.asset == this.rel){
-                balance = o.amount;
-              }
-            })
+          data = await axios.get(`${api}/get_balance/${address}`);
+          data.data.balance.map(o=>{
+            if(o.asset == this.rel){
+              balance = o.amount;
+            }
+          })
+          break;
+          case 'NANO':
+          console.log(api)
+            data = await axios.post(`${api}`,{
+              "action": "account_balance",
+              "account": address              
+            });
+            //@ts-ignore
+            balance = nanocurrency.convert(data.data.balance, {from: 'raw', to: 'NANO'});
+            //data.data.pending = pending
           break;
         }
         resolve(balance); 

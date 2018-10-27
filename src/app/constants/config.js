@@ -73,8 +73,8 @@ const a =  {
             "test": "https://www.nanode.co/"
         },
         "api": {
-            "main": "https://api.nanode.co",
-            "test": "https://api.nanode.co"
+            "main": "http://35.227.18.245:7076/",
+            "test": "http://35.227.18.245:7076/"
         },
         "code": 165,
         "decimals": 10 ** 18,
