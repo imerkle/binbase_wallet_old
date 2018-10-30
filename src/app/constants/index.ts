@@ -56,10 +56,14 @@ export const isValidAddress = (address, coin) => {
       }
     break;
     case "NEO":
+    return true;
+    if(WAValidator.validate(address, 'neo', 'testnet')){
       return true;
-      if(WAValidator.validate(address, 'neo', 'testnet')){
-        return true;
-      }
+    }
+    break;
+    case "NANO":
+      const nanocurrency = require("nanocurrency");
+      return nanocurrency.checkAddress(address);
     break;
     default:
     if(web3.utils.isAddress(address)){

@@ -280,7 +280,7 @@ class OmniJs {
         }catch(e){ reject(e)}
     });
 }
-  getBalance = (address: string) => {
+  getBalance = (address: string, option?: any) => {
     const api = getConfig("api", this.rel, this.isTestnet);
     let data;
     let balance: number = 0;
@@ -305,17 +305,54 @@ class OmniJs {
           })
           break;
           case 'NANO':
-          console.log(api)
             data = await axios.post(`${api}`,{
               "action": "account_balance",
-              "account": address              
+              "account": address,     
             });
             //@ts-ignore
             balance = nanocurrency.convert(data.data.balance, {from: 'raw', to: 'NANO'});
-            //data.data.pending = pending
+            //@ts-ignore
+            const pending = nanocurrency.convert(data.data.pending, { from: 'raw', to: 'NANO' });
+            if(parseFloat(pending) > 0){
+              const d1 = await axios.post(`${api}`, {
+                "action": "accounts_pending",
+                "accounts": [address]
+              });
+              const d3 = await axios.post(`${api}`, {
+                "action": "accounts_frontiers",
+                "accounts": [address],
+              });
+              const frontier = d3.data.frontiers[address];
+
+
+              d1.data.blocks[address].map(async o=>{
+                const d2 = await axios.post(`${api}`, {
+                  "action": "block",
+                  "hash": o
+                });
+                const content = JSON.parse(d2.data.contents);
+                const previous = frontier || option.publicKey;
+                const source = content.account;
+                const block = {
+                  key: option.pkey,
+                  source,
+                  previous,
+                  "action": "block_create",
+                  "type": "receive",                  
+                };
+                console.log(previous)
+               /* const w1 = await axios.post(`${api}`, {
+                  "action": "work_generate",
+                  "hash": previous
+                });      */          
+                console.log(block)
+                console.log(w1.data)
+              })
+            }
+            resolve({balance, pending})
           break;
         }
-        resolve(balance); 
+        resolve({balance}); 
   }catch(e){
     reject(e);
   }  });

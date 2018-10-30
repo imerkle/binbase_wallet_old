@@ -175,3 +175,10 @@ td .sent{
     font-size: 12px;
     opacity: .5;
 }
+.pending{
+    font-size: 60%;
+    opacity: .5;
+    font-style: italic;
+    padding: 0 5px;
+    font-weight: initial;
+}

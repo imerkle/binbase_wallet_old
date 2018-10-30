@@ -96,7 +96,7 @@ class Exchange extends React.Component<any, any>{
       if(no_advanced_fee.indexOf(_rel) != -1){
         this.setState({advanceToggleDisabled: true, showAdvanced: true});
       }else if(no_fee.indexOf(_rel) != -1){
-        this.setState({advanceToggleDisabled: true, showAdvanced: false});
+        this.setState({showFees: false});
       }else{
        this.setState({advanceToggleDisabled: false});
       }
@@ -107,13 +107,14 @@ class Exchange extends React.Component<any, any>{
     amountField: "",
     addressError: false,
     showAdvanced: false,
+    showFees: true,
     advanceToggleDisabled: false,
 
   }
   render(){
     const { classes, exchangeStore, appStore } = this.props;
     const { address, txs } = exchangeStore;
-    const { advanceToggleDisabled, showAdvanced, addressField, amountField, addressError } = this.state;
+    const { showFees, advanceToggleDisabled, showAdvanced, addressField, amountField, addressError } = this.state;
 
     let fee_label = "";
     if (btc_forks.indexOf(exchangeStore.rel) != -1){
@@ -128,7 +129,10 @@ class Exchange extends React.Component<any, any>{
         <FaDiv>
           <FaDiv fs c>
             <Fa className={cx(stylesg.uppercase)}>{exchangeStore.rel} Balance</Fa>
-            <Fa className={cx(styles.balance)}>{exchangeStore.balance}</Fa>
+            <FaDiv vcenter className={cx(styles.balance)}>
+              <Fa fa className={cx(styles.balance)}>{exchangeStore.balance}</Fa>
+              <Fa fs className={cx(styles.pending)}>{exchangeStore.pending ? `(${exchangeStore.pending} pending)` : ""}</Fa>
+            </FaDiv>
           </FaDiv>
           <FaDiv c>
             <Fa className={cx(stylesg.uppercase)}>{exchangeStore.fiat.name} Value</Fa>
@@ -196,6 +200,8 @@ class Exchange extends React.Component<any, any>{
               }} color="primary" ><Icon style={{fontSize: 14}} className={cx(classes.icon)}>call_made</Icon></IconButton>
             </FaDiv>
           </FaDiv>
+          {
+          showFees &&
           <FaDiv vcenter>
             <Fa fs></Fa>
             <Fa className={cx(styles.feelabel)}>Advanced Options</Fa>
@@ -210,6 +216,7 @@ class Exchange extends React.Component<any, any>{
               color="primary"
             />          
           </FaDiv>
+          }
           {
             showAdvanced &&
             exchangeStore.rel == "ETH" &&  
@@ -231,7 +238,7 @@ class Exchange extends React.Component<any, any>{
               fullWidth />
           </FaDiv>
           }
-          {showAdvanced && exchangeStore.rel != "ETH" &&
+          {showFees && showAdvanced && exchangeStore.rel != "ETH" &&
            <TextField
             className={cx(stylesg.mar_20_0)}
             value={exchangeStore.fees}
@@ -241,7 +248,7 @@ class Exchange extends React.Component<any, any>{
             fullWidth />
           }             
           {
-          !showAdvanced &&
+          showFees && !showAdvanced &&
           <FaDiv c>
             <FaDiv vcenter>
               <Fa className={cx(styles.feelabel)}>Slow</Fa>

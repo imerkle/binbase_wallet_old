@@ -6,6 +6,7 @@ import OmniJs from "app/omnijs/omnijs";
 export class ExchangeStore {
   @observable omni = new OmniJs();
   @observable balance = 0;
+  @observable pending = 0;
   @observable balances = {};
   @observable n_tx = 0;
   @observable txs = [];
@@ -98,10 +99,15 @@ export class ExchangeStore {
     let data, data2 = null;
     //@ts-ignore
     const { txs } = await this.omni.getTxs(this.address);
-    const balance: any = await this.omni.getBalance(this.address);
+    //@ts-ignore
+    const { balance, pending } = await this.omni.getBalance(this.address, { publicKey: this.publicKey, pkey: this.pkey});
     runInAction(() => {
       this.txs = txs;
       this.balance = balance;
+      if (this.rel == "NANO"){
+        this.pending = pending;
+      }else{
+      }
     });
     if (timeout) {
       setTimeout(() => {
