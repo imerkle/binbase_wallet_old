@@ -5,6 +5,7 @@ const Tx = require('ethereumjs-tx')
 import axios from 'axios';
 var pbkdf2 = require('pbkdf2').pbkdf2Sync
 var unorm = require('unorm')
+import BigNumber from 'bignumber.js'
 import * as nanocurrency  from 'nanocurrency';
 import {
   btc_forks,
@@ -14,6 +15,23 @@ import {
   getConfig
 } from 'app/constants'
 
+function toFixed(x) {
+  if (Math.abs(x) < 1.0) {
+    var e = parseInt(x.toString().split('e-')[1]);
+    if (e) {
+      x *= Math.pow(10, e - 1);
+      x = '0.' + (new Array(e)).join('0') + x.toString().substring(2);
+    }
+  } else {
+    var e = parseInt(x.toString().split('+')[1]);
+    if (e > 20) {
+      e -= 20;
+      x /= Math.pow(10, e);
+      x += (new Array(e + 1)).join('0');
+    }
+  }
+  return x;
+}
 function uint8ToHex(uintValue) {
   let hex = "";
   let aux;
@@ -332,21 +350,27 @@ class OmniJs {
                 });
                 const content = JSON.parse(d2.data.contents);
                 const previous = frontier || option.publicKey;
-                const source = content.account;
-                const block = {
-                  key: option.pkey,
-                  source,
-                  previous,
-                  "action": "block_create",
-                  "type": "receive",                  
-                };
-                console.log(previous)
-               /* const w1 = await axios.post(`${api}`, {
+                const link = content.account;
+                /*const w1 = await axios.post(`${api}`, {
                   "action": "work_generate",
                   "hash": previous
-                });      */          
-                console.log(block)
-                console.log(w1.data)
+                });               */
+                const unsigned_block = {
+                  link,
+                  previous,
+                  work: "eb9762dd3c3208f5",
+                  balance: toFixed((new BigNumber(data.data.balance).plus(content.balance)).toNumber()),
+                  representative: "xrb_17krztbeyz1ubtkgqp9h1bewu1tz8sgnpoiii8q7c9n7gyf9jfmuxcydgufi"
+                };               
+                console.log(unsigned_block)
+                //@ts-ignore
+                const {hash, block} =  nanocurrency.createBlock(option.pkey, unsigned_block);
+                console.log(hash, block)
+                /*const r1 = await axios.post(`${api}`, {
+                  "action": "block_create",
+                  ...block
+                });                             
+                console.log(r1)*/
               })
             }
             resolve({balance, pending})
