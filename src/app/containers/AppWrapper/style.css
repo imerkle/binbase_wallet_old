@@ -144,3 +144,8 @@
 .slide_bar.visible{
     display: flex;
 }
+.assets_menu_container{
+	height: 0px;
+	overflow: auto;
+	flex: 1 1 auto;
+}

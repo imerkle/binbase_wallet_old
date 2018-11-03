@@ -5,6 +5,7 @@ import { LangStore } from './LangStore';
 import { LoginStore } from './LoginStore';
 import { XhrStore } from './XhrStore';
 import { ExchangeStore } from './ExchangeStore';
+import { PriceStore } from './PriceStore';
 
 export function createStores(history: History) {
   const routerStore = new RouterStore(history);
@@ -13,6 +14,7 @@ export function createStores(history: History) {
   const loginStore = new LoginStore();
   const xhrStore = new XhrStore();
   const exchangeStore = new ExchangeStore();
+  const priceStore = new PriceStore();
   return {
     routerStore,
     appStore,
@@ -20,5 +22,6 @@ export function createStores(history: History) {
     loginStore,
     xhrStore,
     exchangeStore,
+    priceStore,
   };
 }

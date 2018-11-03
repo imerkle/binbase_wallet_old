@@ -50,6 +50,7 @@ const styleSheet = (theme: Theme): StyleRules => ({
   },  
 });
 
+//@ts-ignore
 const numberWithCommas = (x) => {
   var parts = x.toString().split(".");
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -70,7 +71,7 @@ const smartTrim = (string, maxLength) => {
 }   
 
 @compose(withStyles(styleSheet))
-@inject('langStore','exchangeStore','appStore')
+@inject('langStore','exchangeStore','appStore', 'priceStore')
 @observer
 class Exchange extends React.Component<any, any>{
   componentWillReceiveProps(){
@@ -112,7 +113,7 @@ class Exchange extends React.Component<any, any>{
 
   }
   render(){
-    const { classes, exchangeStore, appStore } = this.props;
+    const { classes, exchangeStore, priceStore, appStore } = this.props;
     const { address, txs } = exchangeStore;
     const { showFees, advanceToggleDisabled, showAdvanced, addressField, amountField, addressError } = this.state;
 
@@ -124,6 +125,7 @@ class Exchange extends React.Component<any, any>{
     } else if (exchangeStore.rel == "NEO"){
       fee_label = `Network Fees(in GAS)`;
     }
+    const balance_usd = priceStore.getFiatPrice(exchangeStore.rel) * exchangeStore.balance;
   	return (
       <FaDiv c>
         <FaDiv>
@@ -131,12 +133,12 @@ class Exchange extends React.Component<any, any>{
             <Fa className={cx(stylesg.uppercase)}>{exchangeStore.rel} Balance</Fa>
             <FaDiv vcenter className={cx(styles.balance)}>
               <Fa fa className={cx(styles.balance)}>{exchangeStore.balance}</Fa>
-              <Fa fs className={cx(styles.pending)}>{exchangeStore.pending ? `(${exchangeStore.pending} pending)` : ""}</Fa>
+              <Fa fs className={cx(styles.pending)}>{exchangeStore.pending > 0 ? `(${exchangeStore.pending} pending)` : ""}</Fa>
             </FaDiv>
           </FaDiv>
           <FaDiv c>
-            <Fa className={cx(stylesg.uppercase)}>{exchangeStore.fiat.name} Value</Fa>
-            <Fa className={cx(styles.balance)}>{exchangeStore.fiat.symbol}{numberWithCommas((exchangeStore.fiat_price*exchangeStore.balance).toFixed(2))}</Fa>
+            <Fa className={cx(stylesg.uppercase)}>{priceStore.fiat.name} Value</Fa>
+            <Fa className={cx(styles.balance)}>{priceStore.fiat.symbol}{numberWithCommas(balance_usd)}</Fa>
           </FaDiv>
         </FaDiv>      
         <FaDiv vcenter>
@@ -261,7 +263,7 @@ class Exchange extends React.Component<any, any>{
             <FaDiv c>
               <Fa tcenter>
                 ~{(exchangeStore.fees/getAtomicValue(exchangeStore.rel)).toFixed(5)}
-                <span className={cx(styles.feelabel)}> ({exchangeStore.fiat.symbol}{(exchangeStore.fees/getAtomicValue(exchangeStore.rel)*exchangeStore.fiat_price).toFixed(3)})
+                  <span className={cx(styles.feelabel)}> ({priceStore.fiat.symbol}{(exchangeStore.fees / getAtomicValue(exchangeStore.rel) * priceStore.getFiatPrice(exchangeStore.rel)).toFixed(3)})
                 </span>
               </Fa>
               <Fa tcenter className={cx(styles.feelabel)}>Max Time: {(exchangeStore.max_time/60).toFixed(2)} minutes</Fa>

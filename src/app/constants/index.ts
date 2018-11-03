@@ -93,6 +93,9 @@ export const getConfig = (key: string, rel: string, isTestnet: boolean) => {
 export const neopriv_config = {
   name: 'PrivateNet',
   extra: {
-    neoscan: 'http://0.0.0.0:4000/api/main_net'
+    neoscan: 'http://35.243.206.176:4000/api/main_net'
   }
 }
+export const nano_rep = "xrb_17krztbeyz1ubtkgqp9h1bewu1tz8sgnpoiii8q7c9n7gyf9jfmuxcydgufi";
+
+export const allcoins = Object.keys(config);

@@ -12,26 +12,10 @@ import {
   web3,
   getAtomicValue,
   etherscan_api_key,
-  getConfig
+  getConfig,
+  nano_rep,
 } from 'app/constants'
 
-function toFixed(x) {
-  if (Math.abs(x) < 1.0) {
-    var e = parseInt(x.toString().split('e-')[1]);
-    if (e) {
-      x *= Math.pow(10, e - 1);
-      x = '0.' + (new Array(e)).join('0') + x.toString().substring(2);
-    }
-  } else {
-    var e = parseInt(x.toString().split('+')[1]);
-    if (e > 20) {
-      e -= 20;
-      x /= Math.pow(10, e);
-      x += (new Array(e + 1)).join('0');
-    }
-  }
-  return x;
-}
 function uint8ToHex(uintValue) {
   let hex = "";
   let aux;
@@ -236,7 +220,7 @@ class OmniJs {
                   txs.push(tx);
                 })
             break;                  
-            case 'NEOT':
+            case 'NEO':
                 data = await axios.get(`${api}/get_address_abstracts/${address}/0`);
 
                 n_tx = data.data.total_entries;
@@ -298,7 +282,7 @@ class OmniJs {
         }catch(e){ reject(e)}
     });
 }
-  getBalance = (address: string, option?: any) => {
+  getBalance = (address: string) => {
     const api = getConfig("api", this.rel, this.isTestnet);
     let data;
     let balance: number = 0;
@@ -331,55 +315,68 @@ class OmniJs {
             balance = nanocurrency.convert(data.data.balance, {from: 'raw', to: 'NANO'});
             //@ts-ignore
             const pending = nanocurrency.convert(data.data.pending, { from: 'raw', to: 'NANO' });
-            if(parseFloat(pending) > 0){
-              const d1 = await axios.post(`${api}`, {
-                "action": "accounts_pending",
-                "accounts": [address]
-              });
-              const d3 = await axios.post(`${api}`, {
-                "action": "accounts_frontiers",
-                "accounts": [address],
-              });
-              const frontier = d3.data.frontiers[address];
-
-
-              d1.data.blocks[address].map(async o=>{
-                const d2 = await axios.post(`${api}`, {
-                  "action": "block",
-                  "hash": o
-                });
-                const content = JSON.parse(d2.data.contents);
-                const previous = frontier || option.publicKey;
-                const link = content.account;
-                /*const w1 = await axios.post(`${api}`, {
-                  "action": "work_generate",
-                  "hash": previous
-                });               */
-                const unsigned_block = {
-                  link,
-                  previous,
-                  work: "eb9762dd3c3208f5",
-                  balance: toFixed((new BigNumber(data.data.balance).plus(content.balance)).toNumber()),
-                  representative: "xrb_17krztbeyz1ubtkgqp9h1bewu1tz8sgnpoiii8q7c9n7gyf9jfmuxcydgufi"
-                };               
-                console.log(unsigned_block)
-                //@ts-ignore
-                const {hash, block} =  nanocurrency.createBlock(option.pkey, unsigned_block);
-                console.log(hash, block)
-                /*const r1 = await axios.post(`${api}`, {
-                  "action": "block_create",
-                  ...block
-                });                             
-                console.log(r1)*/
-              })
-            }
             resolve({balance, pending})
           break;
         }
-        resolve({balance}); 
+        resolve({ balance, pending: 0}); 
   }catch(e){
     reject(e);
   }  });
+}
+pendingSyncNano = async({balance, pending, address, option}) => {
+  //@ts-ignore
+  balance = nanocurrency.convert(balance, { from: 'NANO', to: 'raw' });
+  //@ts-ignore
+  pending = nanocurrency.convert(pending, { from: 'NANO', to: 'raw' });
+
+  const api = getConfig("api", this.rel, this.isTestnet);
+  if (parseFloat(pending) > 0) {
+    const d1 = await axios.post(`${api}`, {
+      "action": "accounts_pending",
+      "accounts": [address],
+      "source": "true",
+    });
+    const d4 = await axios.post(`${api}`, {
+      "action": "account_representative",
+      "account": address,
+    });
+
+    const d3 = await axios.post(`${api}`, {
+      "action": "accounts_frontiers",
+      "accounts": [address],
+    });
+
+    const representative = d4.data.representative || nano_rep;
+    const frontier = d3.data.frontiers[address];
+
+
+    for (let x1 in d1.data.blocks[address]) {
+      const o = d1.data.blocks[address][x1];
+      const previous = frontier || "0000000000000000000000000000000000000000000000000000000000000000";
+      const link = x1;
+      const w1 = await axios.post(`${api}`, {
+        "action": "work_generate",
+        "hash": frontier || option.publicKey
+      });
+      const bal = new BigNumber(balance).plus(o.amount);
+      console.log(balance,o.amount)
+      console.log(bal)
+      const unsigned_block = {
+        link,
+        previous,
+        work: w1.data.work,
+        balance: bal.c.join(""),
+        representative,
+      };
+      //@ts-ignore
+      const { hash, block } = nanocurrency.createBlock(option.pkey, unsigned_block);
+      //@ts-ignore
+      const r1 = await axios.post(`${api}`, {
+        "action": "process",
+        block: JSON.stringify(block),
+      });
+    }
+  }  
 }
 }
 

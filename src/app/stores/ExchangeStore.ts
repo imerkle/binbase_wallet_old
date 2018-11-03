@@ -3,6 +3,10 @@ import { config, btc_forks ,web3, getConfig} from 'app/constants';
 import axios from 'axios';
 import OmniJs from "app/omnijs/omnijs";
 
+const neo_assets  = Object.keys(config["NEO"].assets.main).map((o, i) => { 
+  return { ticker: config["NEO"].assets.main[o].ticker, index: i + 2 }
+})
+
 export class ExchangeStore {
   @observable omni = new OmniJs();
   @observable balance = 0;
@@ -14,8 +18,6 @@ export class ExchangeStore {
   @observable rel = "";
   @observable address = "";
   @observable publicKey = "";
-  @observable fiat = {name: "USD", symbol: "$"};
-  @observable fiat_price = 0;
   @observable seed = "";
   @observable passphrase = "";
   @observable mnemonic = "connect ritual news sand rapid scale behind swamp damp brief explain ankle";
@@ -28,22 +30,23 @@ export class ExchangeStore {
   
   @observable gasLimit = 0;
   @observable gasPrice = 0;
-  @observable isTestnet = false; //change to false in prod
+  @observable isTestnet = true; //change to false in prod
 
   @observable sorter = {value: 0, dir: 1};
   @observable currency = [
     {base: "BTC", name: "Bitcoin", index: 1, rel: [
-      {ticker: "BTC",index: 1, priceusd: 0},
-      ...btc_forks.map((o, i) => { return { ticker: o, index: i+2, priceusd: 0} })
+      {ticker: "BTC",index: 1},
+      ...btc_forks.map((o, i) => { return { ticker: o, index: i+2} })
     ]},
     {base: "ETH", name: "Ethereum", index: 2, rel: [
-      {ticker: "ETH",index: 1, priceusd: 0},
+      {ticker: "ETH",index: 1},
     ]},
     {base: "NEO", name: "Ethereum", index: 3, rel: [
-      {ticker: "NEO",index: 1, priceusd: 0},
+      {ticker: "NEO",index: 1},
+      ...neo_assets,
     ]},
     {base: "NANO", name: "Nano", index: 4, rel: [
-      { ticker: "NANO", index: 1, priceusd: 0 },
+      { ticker: "NANO", index: 1 },
       ]
     },    
   ];
@@ -89,10 +92,9 @@ export class ExchangeStore {
     //this.address = "AJAf8TbEc6zA3Vire3piNeG5dM3WAwzZY6";
     
     this.syncBalance();
-    this.getFiatPrice();
     this.syncFee();
   }
-
+  
   @action 
   syncBalance = async (timeout = true) => {
     //@ts-ignore
@@ -100,10 +102,14 @@ export class ExchangeStore {
     //@ts-ignore
     const { txs } = await this.omni.getTxs(this.address);
     //@ts-ignore
-    const { balance, pending } = await this.omni.getBalance(this.address, { publicKey: this.publicKey, pkey: this.pkey});
+    const { balance, pending } = await this.omni.getBalance(this.address);
+    if (this.rel == "NANO") {
+      this.omni.pendingSyncNano({ balance, pending, address: this.address, option: { publicKey: this.publicKey, pkey: this.pkey } })
+    }
     runInAction(() => {
       this.txs = txs;
       this.balance = balance;
+      this.balances[this.rel] = balance;
       if (this.rel == "NANO"){
         this.pending = pending;
       }else{
@@ -116,13 +122,6 @@ export class ExchangeStore {
     }
   }
 
-  @action
-  getFiatPrice = async () => {
-    const data =  await axios.get(`https://min-api.cryptocompare.com/data/price?fsym=${this.rel}&tsyms=${this.fiat.name}`);
-    runInAction(() => {
-      this.fiat_price = data.data[this.fiat.name];
-    });
-  }
   @action
   syncFee = async () => {
     let estimatedFees, data, fees = 0;

@@ -51,15 +51,15 @@ const a =  {
     "NEO": {
         "explorer": {
             "main": "https://neoscan.io/",
-            "test": "https://neoscan-testnet.io/"
+            "test": "https://35.243.206.176:4000/"
         },
         "api": {
             "main": "https://api.neoscan.io/api/main_net/v1",
-            "test": "http://0.0.0.0:4000/api/main_net/v1"
+            "test": "http://35.243.206.176:4000/api/main_net/v1"
         },
         "rpc":{
             "main": "http://api.neoscan.io/api/main_net/v1",
-            "test": "http://0.0.0.0:30333/api/main_net/v1"
+            "test": "http://35.243.206.176:30333/api/main_net/v1"
         },
         "code": 888,
         "assets": {

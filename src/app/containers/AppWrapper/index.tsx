@@ -10,6 +10,7 @@ import * as stylesg from '../..//style.css';
 import * as cx from 'classnames';
 import { compose } from 'recompose';
 import { StyleRules, Theme, withStyles } from '@material-ui/core/styles';
+import { Scrollbars } from 'react-custom-scrollbars';
 
 const styleSheet = (theme: Theme): StyleRules => ({
   icon: {
@@ -42,7 +43,7 @@ const sortByChangeDesc = (a,b) => { return b.change - a.change }
 
 const arrows = ["Coin","Price"];
 @compose(withStyles(styleSheet))
-@inject('appStore','langStore','exchangeStore')
+@inject('appStore', 'langStore', 'exchangeStore','priceStore')
 @observer
 class AppWrapper extends React.Component<any, any>{
 
@@ -74,7 +75,7 @@ class AppWrapper extends React.Component<any, any>{
 
   }
   render(){
-  	const { classes, appStore, children, exchangeStore } = this.props;
+    const { classes, appStore, children, exchangeStore, priceStore } = this.props;
     const { select2, selected, slideLeft} = this.state;
   	const { sorter, currency } = exchangeStore;
 
@@ -164,25 +165,31 @@ class AppWrapper extends React.Component<any, any>{
                       )
                   })}
                 </FaDiv>
-                {rel.map( (o, i) =>  (
-                  <Link key={i} onClick={()=>{ this.setState({ select2: i+1 }) }} ey={i} clearfix to={`/exchange/${c_currency.base}_${o.ticker}`}>
-                    <FaDiv className={cx(stylesg.pad_20,styles.li,{[styles.selected]: select2 == i+1})}>
+                <Scrollbars className={cx(styles.assets_menu_container)}>
+                  {rel.map( (o, i) =>  {
+                     const balance = exchangeStore.balances[o.ticker] || 0
+                     const price_usd = priceStore.getFiatPrice(o.ticker);
+                    return (
+                    <Link key={i} onClick={()=>{ this.setState({ select2: i+1 }) }} ey={i} clearfix to={`/exchange/${c_currency.base}_${o.ticker}`}>
+                      <FaDiv className={cx(stylesg.pad_20,styles.li,{[styles.selected]: select2 == i+1})}>
 
-                    <Fa fs style={{width: "100px"}}>
+                      <Fa fs style={{width: "100px"}}>
+                        <FaDiv vcenter>
+                          <Div className={cx(styles.rel)}>{o.ticker}</Div>
+                        </FaDiv>
                       <FaDiv vcenter>
-                        <Div className={cx(styles.rel)}>{o.ticker}</Div>
+                              <Div className={cx(styles.vol)}>{priceStore.fiat.symbol}{
+                                price_usd* balance}</Div>
+                        </FaDiv>                      
+                      </Fa>
+                      <FaDiv fs c style={{width: "86px"}}>
+                            <Div className={cx(styles.price)}>{balance}</Div>
                       </FaDiv>
-                     <FaDiv vcenter>
-                            <Div className={cx(styles.vol)}>{exchangeStore.fiat.symbol}{o.priceusd * (exchangeStore.balances[o.ticker] || 0)}</Div>
-                      </FaDiv>                      
-                    </Fa>
-                    <FaDiv fs c style={{width: "86px"}}>
-                        <Div className={cx(styles.price)}>{exchangeStore.balances[o.ticker] || 0}</Div>
-                    </FaDiv>
-                      
-                    </FaDiv>
-                  </Link>                   
-                ))}
+                        
+                      </FaDiv>
+                    </Link>                   
+                  )})}
+                  </Scrollbars>
                 </FaDiv>
               }
 
