@@ -99,3 +99,4 @@ export const neopriv_config = {
 export const nano_rep = "xrb_17krztbeyz1ubtkgqp9h1bewu1tz8sgnpoiii8q7c9n7gyf9jfmuxcydgufi";
 
 export const allcoins = Object.keys(config);
+export const isTestnet = true;

@@ -78,7 +78,8 @@ export const getWallet = (key: any, rel: string, isTestnet?: boolean) => {
       break      
     default:
       //eth and rest of its shitcoins
-      var privKeyBuffer = key.keyPair.d.toBuffer(32)
+      //var privKeyBuffer = key.__d.toBuffer(32)
+      var privKeyBuffer = key.__d;
       const privkey = privKeyBuffer.toString('hex')
       var addressBuffer = ethUtil.privateToAddress(privKeyBuffer)
       var hexAddress = addressBuffer.toString('hex')

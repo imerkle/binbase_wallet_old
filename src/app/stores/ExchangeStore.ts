@@ -1,17 +1,16 @@
 import { observable, action, runInAction } from 'mobx';
-import { config, btc_forks ,web3, getConfig} from 'app/constants';
+import { isTestnet, config, btc_forks ,web3, getConfig} from 'app/constants';
 import axios from 'axios';
 import OmniJs from "app/omnijs/omnijs";
+import { CoinStore } from './CoinStore';
 
 const neo_assets  = Object.keys(config["NEO"].assets.main).map((o, i) => { 
   return { ticker: config["NEO"].assets.main[o].ticker, index: i + 2 }
 })
 
 export class ExchangeStore {
-  @observable omni = new OmniJs();
-  @observable balance = 0;
-  @observable pending = 0;
-  @observable balances = {};
+  public omni = new OmniJs();
+
   @observable n_tx = 0;
   @observable txs = [];
   @observable base = "";
@@ -19,8 +18,6 @@ export class ExchangeStore {
   @observable address = "";
   @observable publicKey = "";
   @observable seed = "";
-  @observable passphrase = "";
-  @observable mnemonic = "connect ritual news sand rapid scale behind swamp damp brief explain ankle";
   
   @observable feeSlider = 85;
   @observable estimatedFees = null;
@@ -30,7 +27,7 @@ export class ExchangeStore {
   
   @observable gasLimit = 0;
   @observable gasPrice = 0;
-  @observable isTestnet = true; //change to false in prod
+  @observable isTestnet = isTestnet;
 
   @observable sorter = {value: 0, dir: 1};
   @observable currency = [
@@ -50,7 +47,10 @@ export class ExchangeStore {
       ]
     },    
   ];
-  
+  public coinStore;
+  constructor(coinStore: CoinStore){
+      this.coinStore = coinStore;
+  }
   @action
   toggleSort = (value) => {  
     if(value == this.sorter.value){
@@ -76,25 +76,16 @@ export class ExchangeStore {
 
   @action 
   generatePKey = () => {
-    let seed;
-    if(this.rel == "NANOx"){
-      seed = this.omni.generateSeedNano(this.mnemonic, this.passphrase)
-    }else{
-      seed = this.omni.generateSeed(this.mnemonic, this.passphrase)
-    }
-    this.mnemonic = seed.mnemonic;
-    this.seed = seed.seed;
-    const k = this.omni.generatePKey(seed.seed)
+    
+    const k = this.coinStore.keys[this.rel];
     this.pkey = k.wif;
     this.address = k.address;
     this.publicKey = k.publicKey;
-    
-    //this.address = "AJAf8TbEc6zA3Vire3piNeG5dM3WAwzZY6";
-    
-    this.syncBalance();
+        
+    //this.syncBalance();
     this.syncFee();
   }
-  
+  /*
   @action 
   syncBalance = async (timeout = true) => {
     //@ts-ignore
@@ -121,6 +112,7 @@ export class ExchangeStore {
       },60000)
     }
   }
+  */
 
   @action
   syncFee = async () => {

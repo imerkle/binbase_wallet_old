@@ -71,7 +71,7 @@ const smartTrim = (string, maxLength) => {
 }   
 
 @compose(withStyles(styleSheet))
-@inject('langStore','exchangeStore','appStore', 'priceStore')
+@inject('langStore','exchangeStore','appStore', 'priceStore', 'coinStore')
 @observer
 class Exchange extends React.Component<any, any>{
   componentWillReceiveProps(){
@@ -113,27 +113,28 @@ class Exchange extends React.Component<any, any>{
 
   }
   render(){
-    const { classes, exchangeStore, priceStore, appStore } = this.props;
+    const { classes, exchangeStore, coinStore, priceStore, appStore } = this.props;
     const { address, txs } = exchangeStore;
     const { showFees, advanceToggleDisabled, showAdvanced, addressField, amountField, addressError } = this.state;
-
+    const { rel } = exchangeStore;
     let fee_label = "";
-    if (btc_forks.indexOf(exchangeStore.rel) != -1){
-      fee_label = `Network Fees (${exchangeStore.rel})`;
-    } else if (exchangeStore.rel == "BTC"){
+    if (btc_forks.indexOf(rel) != -1){
+      fee_label = `Network Fees (${rel})`;
+    } else if (rel == "BTC"){
       fee_label = `Network Fees(in sats)`;
-    } else if (exchangeStore.rel == "NEO"){
+    } else if (rel == "NEO"){
       fee_label = `Network Fees(in GAS)`;
     }
-    const balance_usd = priceStore.getFiatPrice(exchangeStore.rel) * exchangeStore.balance;
+    const balance = coinStore.balances[rel] || {balance: 0, pending: 0};
+    const balance_usd = priceStore.getFiatPrice(rel) * balance.balance;
   	return (
       <FaDiv c>
         <FaDiv>
           <FaDiv fs c>
-            <Fa className={cx(stylesg.uppercase)}>{exchangeStore.rel} Balance</Fa>
+            <Fa className={cx(stylesg.uppercase)}>{rel} Balance</Fa>
             <FaDiv vcenter className={cx(styles.balance)}>
-              <Fa fa className={cx(styles.balance)}>{exchangeStore.balance}</Fa>
-              <Fa fs className={cx(styles.pending)}>{exchangeStore.pending > 0 ? `(${exchangeStore.pending} pending)` : ""}</Fa>
+              <Fa fa className={cx(styles.balance)}>{balance.balance}</Fa>
+              <Fa fs className={cx(styles.pending)}>{balance.pending > 0 ? `(${balance.pending} pending)` : ""}</Fa>
             </FaDiv>
           </FaDiv>
           <FaDiv c>
@@ -146,7 +147,7 @@ class Exchange extends React.Component<any, any>{
             className={cx(stylesg.mar_20_0)}
             value={address}
             disabled
-            label={`Your ${exchangeStore.rel} Address`}
+            label={`Your ${rel} Address`}
             type="text"
             fullWidth />
 
@@ -179,12 +180,12 @@ class Exchange extends React.Component<any, any>{
               value={addressField}
               onChange={(e)=>{ 
                   let _addressError = false;
-                  if(!isValidAddress(e.target.value, exchangeStore.rel)){
+                  if(!isValidAddress(e.target.value, rel)){
                     _addressError = true;
                   }
                   this.setState({addressField: e.target.value, addressError: _addressError })
               }}
-              label={addressError ? `Invalid ${exchangeStore.rel} address` : `Recieving Address`}
+              label={addressError ? `Invalid ${rel} address` : `Recieving Address`}
               type="text"
               fullWidth />   
             <FaDiv vcenter>
@@ -192,13 +193,13 @@ class Exchange extends React.Component<any, any>{
                 className={cx(stylesg.mar_20)}
                 value={amountField}
                 onChange={(e)=>{ this.setState({amountField: e.target.value }) }}
-                label={`${exchangeStore.rel} Amount to Send`}
+                label={`${rel} Amount to Send`}
                 type="text"
                 fullWidth />             
                 <IconButton onClick={()=>{
 
-                 const divide_by = (btc_forks.indexOf(exchangeStore.rel) != -1) ? 1 : getAtomicValue(exchangeStore.rel);
-                 this.setState({amountField: exchangeStore.balance - (exchangeStore.fees/divide_by)})
+                 const divide_by = (btc_forks.indexOf(rel) != -1) ? 1 : getAtomicValue(rel);
+                 this.setState({amountField: balance.balance - (exchangeStore.fees/divide_by)})
               }} color="primary" ><Icon style={{fontSize: 14}} className={cx(classes.icon)}>call_made</Icon></IconButton>
             </FaDiv>
           </FaDiv>
@@ -221,7 +222,7 @@ class Exchange extends React.Component<any, any>{
           }
           {
             showAdvanced &&
-            exchangeStore.rel == "ETH" &&  
+            rel == "ETH" &&  
           <FaDiv>
             <TextField
               className={cx(stylesg.mar_20_0)}
@@ -240,7 +241,7 @@ class Exchange extends React.Component<any, any>{
               fullWidth />
           </FaDiv>
           }
-          {showFees && showAdvanced && exchangeStore.rel != "ETH" &&
+          {showFees && showAdvanced && rel != "ETH" &&
            <TextField
             className={cx(stylesg.mar_20_0)}
             value={exchangeStore.fees}
@@ -262,8 +263,8 @@ class Exchange extends React.Component<any, any>{
             </FaDiv>
             <FaDiv c>
               <Fa tcenter>
-                ~{(exchangeStore.fees/getAtomicValue(exchangeStore.rel)).toFixed(5)}
-                  <span className={cx(styles.feelabel)}> ({priceStore.fiat.symbol}{(exchangeStore.fees / getAtomicValue(exchangeStore.rel) * priceStore.getFiatPrice(exchangeStore.rel)).toFixed(3)})
+                ~{(exchangeStore.fees/getAtomicValue(rel)).toFixed(5)}
+                  <span className={cx(styles.feelabel)}> ({priceStore.fiat.symbol}{(exchangeStore.fees / getAtomicValue(rel) * priceStore.getFiatPrice(rel)).toFixed(3)})
                 </span>
               </Fa>
               <Fa tcenter className={cx(styles.feelabel)}>Max Time: {(exchangeStore.max_time/60).toFixed(2)} minutes</Fa>
@@ -289,7 +290,7 @@ class Exchange extends React.Component<any, any>{
           {txs.map((o,i)=>{ 
             return (
             <tr key={i} className={cx(styles.tx_box_li, {[styles.tx_pending]: o.confirmations == 0})} onClick={()=>{
-                window.open(`${getConfig("explorer", exchangeStore.rel, exchangeStore.isTestnet)}/tx/${o.hash}`,"_blank");
+                window.open(`${getConfig("explorer", rel, exchangeStore.isTestnet)}/tx/${o.hash}`,"_blank");
                }}>
                 <td>{smartTrim(o.hash, 20)}</td>
                 <td>{o.confirmations == 0 ? <CircularProgress size={18} color="primary" /> : 
@@ -298,12 +299,12 @@ class Exchange extends React.Component<any, any>{
                 }</td>
                 <td className={cx(stylesg.tcenter)}><span className={cx({[styles.got]: o.kind == "got"},
                 {[styles.sent]: o.kind == "sent"})}>{o.kind == "got" ? "IN": "OUT" }</span></td>
-                <td>{o.value} {o.asset ? o.asset.ticker : exchangeStore.rel}</td>
+                <td>{o.value} {o.asset ? o.asset.ticker : rel}</td>
                 <td>{o.fee}</td>
             </tr>
             )
           })}
-            <tr><td><a href={`${getConfig("explorer", exchangeStore.rel, exchangeStore.isTestnet)}/address/${exchangeStore.address}`}>View all Transactions</a></td></tr>
+            <tr><td><a href={`${getConfig("explorer", rel, exchangeStore.isTestnet)}/address/${exchangeStore.address}`}>View all Transactions</a></td></tr>
           </tbody>
          </table>
         }
@@ -311,11 +312,13 @@ class Exchange extends React.Component<any, any>{
     )
   }
   send = () => {
-    const {exchangeStore, appStore} = this.props;
+    const { coinStore, exchangeStore, appStore} = this.props;
+    const { rel } = exchangeStore;
     const { addressError, addressField, amountField } = this.state;
+    const balance = coinStore.balances[rel];
       return new Promise(async (resolve, reject) => {
         const amt = parseFloat(amountField);
-        const divide_by = (btc_forks.indexOf(exchangeStore.rel) != -1) ? 1 : getAtomicValue(exchangeStore.rel);
+        const divide_by = (btc_forks.indexOf(rel) != -1) ? 1 : getAtomicValue(rel);
         let fees = exchangeStore.fees/divide_by;
           
         if(addressError || !addressField){
@@ -326,11 +329,11 @@ class Exchange extends React.Component<any, any>{
           appStore.setSnackMsg("Invalid Amount");
           reject();
         }
-        if(exchangeStore.balance < amt){
+        if (balance.balance < amt){
           appStore.setSnackMsg("Not enough balance");
           reject();
         }
-        if(exchangeStore.balance < fees + amt){
+        if (balance.balance < fees + amt){
           appStore.setSnackMsg("Not enough balance to cover network fees");
           reject();
         }
@@ -347,7 +350,7 @@ class Exchange extends React.Component<any, any>{
           appStore.setSnackMsg("Transaction Failed to broadcast!");
           reject(e);
         }
-        exchangeStore.syncBalance(false)
+        //exchangeStore.syncBalance(false)
       });    
     }
 }
