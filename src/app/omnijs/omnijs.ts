@@ -205,7 +205,7 @@ class OmniJs {
                     fee,
                     timestamp: o.time,
                     token_address: o.asset,
-                  asset: this.config[this.rel].assets.main[o.asset] ? this.config[this.rel].assets.main[o.asset] : null,
+                    asset: this.config[this.rel].assets.main[o.asset] ? this.config[this.rel].assets.main[o.asset] : null,
                 };
                 txs.push(tx);
                 })

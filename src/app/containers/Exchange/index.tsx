@@ -71,7 +71,7 @@ const smartTrim = (string, maxLength) => {
 }   
 
 @compose(withStyles(styleSheet))
-@inject('langStore','exchangeStore','appStore', 'priceStore', 'coinStore')
+@inject('rootStore')
 @observer
 class Exchange extends React.Component<any, any>{
   componentWillReceiveProps(){
@@ -81,7 +81,7 @@ class Exchange extends React.Component<any, any>{
     this.init()
   }
   init = () => {
-    const { exchangeStore } = this.props;
+    const { exchangeStore } = this.props.rootStore;
     const regex2 = /^\/exchange\/(\w{5,12})/;
     const str = window.location.pathname;
     let m;
@@ -113,7 +113,8 @@ class Exchange extends React.Component<any, any>{
 
   }
   render(){
-    const { classes, exchangeStore, coinStore, priceStore, appStore } = this.props;
+    const { classes } = this.props;
+    const { exchangeStore, coinStore, priceStore, appStore } = this.props.rootStore;
     const { address, txs } = exchangeStore;
     const { showFees, advanceToggleDisabled, showAdvanced, addressField, amountField, addressError } = this.state;
     const { rel } = exchangeStore;
@@ -312,7 +313,7 @@ class Exchange extends React.Component<any, any>{
     )
   }
   send = () => {
-    const { coinStore, exchangeStore, appStore} = this.props;
+    const { coinStore, exchangeStore, appStore} = this.props.rootStore;
     const { rel } = exchangeStore;
     const { addressError, addressField, amountField } = this.state;
     const balance = coinStore.balances[rel];

@@ -78,7 +78,7 @@ interface ErrorProps{
 @compose(
     withStyles(styleSheet),
 )
-@inject('errorStore','langStore') 
+@inject('errorStore','rootStore') 
 @observer
 class Error extends React.Component<ErrorProps, any>{
 
@@ -90,9 +90,10 @@ class Error extends React.Component<ErrorProps, any>{
     e.stopPropagation();
   }
   parseErrorCode(){
-    const {errorStore , langStore } = this.props;
+    //const { langStore } = this.props.rootStore;
+    const {errorStore } = this.props;
     if(errorStore.errorCode > -1 && errorStore.errorActive){
-      errorStore.setErrorParams(langStore.getE(errorStore.errorCode));
+      //errorStore.setErrorParams(langStore.getE(errorStore.errorCode));
     }
   }
   render() {

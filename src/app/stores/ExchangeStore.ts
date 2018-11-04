@@ -29,7 +29,7 @@ export class ExchangeStore {
   @observable gasPrice = 0;
   @observable isTestnet = isTestnet;
 
-  @observable sorter = {value: 0, dir: 1};
+  @observable sorter = {value: 1, dir: 1};
   @observable currency = [
     {base: "BTC", name: "Bitcoin", index: 1, rel: [
       {ticker: "BTC",index: 1},

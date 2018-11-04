@@ -36,14 +36,9 @@ const sortByNameDesc = (a,b) => {
 const sortByPriceAsc = (a,b) => { return a.price - b.price }
 const sortByPriceDesc = (a,b) => { return b.price - a.price }
 
-const sortByChangeAsc = (a,b) => { return a.change - b.change }
-const sortByChangeDesc = (a,b) => { return b.change - a.change }
-
-
-
 const arrows = ["Coin","Price"];
 @compose(withStyles(styleSheet))
-@inject('appStore', 'langStore', 'exchangeStore','priceStore', 'coinStore')
+  @inject('rootStore')
 @observer
 class AppWrapper extends React.Component<any, any>{
 
@@ -54,7 +49,7 @@ class AppWrapper extends React.Component<any, any>{
     slideLeft: false,
   } 		
   componentDidMount(){
-    const { exchangeStore } = this.props;
+    const { exchangeStore } = this.props.rootStore;
     const { currency } = exchangeStore;
     const regex = /^\/markets\/(\w{3,5})/;
     const regex2 = /^\/exchange\/(\w{5,12})/;
@@ -75,7 +70,8 @@ class AppWrapper extends React.Component<any, any>{
 
   }
   render(){
-    const { classes, appStore, children, exchangeStore, priceStore, coinStore } = this.props;
+    const { classes, children} = this.props;
+    const { appStore, exchangeStore, priceStore, coinStore } = this.props.rootStore;
     const { select2, selected, slideLeft} = this.state;
   	const { sorter, currency } = exchangeStore;
 
@@ -83,7 +79,6 @@ class AppWrapper extends React.Component<any, any>{
     let c_currency;
     if(selected > 0){
       c_currency = currency[selected-1];
-
       switch(sorter.value){
         case 0:
           if(sorter.dir){
@@ -97,13 +92,6 @@ class AppWrapper extends React.Component<any, any>{
             rel = c_currency.rel.sort(sortByPriceAsc);
           }else{
             rel = c_currency.rel.sort(sortByPriceDesc);
-          }
-        break;
-        case 2:
-          if(sorter.dir){
-            rel = c_currency.rel.sort(sortByChangeAsc);
-          }else{
-            rel = c_currency.rel.sort(sortByChangeDesc);
           }
         break;
       }

@@ -111,7 +111,7 @@ class AppFragment extends React.Component<any, any>{
 		return (
 		  <MuiThemeProvider theme={this.theme} >
 		  	<CssBaseline />
-		  	<Provider {...this.props} {...rootStore} errorStore={this.errorStore} >
+				<Provider {...this.props} rootStore={rootStore} errorStore={this.errorStore} >
 		  	<div
 		  	   className={cx(
 		  	   	styles.app_container,

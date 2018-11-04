@@ -43,7 +43,7 @@ const a =  {
         },
         "api": {
             "main": "https://api.etherscan.io/api",
-            "test": "https://api.rinkeby.etherscan.io/api"
+            "test": "https://api-rinkeby.etherscan.io/api"
         },
         "code": 60,
         "decimals": 10 ** 18,
