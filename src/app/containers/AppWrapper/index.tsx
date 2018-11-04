@@ -43,7 +43,7 @@ const sortByChangeDesc = (a,b) => { return b.change - a.change }
 
 const arrows = ["Coin","Price"];
 @compose(withStyles(styleSheet))
-@inject('appStore', 'langStore', 'exchangeStore','priceStore')
+@inject('appStore', 'langStore', 'exchangeStore','priceStore', 'coinStore')
 @observer
 class AppWrapper extends React.Component<any, any>{
 
@@ -75,7 +75,7 @@ class AppWrapper extends React.Component<any, any>{
 
   }
   render(){
-    const { classes, appStore, children, exchangeStore, priceStore } = this.props;
+    const { classes, appStore, children, exchangeStore, priceStore, coinStore } = this.props;
     const { select2, selected, slideLeft} = this.state;
   	const { sorter, currency } = exchangeStore;
 
@@ -167,7 +167,7 @@ class AppWrapper extends React.Component<any, any>{
                 </FaDiv>
                 <Scrollbars className={cx(styles.assets_menu_container)}>
                   {rel.map( (o, i) =>  {
-                     const balance = exchangeStore.balances[o.ticker] || 0
+                     const balance = coinStore.balances[o.ticker] || {balance: 0};
                      const price_usd = priceStore.getFiatPrice(o.ticker);
                     return (
                     <Link key={i} onClick={()=>{ this.setState({ select2: i+1 }) }} ey={i} clearfix to={`/exchange/${c_currency.base}_${o.ticker}`}>
@@ -179,11 +179,11 @@ class AppWrapper extends React.Component<any, any>{
                         </FaDiv>
                       <FaDiv vcenter>
                               <Div className={cx(styles.vol)}>{priceStore.fiat.symbol}{
-                                price_usd* balance}</Div>
+                                price_usd* balance.balance}</Div>
                         </FaDiv>                      
                       </Fa>
                       <FaDiv fs c style={{width: "86px"}}>
-                            <Div className={cx(styles.price)}>{balance}</Div>
+                            <Div className={cx(styles.price)}>{balance.balance}</Div>
                       </FaDiv>
                         
                       </FaDiv>
