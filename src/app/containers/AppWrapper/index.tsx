@@ -120,7 +120,10 @@ class AppWrapper extends React.Component<any, any>{
                       <Link key={i} onClick={()=>{ this.setState({ selected: o.index }) }} clearfix to={`/markets/${o.base}/`}>
                         <FaDiv className={cx(styles.fabdiv)}>
                             <Div className={cx(styles.nib, {[styles.selected]: selected == o.index})}></Div>
-                            <Button className={cx(styles.fab, {[styles.selected]: selected == o.index})} variant="fab" color="primary" >{o.base.substr(0,1)}</Button>
+                            <Button className={cx(styles.fab, {[styles.selected]: selected == o.index})} variant="fab" color="primary" >
+                              <img className={cx(styles.fabicon)} src={`/assets/cryptocurrency-icons/color/${o.base.toLowerCase()}.svg`} />
+                              {/*o.base.substr(0,1)*/}
+                            </Button>
                         </FaDiv>
                       </Link>
                     )
@@ -161,6 +164,9 @@ class AppWrapper extends React.Component<any, any>{
                     <Link key={i} onClick={()=>{ this.setState({ select2: i+1 }) }} ey={i} clearfix to={`/exchange/${c_currency.base}_${o.ticker}`}>
                       <FaDiv className={cx(stylesg.pad_20,styles.li,{[styles.selected]: select2 == i+1})}>
 
+                      <FaDiv vcenter fs style={{width: "18px"}}>
+                            <Div className={cx(styles.col_icon)} style={{ backgroundImage: `url(/assets/cryptocurrency-icons/color/${o.ticker.toLowerCase()}.svg)` }} ></Div>
+                      </FaDiv>
                       <Fa fs style={{width: "100px"}}>
                         <FaDiv vcenter>
                           <Div className={cx(styles.rel)}>{o.ticker}</Div>

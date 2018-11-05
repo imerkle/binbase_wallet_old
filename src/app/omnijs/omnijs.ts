@@ -7,6 +7,7 @@ import BigNumber from 'bignumber.js'
 import * as nanocurrency  from 'nanocurrency';
 import {
   btc_forks,
+  neo_assets,
   web3,
   getAtomicValue,
   etherscan_api_key,
@@ -71,11 +72,11 @@ class OmniJs {
       switch (this.rel) {
       case 'BTC':
         case btc_forks.indexOf(this.rel) + 1 && this.rel:
-          const multiply_by = this.rel == 'BTC' ? 1 : getAtomicValue(this.rel)
-          const utxos = await getUtxos({ isTestnet: this.isTestnet, rel: this.rel, address: from })
-          try {
-            const txid = await broadcastTx({
-              utxos,
+        const multiply_by = this.rel == 'BTC' ? 1 : getAtomicValue(this.rel)
+        const utxos = await getUtxos({ isTestnet: this.isTestnet, rel: this.rel, address: from })
+        try {
+          const txid = await broadcastTx({
+            utxos,
               from: from,
               to: address,
               amount: amount * getAtomicValue(this.rel),
@@ -89,20 +90,20 @@ class OmniJs {
             reject(e)
           }
           break
-        case 'ETH':
+          case 'ETH':
           web3.eth
-            .getTransactionCount(from)
-            .then(txCount => {
-              const txData = {
-                nonce: web3.utils.toHex(txCount.toString()),
-                gasLimit: web3.utils.toHex(options.gasLimit.toString()),
-                gasPrice: web3.utils.toHex(options.gasPrice.toString()),
-                to: address,
-                from: from,
-                //@ts-ignore
+          .getTransactionCount(from)
+          .then(txCount => {
+            const txData = {
+              nonce: web3.utils.toHex(txCount.toString()),
+              gasLimit: web3.utils.toHex(options.gasLimit.toString()),
+              gasPrice: web3.utils.toHex(options.gasPrice.toString()),
+              to: address,
+              from: from,
+              //@ts-ignore
                 value: web3.utils.toHex(toFixed(amount * 10 ** 18).toString())
               }
-
+              
               this.sendSignedWeb3(wif, txData, (err, result) => {
                 if (err) reject(err)
                 resolve(result)
@@ -111,8 +112,9 @@ class OmniJs {
             .catch(e => {
               reject(e)
             })
-        case "NEO":
-
+            case "NEO":
+            case neo_assets.indexOf(this.rel) + 1 && this.rel:
+            
           const api = getConfig("api", this.rel, this.isTestnet);
 
           const balance = (await axios.get(`${api}/get_balance/${address}`)).data;
@@ -182,6 +184,7 @@ class OmniJs {
                 })
             break;                  
             case 'NEO':
+            case neo_assets.indexOf(this.rel) + 1 && this.rel:
                 data = await axios.get(`${api}/get_address_abstracts/${address}/0`);
 
                 n_tx = data.data.total_entries;
@@ -246,6 +249,7 @@ class OmniJs {
   getBalance = (address: string) => {
     const api = getConfig("api", this.rel, this.isTestnet);
     let data;
+    let balances = {};
     let balance: number = 0;
     return new Promise(async (resolve, reject) => {
       try {
@@ -254,18 +258,18 @@ class OmniJs {
           case (btc_forks.indexOf(this.rel) + 1 && this.rel):
             data = await axios.get(`${api}/addr/${address}`);
             balance = data.data.balance;
-          break;
-          case 'ETH':
-          data = await axios.get(`${api}/?module=account&action=balance&address=${address}&tag=latest&apikey=${etherscan_api_key}`);
-          balance = data.data.result / this.config[this.rel].decimals;
+            balances = { [this.rel]: {balance} }
+            break;
+            case 'ETH':
+            data = await axios.get(`${api}/?module=account&action=balance&address=${address}&tag=latest&apikey=${etherscan_api_key}`);
+            balances = { [this.rel]: { balance: data.data.result / this.config[this.rel].decimals} }
           break;
           case 'NEO':
-          data = await axios.get(`${api}/get_balance/${address}`);
-          data.data.balance.map(o=>{
-            if(o.asset == this.rel){
-              balance = o.amount;
-            }
-          })
+          case neo_assets.indexOf(this.rel) + 1 && this.rel:
+            data = await axios.get(`${api}/get_balance/${address}`);
+            data.data.balance.map(o=>{
+              balances[o.asset] = { balance: o.amount };
+            });
           break;
           case 'NANO':
             data = await axios.post(`${api}`,{
@@ -276,10 +280,10 @@ class OmniJs {
             balance = nanocurrency.convert(data.data.balance, {from: 'raw', to: 'NANO'});
             //@ts-ignore
             const pending = nanocurrency.convert(data.data.pending, { from: 'raw', to: 'NANO' });
-            resolve({balance, pending})
+            balances = { [this.rel]: { balance, pending } }
           break;
         }
-        resolve({ balance, pending: 0}); 
+        resolve(balances); 
   }catch(e){
     reject(e);
   }  });

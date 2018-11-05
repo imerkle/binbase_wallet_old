@@ -42,7 +42,7 @@ const a =  {
             "test": "https://rinkeby.etherscan.io"
         },
         "api": {
-            "main": "https://api.etherscan.io/api",
+            "main": "https://api.ethplorer.io/",
             "test": "https://api-rinkeby.etherscan.io/api"
         },
         "code": 60,

@@ -1,11 +1,11 @@
 import { observable, action, runInAction } from 'mobx';
-import { isTestnet, config, btc_forks ,web3, getConfig} from 'app/constants';
+import { neo_assets, isTestnet, config, btc_forks ,web3, getConfig} from 'app/constants';
 import axios from 'axios';
 import OmniJs from "app/omnijs/omnijs";
 import { CoinStore } from './CoinStore';
 
-const neo_assets  = Object.keys(config["NEO"].assets.main).map((o, i) => { 
-  return { ticker: config["NEO"].assets.main[o].ticker, index: i + 2 }
+const neo_assets_windex  = Object.keys(config["NEO"].assets.main).map((o, i) => { 
+  return { ticker: o, index: i + 2 }
 })
 
 export class ExchangeStore {
@@ -40,7 +40,7 @@ export class ExchangeStore {
     ]},
     {base: "NEO", name: "Ethereum", index: 3, rel: [
       {ticker: "NEO",index: 1},
-      ...neo_assets,
+      ...neo_assets_windex,
     ]},
     {base: "NANO", name: "Nano", index: 4, rel: [
       { ticker: "NANO", index: 1 },
@@ -147,6 +147,7 @@ export class ExchangeStore {
       case "BTC":
       case (btc_forks.indexOf(this.rel)+1 && this.rel):     
       case "NEO":
+      case (neo_assets.indexOf(this.rel) + 1 && this.rel):
         this.fees = fees;
       break;
       default:
@@ -209,6 +210,7 @@ export class ExchangeStore {
             case 'BTC':
             case 'NEO':
             case (btc_forks.indexOf(this.rel)+1 && this.rel):
+            case (neo_assets.indexOf(this.rel) + 1 && this.rel):
               result = await this.omni.send(
               this.address,
               address,

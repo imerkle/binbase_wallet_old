@@ -10,6 +10,8 @@ var outPath = path.join(__dirname, './dist');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var WebpackCleanupPlugin = require('webpack-cleanup-plugin');
+var CopyPlugin = require('copy-webpack-plugin');
+var WriteFilePlugin = require('write-file-webpack-plugin');
 
 module.exports = {
   context: sourcePath,
@@ -77,7 +79,12 @@ module.exports = {
       // static assets
       { test: /\.html$/, use: 'html-loader' },
       { test: /\.png$/, use: 'url-loader?limit=10000' },
-      { test: /\.jpg$/, use: 'file-loader' }
+      { test: /\.jpg$/, use: 'file-loader' },
+			{
+				test: /\.woff2?$|\.ttf$|\.eot$|\.svg$/,
+				exclude: /node_modules/,
+				loader: 'file-loader',
+      },      
     ]
   },
   optimization: {
@@ -105,7 +112,15 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       template: 'assets/index.html'
-    })
+    }),
+    new WriteFilePlugin(),
+    new CopyPlugin([
+      {
+        context: 'node_modules/cryptocurrency-icons/svg/color',
+        from: '*.svg',
+        to: 'assets/cryptocurrency-icons',
+      },
+    ]),    
   ],
   devServer: {
     contentBase: sourcePath,

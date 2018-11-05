@@ -11,7 +11,7 @@ import * as stylesg from '../../style.css';
 import * as cx from 'classnames';
 import { compose } from 'recompose';
 import { StyleRules, Theme, withStyles } from '@material-ui/core/styles';
-import { no_fee, btc_forks, no_advanced_fee, getAtomicValue, getConfig, isValidAddress } from 'app/constants';
+import { no_fee, neo_assets, btc_forks, no_advanced_fee, getAtomicValue, getConfig, isValidAddress } from 'app/constants';
 
 //@ts-ignore
 import formatDistance from 'date-fns/formatDistance';
@@ -123,7 +123,7 @@ class Exchange extends React.Component<any, any>{
       fee_label = `Network Fees (${rel})`;
     } else if (rel == "BTC"){
       fee_label = `Network Fees(in sats)`;
-    } else if (rel == "NEO"){
+    } else if (rel == "NEO" || (neo_assets.indexOf(rel))){
       fee_label = `Network Fees(in GAS)`;
     }
     const balance = coinStore.balances[rel] || {balance: 0, pending: 0};
