@@ -11,6 +11,7 @@ import {
   web3,
   getAtomicValue,
   etherscan_api_key,
+  ethplorer_api_key,
   getConfig,
   nano_rep,
 } from 'app/constants'
@@ -260,10 +261,6 @@ class OmniJs {
             balance = data.data.balance;
             balances = { [this.rel]: {balance} }
             break;
-            case 'ETH':
-            data = await axios.get(`${api}/?module=account&action=balance&address=${address}&tag=latest&apikey=${etherscan_api_key}`);
-            balances = { [this.rel]: { balance: data.data.result / this.config[this.rel].decimals} }
-          break;
           case 'NEO':
           case neo_assets.indexOf(this.rel) + 1 && this.rel:
             data = await axios.get(`${api}/get_balance/${address}`);
@@ -282,6 +279,19 @@ class OmniJs {
             const pending = nanocurrency.convert(data.data.pending, { from: 'raw', to: 'NANO' });
             balances = { [this.rel]: { balance, pending } }
           break;
+          default:
+          //ETH and shitcoins
+            if (this.isTestnet) {
+              data = await axios.get(`${api}/?module=account&action=balance&address=${address}&tag=latest&apikey=${etherscan_api_key}`);
+              balances = { [this.rel]: { balance: data.data.result / this.config[this.rel].decimals } }
+            } else {
+              data = await axios.get(`${api}/getAddressInfo/${address}&apikey=${ethplorer_api_key}`);
+              balances["ETH"] = {balance: data.data.ETH.balance};
+              data.data.tokens.map(o=>{
+                balances[o.tokenInfo.symbol] = { balance: o.balance / 10 ^ o.tokenInfo.decimals, tokenInfo: o.tokenInfo}
+              })
+            }
+          break;          
         }
         resolve(balances); 
   }catch(e){

@@ -15,10 +15,10 @@ export const getRootNode = (seed: any, rel: string, isTestnet?: boolean) => {
   switch (rel) {
     case 'BTC':
     case btc_forks.indexOf(rel) + 1 && rel:
-      const network = getNetwork(rel, isTestnet)
-      rootNode = bip32.fromSeed(seed, network)
-
-      break
+    const network = getNetwork(rel, isTestnet)
+    rootNode = bip32.fromSeed(seed, network)
+    
+    break
     case 'NEO':
       rootNode = bitcoinSecp256r1.HDNode.fromSeedBuffer(
         seed,

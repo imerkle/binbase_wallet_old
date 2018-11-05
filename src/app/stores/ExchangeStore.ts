@@ -77,7 +77,12 @@ export class ExchangeStore {
   @action 
   generatePKey = () => {
     
-    const k = this.coinStore.keys[this.rel];
+    let r = this.rel;
+    if (neo_assets.indexOf(this.rel)+1){
+      r = "NEO";
+    }
+    
+    const k = this.coinStore.keys[r];
     this.pkey = k.wif;
     this.address = k.address;
     this.publicKey = k.publicKey;

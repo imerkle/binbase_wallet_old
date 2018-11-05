@@ -11,6 +11,7 @@ var options = {
 export const web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/2294f3b338ad4524aa9186012810e412", options));
 
 export const etherscan_api_key = "8FISWFNZET4P2J451BY5I5GERA5MZG34S2";
+export const ethplorer_api_key = "freekey";
 //?module=account&action=txlist&address=0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae&startblock=0&endblock=99999999&sort=asc&apikey=YourApiKeyToken
 
 export const getAtomicValue = (rel) => {
