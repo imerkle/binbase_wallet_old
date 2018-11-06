@@ -178,12 +178,12 @@ class AppWrapper extends React.Component<any, any>{
                           <Div className={cx(styles.rel)}>{o.ticker}</Div>
                         </FaDiv>
                       <FaDiv vcenter>
-                              <Div className={cx(styles.vol)}>{priceStore.fiat.symbol}{
-                                price_usd* balance.balance}</Div>
+                              <Div className={cx(styles.vol)}>{priceStore.fiat.symbol}{+(
+                                price_usd* balance.balance).toFixed(2)}</Div>
                         </FaDiv>                      
                       </Fa>
                       <FaDiv fs c style={{width: "86px"}}>
-                            <Div className={cx(styles.price)}>{balance.balance}</Div>
+                            <Div className={cx(styles.price)}>{+(balance.balance).toFixed(8)}</Div>
                       </FaDiv>
                         
                       </FaDiv>

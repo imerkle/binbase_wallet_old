@@ -6,8 +6,8 @@ import axios from 'axios';
 import BigNumber from 'bignumber.js'
 import * as nanocurrency  from 'nanocurrency';
 import {
-  allcoins,
   btc_forks,
+  eth_assets,
   neo_assets,
   web3,
   getAtomicValue,
@@ -264,24 +264,25 @@ class OmniJs {
             break;
           case 'NEO':
           case neo_assets.indexOf(this.rel) + 1 && this.rel:
-            data = await axios.get(`${api}/get_balance/${address}`);
-            data.data.balance.map(o=>{
-              balances[o.asset] = { balance: o.amount, isNeo: true, };
-            });
+          data = await axios.get(`${api}/get_balance/${address}`);
+          data.data.balance.map(o=>{
+            balances[o.asset] = { balance: o.amount, isNeo: true, };
+          });
           break;
           case 'NANO':
-            data = await axios.post(`${api}`,{
-              "action": "account_balance",
+          data = await axios.post(`${api}`,{
+            "action": "account_balance",
               "account": address,     
             });
             //@ts-ignore
             balance = nanocurrency.convert(data.data.balance, {from: 'raw', to: 'NANO'});
             //@ts-ignore
             const pending = nanocurrency.convert(data.data.pending, { from: 'raw', to: 'NANO' });
-            balances = { [this.rel]: { balance, pending } }
-          break;
-          default:
-          //ETH and shitcoins
+            balances = { [this.rel]: { balance: +balance, pending: +pending } }
+            break;
+            case 'ETH':
+            case eth_assets.indexOf(this.rel) + 1 && this.rel:
+            //ETH and shitcoins
             if (!this.isTestnet) {
               data = await axios.get(`${api}/?module=account&action=balance&address=${address}&tag=latest&apikey=${etherscan_api_key}`);
               balances = { [this.rel]: { balance: data.data.result / this.config[this.rel].decimals } }
@@ -290,7 +291,7 @@ class OmniJs {
               data = await axios.get(`${api}/getAddressInfo/${address}?apiKey=${ethplorer_api_key}`);
               balances["ETH"] = {balance: data.data.ETH.balance};
               data.data.tokens.map(o=>{
-                if (allcoins.indexOf(o.tokenInfo.symbol) == -1 && o.balance > 0){
+                if (eth_assets.indexOf(o.tokenInfo.symbol)+1 && o.balance > 0){
                   balances[o.tokenInfo.symbol] = {
                     balance: (o.balance / (10 ** o.tokenInfo.decimals)),
                     tokenInfo: o.tokenInfo,
