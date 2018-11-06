@@ -6,6 +6,7 @@ import axios from 'axios';
 import BigNumber from 'bignumber.js'
 import * as nanocurrency  from 'nanocurrency';
 import {
+  allcoins,
   btc_forks,
   neo_assets,
   web3,
@@ -265,7 +266,7 @@ class OmniJs {
           case neo_assets.indexOf(this.rel) + 1 && this.rel:
             data = await axios.get(`${api}/get_balance/${address}`);
             data.data.balance.map(o=>{
-              balances[o.asset] = { balance: o.amount };
+              balances[o.asset] = { balance: o.amount, isNeo: true, };
             });
           break;
           case 'NANO':
@@ -281,14 +282,21 @@ class OmniJs {
           break;
           default:
           //ETH and shitcoins
-            if (this.isTestnet) {
+            if (!this.isTestnet) {
               data = await axios.get(`${api}/?module=account&action=balance&address=${address}&tag=latest&apikey=${etherscan_api_key}`);
               balances = { [this.rel]: { balance: data.data.result / this.config[this.rel].decimals } }
             } else {
-              data = await axios.get(`${api}/getAddressInfo/${address}&apikey=${ethplorer_api_key}`);
+              address = "0x32Be343B94f860124dC4fEe278FDCBD38C102D88";
+              data = await axios.get(`${api}/getAddressInfo/${address}?apiKey=${ethplorer_api_key}`);
               balances["ETH"] = {balance: data.data.ETH.balance};
               data.data.tokens.map(o=>{
-                balances[o.tokenInfo.symbol] = { balance: o.balance / 10 ^ o.tokenInfo.decimals, tokenInfo: o.tokenInfo}
+                if (allcoins.indexOf(o.tokenInfo.symbol) == -1 && o.balance > 0){
+                  balances[o.tokenInfo.symbol] = {
+                    balance: (o.balance / (10 ** o.tokenInfo.decimals)),
+                    tokenInfo: o.tokenInfo,
+                    isERC20: true,
+                  }
+                }
               })
             }
           break;          

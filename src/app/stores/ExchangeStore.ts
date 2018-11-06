@@ -1,10 +1,13 @@
 import { observable, action, runInAction } from 'mobx';
-import { neo_assets, isTestnet, config, btc_forks ,web3, getConfig} from 'app/constants';
+import { eth_assets, neo_assets, isTestnet, config, btc_forks ,web3, getConfig} from 'app/constants';
 import axios from 'axios';
 import OmniJs from "app/omnijs/omnijs";
 import { CoinStore } from './CoinStore';
 
-const neo_assets_windex  = Object.keys(config["NEO"].assets.main).map((o, i) => { 
+const neo_assets_windex  = neo_assets.map((o, i) => { 
+  return { ticker: o, index: i + 2 }
+})
+const eth_assets_windex = eth_assets.map((o, i) => { 
   return { ticker: o, index: i + 2 }
 })
 
@@ -37,6 +40,7 @@ export class ExchangeStore {
     ]},
     {base: "ETH", name: "Ethereum", index: 2, rel: [
       {ticker: "ETH",index: 1},
+      ...eth_assets_windex,
     ]},
     {base: "NEO", name: "Ethereum", index: 3, rel: [
       {ticker: "NEO",index: 1},
@@ -78,8 +82,8 @@ export class ExchangeStore {
   generatePKey = () => {
     
     let r = this.rel;
-    if (neo_assets.indexOf(this.rel)+1){
-      r = "NEO";
+    if (this.base == "NEO" || this.base == "ETH"){
+      r = this.base;
     }
     
     const k = this.coinStore.keys[r];

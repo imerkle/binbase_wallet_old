@@ -82,6 +82,7 @@ export const apiEndPoints = {
 
 export const btc_forks = config["BTC"]["forks"];
 export const neo_assets = Object.keys(config["NEO"].assets.main);
+export const eth_assets = Object.keys(config["ETH"].assets.main);
 export const no_advanced_fee = ["LTC", "DASH", "VTC", "BTG", "NEO"];
 export const no_fee = ["NANO"];
 

@@ -42,9 +42,13 @@ const a =  {
             "test": "https://rinkeby.etherscan.io"
         },
         "api": {
-            "main": "https://api.ethplorer.io/",
-            "test": "https://api-rinkeby.etherscan.io/api"
+            "main": "https://api.ethplorer.io",
+            "test": "https://api-rinkeby.etherscan.io/api",
+            "test": "https://api.ethplorer.io",
         },
+        "assets": {
+            "main": require("./eth_assets.json")
+        },        
         "code": 60,
         "decimals": 10 ** 18,
     },

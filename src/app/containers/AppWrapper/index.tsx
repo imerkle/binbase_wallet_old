@@ -11,6 +11,7 @@ import * as cx from 'classnames';
 import { compose } from 'recompose';
 import { StyleRules, Theme, withStyles } from '@material-ui/core/styles';
 import { Scrollbars } from 'react-custom-scrollbars';
+import { btc_forks } from 'app/constants';
 
 const styleSheet = (theme: Theme): StyleRules => ({
   icon: {
@@ -47,6 +48,7 @@ class AppWrapper extends React.Component<any, any>{
   	select2: 0,
     market: "",
     slideLeft: false,
+    _base: "",
   } 		
   componentDidMount(){
     const { exchangeStore } = this.props.rootStore;
@@ -63,6 +65,7 @@ class AppWrapper extends React.Component<any, any>{
       const index = currency.filter(o => o.base == _base)[0].index;
       
       this.setState({ 
+          _base,
           selected: index,
           select2: currency[index-1].rel.filter(o => o.ticker == _rel)[0].index,
       });
@@ -94,7 +97,7 @@ class AppWrapper extends React.Component<any, any>{
             rel = c_currency.rel.sort(sortByPriceDesc);
           }
         break;
-      }
+      }    
     }
   	return (
   			<FaDiv fs className={cx(styles.root)}>
@@ -160,6 +163,9 @@ class AppWrapper extends React.Component<any, any>{
                   {rel.map( (o, i) =>  {
                      const balance = coinStore.balances[o.ticker] || {balance: 0};
                      const price_usd = priceStore.getFiatPrice(o.ticker);
+                     if (!(balance.balance > 0 || c_currency.base == o.ticker || btc_forks.indexOf(o.ticker)+1 ) ){
+                      return (null)
+                     }
                     return (
                     <Link key={i} onClick={()=>{ this.setState({ select2: i+1 }) }} ey={i} clearfix to={`/exchange/${c_currency.base}_${o.ticker}`}>
                       <FaDiv className={cx(stylesg.pad_20,styles.li,{[styles.selected]: select2 == i+1})}>
