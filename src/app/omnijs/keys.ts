@@ -26,6 +26,7 @@ export const getRootNode = (seed: any, rel: string, isTestnet?: boolean) => {
       )
       break
     case 'NANO':
+    case 'XMR':
       return seed.toString("hex");
     default:
       //eth and rest of its shitcoins
@@ -47,6 +48,7 @@ export const deriveAccount = (
   const bip44path = `m/44'/${networkCode}'/${account}'/${change}/${index}`
   return typeof rootNode == "object" ? rootNode.derivePath(bip44path) : rootNode;
 }
+
 export const getWallet = (key: any, rel: string, isTestnet?: boolean) => {
   let wif, address, publicKey
   switch (rel) {
@@ -72,10 +74,26 @@ export const getWallet = (key: any, rel: string, isTestnet?: boolean) => {
       publicKey = account.publicKey 
       break
     case 'NANO':
-      wif = nanocurrency.deriveSecretKey(key, 0)
-      publicKey = nanocurrency.derivePublicKey(wif)
-      address = nanocurrency.deriveAddress(publicKey)
-      break      
+    wif = nanocurrency.deriveSecretKey(key, 0)
+    publicKey = nanocurrency.derivePublicKey(wif)
+    address = nanocurrency.deriveAddress(publicKey)
+    break;  
+    case 'XMR':
+
+      const monero_utils = require('mymonero-core-js/monero_utils/monero_cryptonote_utils_instance')
+      const walletUtils = require('mymonero-core-js/monero_utils/monero_wallet_utils')
+      const k = monero_utils.create_address(key);
+      console.log(k)
+      console.log(walletUtils.NewlyCreatedWallet('english'))
+    /*
+      require("./monero_utils/monero_utils")({}).then(function (monero_utils) { 
+        const mymonero = require("mymonero-core-js");
+        var nettype = mymonero.nettype_utils.network_type.STAGENET;
+        var decoded = monero_utils.address_and_keys_from_seed(key, nettype);
+        console.log(decoded)
+      });
+      */
+    break;  
     default:
       //eth and rest of its shitcoins
       //var privKeyBuffer = key.__d.toBuffer(32)

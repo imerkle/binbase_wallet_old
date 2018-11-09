@@ -103,3 +103,5 @@ export const nano_rep = "xrb_17krztbeyz1ubtkgqp9h1bewu1tz8sgnpoiii8q7c9n7gyf9jfm
 
 export const allcoins = Object.keys(config);
 export const isTestnet = true;
+
+export const transferABI = [{ constant: !1, inputs: [{ name: "_to", type: "address" }, { name: "_value", type: "uint256" }], name: "transfer", outputs: [{ name: "", type: "bool" }], type: "function" }];

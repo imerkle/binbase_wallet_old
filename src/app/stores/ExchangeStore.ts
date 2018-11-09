@@ -42,14 +42,24 @@ export class ExchangeStore {
       {ticker: "ETH",index: 1},
       ...eth_assets_windex,
     ]},
-    {base: "NEO", name: "Ethereum", index: 3, rel: [
+    {base: "NEO", name: "Neo", index: 3, rel: [
       {ticker: "NEO",index: 1},
       ...neo_assets_windex,
     ]},
     {base: "NANO", name: "Nano", index: 4, rel: [
       { ticker: "NANO", index: 1 },
       ]
+    },
+    {base: "VET", name: "Vechain", index: 5, rel: [
+        { ticker: "VET", index: 1 },
+      ]
     },    
+    /*    
+    {base: "XMR", name: "Monero", index: 5, rel: [
+      { ticker: "XMR", index: 1 },
+      ]
+    }, 
+    */   
   ];
   public coinStore;
   constructor(coinStore: CoinStore){
@@ -137,11 +147,10 @@ export class ExchangeStore {
         estimatedFees = data.data;
         fees = estimatedFees[3];
       break;
-      case "ETH":
-        data =  await axios.get(`https://ethgasstation.info/json/ethgasAPI.json`);
-        estimatedFees = data.data;
-      break;
-      default:
+      case 'ETH':
+      case (eth_assets.indexOf(this.rel) + 1 && this.rel):
+          data =  await axios.get(`https://ethgasstation.info/json/ethgasAPI.json`);
+          estimatedFees = data.data;
       break;
     }
     runInAction(() => {
@@ -159,7 +168,8 @@ export class ExchangeStore {
       case (neo_assets.indexOf(this.rel) + 1 && this.rel):
         this.fees = fees;
       break;
-      default:
+      case 'ETH':
+      case (eth_assets.indexOf(this.rel) + 1 && this.rel):
         switch(kind){
           case 1:
             this.gasLimit = parseInt(fees);
@@ -188,19 +198,17 @@ export class ExchangeStore {
         max_time = this.estimatedFees[4].maxMinutes/4*estimation * 60; // in seconds
         fees = sat_per_byte * bytes;
       break;
-      case "ETH":
-      //https://ethgasstation.info/json/ethgasAPI.json
-      gasLimit = 21000;
-      const atom = (this.estimatedFees.fastest - this.estimatedFees.safeLow)/100;
-      let gasPrice = ((atom*percent)+this.estimatedFees.safeLow);
-      fees = gasLimit * gasPrice * 1000000000;
+      case 'ETH':
+      case (eth_assets.indexOf(this.rel) + 1 && this.rel):
+          //https://ethgasstation.info/json/ethgasAPI.json
+          gasLimit = 21000;
+          const atom = (this.estimatedFees.fastest - this.estimatedFees.safeLow)/100;
+          let gasPrice = ((atom*percent)+this.estimatedFees.safeLow);
+          fees = gasLimit * gasPrice * 1000000000;
 
 
-      const atom2 = (this.estimatedFees.safeLowWait - this.estimatedFees.fastestWait)/100;
-      max_time = (this.estimatedFees.safeLowWait - atom2*percent)*60;
-
-      break;
-      default:
+          const atom2 = (this.estimatedFees.safeLowWait - this.estimatedFees.fastestWait)/100;
+          max_time = (this.estimatedFees.safeLowWait - atom2*percent)*60;
       break;
     }    
     runInAction(() => {
@@ -220,7 +228,7 @@ export class ExchangeStore {
             case 'NEO':
             case (btc_forks.indexOf(this.rel)+1 && this.rel):
             case (neo_assets.indexOf(this.rel) + 1 && this.rel):
-              result = await this.omni.send(
+            result = await this.omni.send(
               this.address,
               address,
               amount,
@@ -231,9 +239,10 @@ export class ExchangeStore {
               });
             break;
             case "ETH":
-              result = await this.omni.send(
-                this.address,
-                address,
+            case (eth_assets.indexOf(this.rel) + 1 && this.rel):
+            result = await this.omni.send(
+              this.address,
+              address,
                 amount,
                 this.pkey,
                 {

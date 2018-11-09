@@ -73,8 +73,8 @@ const a =  {
     },
     "NANO": {
         "explorer": {
-            "main": "https://www.nanode.co/",
-            "test": "https://www.nanode.co/"
+            "main": "https://www.nanode.co",
+            "test": "https://www.nanode.co"
         },
         "api": {
             "main": "http://35.227.18.245:7076/",
@@ -82,7 +82,32 @@ const a =  {
         },
         "code": 165,
         "decimals": 10 ** 18,
-    }    
+    },
+    "VET": {
+        "explorer": {
+            "main": "https://explore.veforge.com",
+            "test": "https://testnet.veforge.com"
+        },
+        "api": {
+            "main": "https://explore.veforge.com/api",
+            "test": "https://testnet.veforge.com/api"
+        },
+        "code": 818,
+        "decimals": 10 ** 18,
+    },
+    /*
+    "XMR": {
+        "explorer": {
+            "main": "https://www.nanode.co/",
+            "test": "https://www.nanode.co/"
+        },
+        "api": {
+            "main": "http://35.227.18.245:7076/",
+            "test": "http://35.227.18.245:7076/"
+        },
+        "code": 128,
+        "decimals": 10 ** 18,
+    },    */
 }
 
 export default a;

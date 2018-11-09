@@ -15,6 +15,7 @@ import {
   ethplorer_api_key,
   getConfig,
   nano_rep,
+  transferABI,
 } from 'app/constants'
 
 
@@ -93,19 +94,46 @@ class OmniJs {
           }
           break
           case 'ETH':
-          web3.eth
-          .getTransactionCount(from)
-          .then(txCount => {
-            const txData = {
-              nonce: web3.utils.toHex(txCount.toString()),
-              gasLimit: web3.utils.toHex(options.gasLimit.toString()),
-              gasPrice: web3.utils.toHex(options.gasPrice.toString()),
-              to: address,
-              from: from,
-              //@ts-ignore
-                value: web3.utils.toHex(toFixed(amount * 10 ** 18).toString())
+            web3.eth
+            .getTransactionCount(from)
+            .then(txCount => {
+              const txData = {
+                nonce: web3.utils.toHex(txCount.toString()),
+                gasLimit: web3.utils.toHex(options.gasLimit.toString()),
+                gasPrice: web3.utils.toHex(options.gasPrice.toString()),
+                to: address,
+                from: from,
+                //@ts-ignore
+                  value: web3.utils.toHex(toFixed(amount * 10 ** 18).toString())
+                }
+                
+                this.sendSignedWeb3(wif, txData, (err, result) => {
+                  if (err) reject(err)
+                  resolve(result)
+                })
+              })
+              .catch(e => {
+                reject(e)
+              })
+          case eth_assets.indexOf(this.rel) + 1 && this.rel:
+            const asset = this.config["ETH"].assets.main[this.rel];
+
+            let contract = new web3.eth.Contract(transferABI, asset.hash);
+            const data = contract.methods.transfer(address, amount*(10**asset.decimals)).encodeABI();                 
+
+            web3.eth
+            .getTransactionCount(from)
+            .then(txCount => {
+              const txData = {
+                nonce: web3.utils.toHex(txCount.toString()),
+                gasLimit: web3.utils.toHex(options.gasLimit.toString()),
+                gasPrice: web3.utils.toHex(options.gasPrice.toString()),
+                to: asset.hash,
+                from: from,
+                data: data,
+                value: web3.utils.toHex(0)
               }
-              
+
               this.sendSignedWeb3(wif, txData, (err, result) => {
                 if (err) reject(err)
                 resolve(result)
@@ -113,9 +141,10 @@ class OmniJs {
             })
             .catch(e => {
               reject(e)
-            })
-            case "NEO":
-            case neo_assets.indexOf(this.rel) + 1 && this.rel:
+            })            
+          break;
+          case "NEO":
+          case neo_assets.indexOf(this.rel) + 1 && this.rel:
             
           const api = getConfig("api", this.rel, this.isTestnet);
 
@@ -280,7 +309,12 @@ class OmniJs {
             const pending = nanocurrency.convert(data.data.pending, { from: 'raw', to: 'NANO' });
             balances = { [this.rel]: { balance: +balance, pending: +pending } }
             break;
-            case 'ETH':
+          case 'VET':
+            data = await axios.get(`${api}/accounts/${address}`);
+            balances["VET"] = {balance: data.data.balance/(this.config[this.rel].decimals)};
+            balances["VTHO"] = {balance: data.data.balance/(this.config[this.rel].decimals)};
+          break;
+          case 'ETH':
             case eth_assets.indexOf(this.rel) + 1 && this.rel:
             //ETH and shitcoins
             if (!this.isTestnet) {
