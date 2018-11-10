@@ -138,17 +138,17 @@ class Exchange extends React.Component<any, any>{
         </FaDiv>      
         <FaDiv vcenter>
           <TextField
-            className={cconfig(stylesg.mar_20_0)}
-            value={addreconfigs}
+            className={cx(stylesg.mar_20_0)}
+            value={address}
             disabled
-            label={`Yourconfig${rel} Address`}
+            label={`Your${rel} Address`}
             type="text"
-            fullWidth />config
+            fullWidth />
 
             <TextField
-            className={cconfig(stylesg.invisible)}
-            value={addreconfigs}
-            id="address"config
+            className={cx(stylesg.invisible)}
+            value={address}
+            id="address"
             type="text" />
 
           <IconButton onClick={()=>{
