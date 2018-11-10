@@ -10,7 +10,9 @@ const a =  {
         },
         "code": 0,
         "decimals": 10**8,
-        "forks": ["LTC", "DASH"]
+        "forks": ["LTC", "DASH"],
+        "fee_label": "Sats",
+        "estimateFee": true,
     },
     "LTC": {
         "explorer": {
@@ -22,7 +24,8 @@ const a =  {
             "test": "https://test-insight.bitpay.com/api"
         },
         "code": 2,
-        "decimals": 10 ** 8
+        "decimals": 10 ** 8,
+        "fee_label": "LTC",
     },
     "DASH": {
         "explorer": {
@@ -35,6 +38,7 @@ const a =  {
         },
         "code": 5,
         "decimals": 10 ** 8,
+        "fee_label": "DASH",
     },
     "ETH": {
         "explorer": {
@@ -51,6 +55,8 @@ const a =  {
         },        
         "code": 60,
         "decimals": 10 ** 18,
+        "fee_label": "ETH",
+        "estimateFee": true,
     },
     "NEO": {
         "explorer": {
@@ -70,6 +76,7 @@ const a =  {
             "main": require("./neo_assets.json")
         },
         "decimals": 10 ** 0,
+        "fee_label": "GAS",
     },
     "NANO": {
         "explorer": {
@@ -82,6 +89,8 @@ const a =  {
         },
         "code": 165,
         "decimals": 10 ** 18,
+        "fee_label": "",
+        "noFee": true,
     },
     "VET": {
         "explorer": {
@@ -92,15 +101,19 @@ const a =  {
             "main": "https://explore.veforge.com/api",
             "test": "https://testnet.veforge.com/api"
         },
+        "assets": {
+            "main": require("./vet_assets.json")
+        },        
         "code": 818,
         "decimals": 10 ** 18,
+        "fee_label": "VTHO",
     },
     /*
     "XMR": {
         "explorer": {
             "main": "https://www.nanode.co/",
             "test": "https://www.nanode.co/"
-        },
+        },estimateFee
         "api": {
             "main": "http://35.227.18.245:7076/",
             "test": "http://35.227.18.245:7076/"

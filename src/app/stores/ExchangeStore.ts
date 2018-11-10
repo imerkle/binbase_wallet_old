@@ -52,6 +52,7 @@ export class ExchangeStore {
     },
     {base: "VET", name: "Vechain", index: 5, rel: [
         { ticker: "VET", index: 1 },
+        { ticker: "VTHO", index: 2 },
       ]
     },    
     /*    
@@ -92,7 +93,7 @@ export class ExchangeStore {
   generatePKey = () => {
     
     let r = this.rel;
-    if (this.base == "NEO" || this.base == "ETH"){
+    if (this.base == "NEO" || this.base == "ETH" || this.base == "VET"){
       r = this.base;
     }
     
@@ -103,6 +104,16 @@ export class ExchangeStore {
         
     //this.syncBalance();
     this.syncFee();
+    this.syncTxs();
+  }
+
+  @action 
+  syncTxs = async (timeout = true) => {
+    //@ts-ignore
+    const { txs } = await this.omni.getTxs(this.address);
+    runInAction(() => {
+      this.txs = txs;
+    });    
   }
   /*
   @action 

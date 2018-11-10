@@ -176,7 +176,8 @@ class OmniJs {
   getTxs = (address: string) => {
     let data, n_tx, txs = [];
     const api = getConfig("api", this.rel, this.isTestnet);
-    
+    let decimals = this.config[this.rel] ? this.config[this.rel].decimals : 1;
+
     return new Promise(async (resolve, reject) => {
         try{
             switch(this.rel){
@@ -219,24 +220,14 @@ class OmniJs {
                 data = await axios.get(`${api}/get_address_abstracts/${address}/0`);
 
                 n_tx = data.data.total_entries;
-                data.data.entries.map(o=>{
-                const from = o.address_from;
-                const value = o.amount;
-                let kind = "got";
-                let fee = 0;
-        
-                if(from!= address){
-                    kind = "got";
-                }else{
-                    kind = "sent";
-                }
+                data.data.entries.map(o=>{        
                 const tx = {
-                    from,
+                    from: o.address_from,
                     hash: o.txid,
                     confirmations: null,
-                    value,
-                    kind,
-                    fee,
+                    value: o.amount,
+                    kind: o.address_from == address ? "sent" : "got",
+                    fee: 0,
                     timestamp: o.time,
                     token_address: o.asset,
                     asset: this.config[this.rel].assets.main[o.asset] ? this.config[this.rel].assets.main[o.asset] : null,
@@ -244,28 +235,36 @@ class OmniJs {
                 txs.push(tx);
                 })
             break;
+            case 'VET':
+                data = await axios.get(`${api}/transactions?address=${address}&count=10&offset=0`);
+                n_tx = data.data.total;
+                data.data.transactions.map(o=>{
+                  const tx = {
+                    from: o.origin,
+                    hash: o.id,
+                    value: o.totalValue/decimals,
+                    kind: o.origin == address ? "sent": "got",
+                    fee: 0,
+                    timestamp: o.timestamp,
+                  };
+                  txs.push(tx);                  
+                })
+            break;
             case 'ETH':
-                data = await axios.get(`${api}/?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=${etherscan_api_key}`);
+              data = await axios.get(`${api}/?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=${etherscan_api_key}`);
     
               n_tx = data.data.result.length;
     
               data.data.result.map(o=>{
                 const from = o.from;
-                const value = o.value/getAtomicValue(this.rel);
-                let kind = "got";
-                let fee = (o.gas*o.gasPrice)/getAtomicValue(this.rel);
+                let fee = (o.gas * o.gasPrice) / decimals;
     
-                if(from!= address){
-                  kind = "got";
-                }else{
-                  kind = "sent";
-                }
                 const tx = {
                   from,
                   hash: o.hash,
                   confirmations: o.confirmations,
-                  value,
-                  kind,
+                  value: o.value / decimals,
+                  kind: from == address ? "sent" : "got" ,
                   fee,
                   timestamp: o.timeStamp,
                 };
@@ -312,14 +311,14 @@ class OmniJs {
           case 'VET':
             data = await axios.get(`${api}/accounts/${address}`);
             balances["VET"] = {balance: data.data.balance/(this.config[this.rel].decimals)};
-            balances["VTHO"] = {balance: data.data.balance/(this.config[this.rel].decimals)};
+            balances["VTHO"] = {balance: data.data.energy/(this.config[this.rel].decimals)};
           break;
           case 'ETH':
-            case eth_assets.indexOf(this.rel) + 1 && this.rel:
+          case eth_assets.indexOf(this.rel) + 1 && this.rel:
             //ETH and shitcoins
             if (!this.isTestnet) {
               data = await axios.get(`${api}/?module=account&action=balance&address=${address}&tag=latest&apikey=${etherscan_api_key}`);
-              balances = { [this.rel]: { balance: data.data.result / this.config[this.rel].decimals } }
+              balances = { [this.rel]: { balance: data.data.result / this.config["ETH"].decimals } }
             } else {
               address = "0x32Be343B94f860124dC4fEe278FDCBD38C102D88";
               data = await axios.get(`${api}/getAddressInfo/${address}?apiKey=${ethplorer_api_key}`);

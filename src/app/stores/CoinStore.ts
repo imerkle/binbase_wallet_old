@@ -36,6 +36,7 @@ export class CoinStore {
             const omni = new OmniJs(o, isTestnet, config);
 
             const balances = await omni.getBalance(this.keys[o].address);
+            console.log(balances)
             runInAction(() => {
                 Object.keys(balances).map(o=>{
                     this.balances[o] = balances[o];

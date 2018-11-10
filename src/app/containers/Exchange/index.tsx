@@ -11,7 +11,7 @@ import * as stylesg from '../../style.css';
 import * as cx from 'classnames';
 import { compose } from 'recompose';
 import { StyleRules, Theme, withStyles } from '@material-ui/core/styles';
-import { no_fee, neo_assets, btc_forks, no_advanced_fee, getAtomicValue, getConfig, isValidAddress } from 'app/constants';
+import { config, btc_forks, getAtomicValue, getConfig, isValidAddress } from 'app/constants';
 
 //@ts-ignore
 import formatDistance from 'date-fns/formatDistance';
@@ -94,12 +94,12 @@ class Exchange extends React.Component<any, any>{
       exchangeStore.setRel(_rel);
       exchangeStore.generatePKey();
 
-      if(no_advanced_fee.indexOf(_rel) != -1){
-        this.setState({advanceToggleDisabled: true, showAdvanced: true});
-      }else if(no_fee.indexOf(_rel) != -1){
+      if (config[_rel] ? config[_rel].estimateFee : config[_base].estimateFee){
+        this.setState({advanceToggleDisabled: false});
+      } else if (config[_rel] ? config[_rel].noFee : config[_base].noFee){
         this.setState({showFees: false});
       }else{
-       this.setState({advanceToggleDisabled: false});
+        this.setState({advanceToggleDisabled: true, showAdvanced: true});
       }
     }
   }
@@ -117,15 +117,8 @@ class Exchange extends React.Component<any, any>{
     const { exchangeStore, coinStore, priceStore, appStore } = this.props.rootStore;
     const { address, txs } = exchangeStore;
     const { showFees, advanceToggleDisabled, showAdvanced, addressField, amountField, addressError } = this.state;
-    const { rel } = exchangeStore;
-    let fee_label = "";
-    if (btc_forks.indexOf(rel) != -1){
-      fee_label = `Network Fees (${rel})`;
-    } else if (rel == "BTC"){
-      fee_label = `Network Fees(in sats)`;
-    } else if (rel == "NEO" || (neo_assets.indexOf(rel))){
-      fee_label = `Network Fees(in GAS)`;
-    }
+    const { rel, base } = exchangeStore;
+    let fee_label = base ? `Network Fees (${config[base].fee_label})`: "";
     const balance = coinStore.balances[rel] || {balance: 0, pending: 0};
     const balance_usd = priceStore.getFiatPrice(rel) * balance.balance;
   	return (
@@ -145,17 +138,17 @@ class Exchange extends React.Component<any, any>{
         </FaDiv>      
         <FaDiv vcenter>
           <TextField
-            className={cx(stylesg.mar_20_0)}
-            value={address}
+            className={cconfig(stylesg.mar_20_0)}
+            value={addreconfigs}
             disabled
-            label={`Your ${rel} Address`}
+            label={`Yourconfig${rel} Address`}
             type="text"
-            fullWidth />
+            fullWidth />config
 
             <TextField
-            className={cx(stylesg.invisible)}
-            value={address}
-            id="address"
+            className={cconfig(stylesg.invisible)}
+            value={addreconfigs}
+            id="address"config
             type="text" />
 
           <IconButton onClick={()=>{

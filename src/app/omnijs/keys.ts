@@ -79,13 +79,13 @@ export const getWallet = (key: any, rel: string, isTestnet?: boolean) => {
     address = nanocurrency.deriveAddress(publicKey)
     break;  
     case 'XMR':
-
+    
+    /*
       const monero_utils = require('mymonero-core-js/monero_utils/monero_cryptonote_utils_instance')
       const walletUtils = require('mymonero-core-js/monero_utils/monero_wallet_utils')
       const k = monero_utils.create_address(key);
       console.log(k)
       console.log(walletUtils.NewlyCreatedWallet('english'))
-    /*
       require("./monero_utils/monero_utils")({}).then(function (monero_utils) { 
         const mymonero = require("mymonero-core-js");
         var nettype = mymonero.nettype_utils.network_type.STAGENET;
