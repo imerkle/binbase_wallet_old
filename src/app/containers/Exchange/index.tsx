@@ -1,20 +1,19 @@
 import * as React from 'react';
 import { observer, inject } from 'mobx-react';
 
-//@ts-ignore
-import { TabContainer, Fa, FaDiv, Avatar, Div, Span, AButton, Link, TextField } from 'app/components';
-import { CircularProgress, Switch, IconButton, Icon } from '@material-ui/core';
-import Slider from '@material-ui/lab/Slider';
-//@ts-ignore
+import { Fa, FaDiv, Div, AButton, TextField } from 'app/components';
+import { CircularProgress, IconButton, Icon } from '@material-ui/core';
+
 import * as styles from './style.css';
 import * as stylesg from '../../style.css';
 import * as cx from 'classnames';
 import { compose } from 'recompose';
 import { StyleRules, Theme, withStyles } from '@material-ui/core/styles';
-import { config, btc_forks, getAtomicValue, getConfig, isValidAddress } from 'app/constants';
+import { btc_forks, getAtomicValue, getConfig, isValidAddress } from 'app/constants';
 
 //@ts-ignore
 import formatDistance from 'date-fns/formatDistance';
+import FeeBox from './FeeBox';
 
 const styleSheet = (theme: Theme): StyleRules => ({
   root: {
@@ -93,34 +92,26 @@ class Exchange extends React.Component<any, any>{
       exchangeStore.setBase(_base);
       exchangeStore.setRel(_rel);
       exchangeStore.generatePKey();
-
-      if (config[_rel] ? config[_rel].estimateFee : config[_base].estimateFee){
-        this.setState({advanceToggleDisabled: false});
-      } else if (config[_rel] ? config[_rel].noFee : config[_base].noFee){
-        this.setState({showFees: false});
-      }else{
-        this.setState({advanceToggleDisabled: true, showAdvanced: true});
-      }
     }
   }
   state = {
     addressField: "",
     amountField: "",
     addressError: false,
-    showAdvanced: false,
-    showFees: true,
-    advanceToggleDisabled: false,
-
   }
+
   render(){
     const { classes } = this.props;
     const { exchangeStore, coinStore, priceStore, appStore } = this.props.rootStore;
     const { address, txs } = exchangeStore;
-    const { showFees, advanceToggleDisabled, showAdvanced, addressField, amountField, addressError } = this.state;
+    const { addressField, amountField, addressError } = this.state;
     const { rel, base } = exchangeStore;
-    let fee_label = base ? `Network Fees (${config[base].fee_label})`: "";
+
+
     const balance = coinStore.balances[rel] || {balance: 0, pending: 0};
     const balance_usd = priceStore.getFiatPrice(rel) * balance.balance;
+
+
   	return (
       <FaDiv c>
         <FaDiv>
@@ -141,7 +132,7 @@ class Exchange extends React.Component<any, any>{
             className={cx(stylesg.mar_20_0)}
             value={address}
             disabled
-            label={`Your${rel} Address`}
+            label={`Your ${rel} Address`}
             type="text"
             fullWidth />
 
@@ -152,7 +143,6 @@ class Exchange extends React.Component<any, any>{
             type="text" />
 
           <IconButton onClick={()=>{
-              
               var textArea = document.getElementById("address");
               //@ts-ignore
               textArea.select();
@@ -162,7 +152,6 @@ class Exchange extends React.Component<any, any>{
               window.getSelection().addRange(range);          
               document.execCommand("copy");
               appStore.setSnackMsg("Address copied to clipboard");
-
           }}color="primary" ><Icon style={{fontSize: 14}} className={cx(classes.icon)}>file_copy</Icon></IconButton>
         </FaDiv>
         <FaDiv c className={cx(stylesg.mar_20,styles.tx_box)}>
@@ -192,80 +181,12 @@ class Exchange extends React.Component<any, any>{
                 fullWidth />             
                 <IconButton onClick={()=>{
 
-                 const divide_by = (btc_forks.indexOf(rel) != -1) ? 1 : getAtomicValue(rel);
+                 const divide_by = (btc_forks.indexOf(rel) != -1) ? 1 : getAtomicValue(rel, base);
                  this.setState({amountField: balance.balance - (exchangeStore.fees/divide_by)})
               }} color="primary" ><Icon style={{fontSize: 14}} className={cx(classes.icon)}>call_made</Icon></IconButton>
             </FaDiv>
           </FaDiv>
-          {
-          showFees &&
-          <FaDiv vcenter>
-            <Fa fs></Fa>
-            <Fa className={cx(styles.feelabel)}>Advanced Options</Fa>
-            <Switch
-              disabled = {advanceToggleDisabled}
-              checked={showAdvanced}
-              onChange={()=>{ 
-                exchangeStore.estimateFee(exchangeStore.feeSlider);
-                this.setState({showAdvanced: !showAdvanced})
-              }}
-              value="checkedA"
-              color="primary"
-            />          
-          </FaDiv>
-          }
-          {
-            showAdvanced &&
-            rel == "ETH" &&  
-          <FaDiv>
-            <TextField
-              className={cx(stylesg.mar_20_0)}
-              value={exchangeStore.gasLimit}
-              onChange={(e)=>{ exchangeStore.setFees(e.target.value, 1) }}
-              label={`Gas Limit (in gwei)`}
-              type="text"
-              fullWidth />
-
-            <TextField
-              className={cx(stylesg.mar_20)}
-              value={exchangeStore.gasPrice}
-              onChange={(e)=>{ exchangeStore.setFees(e.target.value, 2) }}
-              label={`Gas Price (in gwei)`}
-              type="text"
-              fullWidth />
-          </FaDiv>
-          }
-          {showFees && showAdvanced && rel != "ETH" &&
-           <TextField
-            className={cx(stylesg.mar_20_0)}
-            value={exchangeStore.fees}
-            onChange={(e)=>{ exchangeStore.setFees(e.target.value) }}
-            label={fee_label}
-            type="text"
-            fullWidth />
-          }             
-          {
-          showFees && !showAdvanced &&
-          <FaDiv c>
-            <FaDiv vcenter>
-              <Fa className={cx(styles.feelabel)}>Slow</Fa>
-              <Slider value={exchangeStore.feeSlider} onChange={(event, value)=>{
-                 exchangeStore.setFeeSlider(value);
-                 exchangeStore.estimateFee(value);
-              }} />
-              <Fa className={cx(styles.feelabel)}>Fast</Fa>
-            </FaDiv>
-            <FaDiv c>
-              <Fa tcenter>
-                ~{(exchangeStore.fees/getAtomicValue(rel)).toFixed(5)}
-                  <span className={cx(styles.feelabel)}> ({priceStore.fiat.symbol}{(exchangeStore.fees / getAtomicValue(rel) * priceStore.getFiatPrice(rel)).toFixed(3)})
-                </span>
-              </Fa>
-              <Fa tcenter className={cx(styles.feelabel)}>Max Time: {(exchangeStore.max_time/60).toFixed(2)} minutes</Fa>
-            </FaDiv>
-          </FaDiv>
-          }
-
+          <FeeBox />
           <AButton 
           className={cx(stylesg.mar_20_0,stylesg.pad_20)}
           variant="contained" color="primary" disabled={!!addressError} 
@@ -284,7 +205,7 @@ class Exchange extends React.Component<any, any>{
           {txs.map((o,i)=>{ 
             return (
             <tr key={i} className={cx(styles.tx_box_li, {[styles.tx_pending]: o.confirmations == 0})} onClick={()=>{
-                window.open(`${getConfig("explorer", rel, exchangeStore.isTestnet)}/tx/${o.hash}`,"_blank");
+                window.open(`${getConfig(rel, base).explorer}/tx/${o.hash}`,"_blank");
                }}>
                 <td>{smartTrim(o.hash, 20)}</td>
                 <td>{o.confirmations == 0 ? <CircularProgress size={18} color="primary" /> : 
@@ -298,7 +219,7 @@ class Exchange extends React.Component<any, any>{
             </tr>
             )
           })}
-            <tr><td><a href={`${getConfig("explorer", rel, exchangeStore.isTestnet)}/address/${exchangeStore.address}`}>View all Transactions</a></td></tr>
+            <tr><td><a href={`${getConfig(rel, base).explorer}/address/${exchangeStore.address}`}>View all Transactions</a></td></tr>
           </tbody>
          </table>
         }
@@ -307,12 +228,12 @@ class Exchange extends React.Component<any, any>{
   }
   send = () => {
     const { coinStore, exchangeStore, appStore} = this.props.rootStore;
-    const { rel } = exchangeStore;
+    const { rel, base } = exchangeStore;
     const { addressError, addressField, amountField } = this.state;
     const balance = coinStore.balances[rel];
       return new Promise(async (resolve, reject) => {
         const amt = parseFloat(amountField);
-        const divide_by = (btc_forks.indexOf(rel) != -1) ? 1 : getAtomicValue(rel);
+        const divide_by = (btc_forks.indexOf(rel) != -1) ? 1 : getAtomicValue(rel, base);
         let fees = exchangeStore.fees/divide_by;
           
         if(addressError || !addressField){

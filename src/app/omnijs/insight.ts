@@ -1,12 +1,12 @@
 import axios from 'axios'
-import { getConfig, testnet } from 'app/constants'
-import coininfo from 'coininfo'
+import { getAtomicValue, toBitcoinJS, getConfig, config } from 'app/constants'
 import bitcoin from 'bitcoinjs-lib'
 
-export const getUtxos = ({ rel, address, isTestnet }) => {
+
+export const getUtxos = ({ rel, address }) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const data = await axios.post(`${getConfig("api",rel, isTestnet)}/addrs/utxo`, {
+      const data = await axios.post(`${getConfig(rel, "BTC").api}/addrs/utxo`, {
         addrs: address
       })
       resolve(data.data)
@@ -22,14 +22,11 @@ export const broadcastTx = ({
   to,
   amount,
   wif,
-  fee,
-  isTestnet
+  fee
 }) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const network = coininfo(
-        `${rel}${isTestnet ? testnet.suffix : ''}`
-      ).toBitcoinJS()
+      const network = toBitcoinJS(config[rel].network)
       var key = bitcoin.ECPair.fromWIF(wif, network)
       var tx = new bitcoin.TransactionBuilder(network)
       let total = 0
@@ -45,7 +42,7 @@ export const broadcastTx = ({
         tx.sign(i, key)
       })
       const rawtx = tx.build().toHex()
-      const data = await axios.post(`${getConfig("api", rel, isTestnet)}/tx/send`, {
+      const data = await axios.post(`${getConfig( rel, "BTC").api}/tx/send`, {
         rawtx
       })
       resolve(data.data.txid)
@@ -53,4 +50,70 @@ export const broadcastTx = ({
       reject(e)
     }
   })
+}
+
+export const send = ({
+  from, rel, address, amount, wif, options
+}) => {
+  const base = "BTC";
+  return new Promise(async (resolve, reject) => {
+    const multiply_by = rel == 'BTC' ? 1 : getAtomicValue(rel, base)
+    const utxos = await getUtxos({ rel: rel, address: from })
+    try {
+      const txid = await broadcastTx({
+        utxos,
+        from: from,
+        to: address,
+        amount: amount * getAtomicValue(rel, base),
+        wif: wif,
+        fee: options.fees * multiply_by,
+        rel: rel
+      })
+      resolve(txid)
+    } catch (e) {
+      reject(e)
+    }
+  });
+}
+
+export const getTxs = async ({address, rel, base}) => {
+  const api = getConfig(rel, base).api;
+  const txs = [];
+  const data = await axios.get(`${api}/txs/?address=${address}`);
+  data.data.txs.map(o => {
+    const from = o.vin[0].addr;
+    let value = 0;
+    let kind = "got";
+    let fee = o.fees;
+
+    if (from != address) {
+      kind = "got";
+      o.vout.map(o => {
+        if (o.scriptPubKey.addresses[0] == address) {
+          value += o.value;
+        }
+      })
+    } else {
+      kind = "sent";
+      value = o.vout[0].value;
+
+    }
+    const tx = {
+      from,
+      hash: o.txid,
+      confirmations: o.confirmations,
+      value,
+      kind,
+      fee,
+      timestamp: o.blocktime,
+    };
+    txs.push(tx);
+  })  
+  return txs;
+}
+export const getBalance = async ({rel, base, address}) => {
+  const api = getConfig(rel, base).api;
+  const data = await axios.get(`${api}/addr/${address}`);
+  const balance = data.data.balance;
+  return { [rel]: { balance } };
 }

@@ -1,21 +1,18 @@
 import { btc_forks } from 'app/constants'
-import coininfo from 'coininfo'
 import bip32 from 'bip32'
 import bitcoin from 'bitcoinjs-lib'
 import bitcoinSecp256r1 from 'bitcoinjs-lib-secp256r1'
 import { wallet as NeoWallet } from '@cityofzion/neon-core'
 import ethUtil from 'ethereumjs-util'
 import * as nanocurrency from 'nanocurrency';
+import { config, toBitcoinJS } from 'app/constants';
 
-export const getNetwork = (rel: string, isTestnet?: boolean) => {
-  return coininfo(`${rel}${isTestnet ? '-TEST' : ''}`).toBitcoinJS()
-}
-export const getRootNode = (seed: any, rel: string, isTestnet?: boolean) => {
+export const getRootNode = (seed: any, rel: string) => {
   let rootNode
   switch (rel) {
     case 'BTC':
     case btc_forks.indexOf(rel) + 1 && rel:
-    const network = getNetwork(rel, isTestnet)
+    const network = toBitcoinJS(config[rel].network);
     rootNode = bip32.fromSeed(seed, network)
     
     break
@@ -30,8 +27,8 @@ export const getRootNode = (seed: any, rel: string, isTestnet?: boolean) => {
       return seed.toString("hex");
     default:
       //eth and rest of its shitcoins
-      rootNode = bip32.fromSeed(seed, bitcoin.networks.bitcoin)
-      break
+    rootNode = bip32.fromSeed(seed, bitcoin.networks.bitcoin)
+    break
   }
   return rootNode
 }
@@ -42,19 +39,18 @@ export const deriveAccount = (
   index: number,
   config: any,
   rel: string,
-  isTestnet?: boolean,
 ) => {
-  const networkCode = isTestnet ? 1 : config[rel].code
+  const networkCode = config[rel].code
   const bip44path = `m/44'/${networkCode}'/${account}'/${change}/${index}`
   return typeof rootNode == "object" ? rootNode.derivePath(bip44path) : rootNode;
 }
 
-export const getWallet = (key: any, rel: string, isTestnet?: boolean) => {
+export const getWallet = (key: any, rel: string) => {
   let wif, address, publicKey
   switch (rel) {
     case 'BTC':
     case btc_forks.indexOf(rel) + 1 && rel:
-      const network = getNetwork(rel, isTestnet)    
+      const network = toBitcoinJS(config[rel].network);    
       const derivedWallet = bitcoin.payments.p2pkh({
         pubkey: key.publicKey,
         network: network
@@ -102,6 +98,7 @@ export const getWallet = (key: any, rel: string, isTestnet?: boolean) => {
       var addressBuffer = ethUtil.privateToAddress(privKeyBuffer)
       var hexAddress = addressBuffer.toString('hex')
       var checksumAddress = ethUtil.toChecksumAddress(hexAddress)
+
       address = ethUtil.addHexPrefix(checksumAddress)
       wif = ethUtil.addHexPrefix(privkey)
       //pubkey = ethUtil.addHexPrefix(pubkey);

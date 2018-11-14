@@ -18,7 +18,10 @@
     "baseUrl": "src",
     "paths": {
       "app/*": ["./app/*"]
-    }
+    },
+
+    //remove on dev
+    "noUnusedLocals": false,
   },
   "exclude": ["dist", "build", "node_modules"]
 }

@@ -1,7 +1,11 @@
 import Neon, { rpc, api, sc, u, wallet } from '@cityofzion/neon-js'
 import {
-    neopriv_config
+    neopriv_config,
+    isTestnet,
+    getConfig,
+    config,
 } from 'app/constants'
+import axios from 'axios';
 
 const neo_privateNet = new rpc.Network(neopriv_config)
 Neon.add.network(neo_privateNet)
@@ -112,7 +116,7 @@ const makeRequest = (sendEntries: Array<SendEntryType>, config: any) => {
 export const sendTransaction = async (sendEntries: Array<SendEntryType>, opts) => {
     const wif = opts.wif;
     const fromAddress = opts.address
-    const net = opts.isTestnet ? "PrivateNet" : "MainNet"
+    const net = isTestnet ? "PrivateNet" : "MainNet"
     const publicKey = opts.publicKey
 
     return new Promise(async(resolve, reject) => {
@@ -126,7 +130,7 @@ export const sendTransaction = async (sendEntries: Array<SendEntryType>, opts) =
                 account: new wallet.Account(wif),
                 privateKey: new wallet.Account(wif).privateKey,
                 signingFunction: null,
-                api: opts.isTestnet ? privNetNeoscan : mainNetNeoscan,
+                api: isTestnet ? privNetNeoscan : mainNetNeoscan,
             })
             if (!response.result) {
                 reject("Failed")
@@ -136,4 +140,58 @@ export const sendTransaction = async (sendEntries: Array<SendEntryType>, opts) =
             reject(err)
         }
     })    
+}
+
+export const send = ({
+    base, from, rel, address, amount, wif, options
+}) => {
+    return new Promise(async (resolve, reject) => {
+    const api = getConfig(rel, base).api;
+
+    const balance = (await axios.get(`${api}/get_balance/${address}`)).data;
+    try {
+        const result = await sendTransaction([{ amount, address, symbol: rel }],
+            {
+                balances: balance,
+                wif,
+                address: from,
+                publicKey: options.publicKey,
+                fees: options.fees,
+            });
+            //@ts-ignore
+        resolve(result.txid);
+    } catch (e) { reject(e); }
+    })
+}
+
+
+export const getTxs = async ({ address, rel, base }) => {
+    const api = getConfig(rel, base).api;
+    const txs = [];
+    const data = await axios.get(`${api}/get_address_abstracts/${address}/0`);
+    
+    data.data.entries.map(o => {
+        const tx = {
+            from: o.address_from,
+            hash: o.txid,
+            confirmations: null,
+            value: o.amount,
+            kind: o.address_from == address ? "sent" : "got",
+            fee: 0,
+            timestamp: o.time,
+            token_address: o.asset,
+            asset: config[rel].assets[o.asset] ? config[rel].assets[o.asset] : null,
+        };
+        txs.push(tx);
+    })
+    return txs;
+}
+export const getBalance = async ({ address, rel, base }) => {
+    const api = getConfig(rel, base).api;
+    const balances = {};
+    
+    const data = await axios.get(`${api}/get_balance/${address}`);
+    data.data.balance.map(o => {
+        balances[o.asset] = { balance: o.amount, isNeo: true };
+    });
 }

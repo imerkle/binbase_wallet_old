@@ -1,20 +1,31 @@
 import { observable, action, runInAction } from 'mobx';
-import { eth_assets, neo_assets, isTestnet, config, btc_forks ,web3, getConfig} from 'app/constants';
+import { eth_assets, neo_assets, config, btc_forks ,web3, getConfig} from 'app/constants';
 import axios from 'axios';
 import OmniJs from "app/omnijs/omnijs";
 import { CoinStore } from './CoinStore';
 
-const neo_assets_windex  = neo_assets.map((o, i) => { 
-  return { ticker: o, index: i + 2 }
-})
-const eth_assets_windex = eth_assets.map((o, i) => { 
-  return { ticker: o, index: i + 2 }
-})
+const coins = [];
+let ig = 1;
+for(let x in config){
+  const c = config[x];
+  if(c.base){
+    const assets = c.assets ? Object.keys(c.assets): [];
+    coins.push(
+      {
+        base: x, name: c.name, index: ig, rel: [
+          { ticker: x, index: 1 },
+          ...c.forks.map((o, i) => { return { ticker: o, index: i + 2 } }),
+          ...assets.map((o, i) => { return { ticker: o, index: c.forks.length + 2 } }),
+        ]
+      }      
 
+    )
+    ig++;
+  }
+}
 export class ExchangeStore {
   public omni = new OmniJs();
 
-  @observable n_tx = 0;
   @observable txs = [];
   @observable base = "";
   @observable rel = "";
@@ -30,42 +41,17 @@ export class ExchangeStore {
   
   @observable gasLimit = 0;
   @observable gasPrice = 0;
-  @observable isTestnet = isTestnet;
 
   @observable sorter = {value: 1, dir: 1};
-  @observable currency = [
-    {base: "BTC", name: "Bitcoin", index: 1, rel: [
-      {ticker: "BTC",index: 1},
-      ...btc_forks.map((o, i) => { return { ticker: o, index: i+2} })
-    ]},
-    {base: "ETH", name: "Ethereum", index: 2, rel: [
-      {ticker: "ETH",index: 1},
-      ...eth_assets_windex,
-    ]},
-    {base: "NEO", name: "Neo", index: 3, rel: [
-      {ticker: "NEO",index: 1},
-      ...neo_assets_windex,
-    ]},
-    {base: "NANO", name: "Nano", index: 4, rel: [
-      { ticker: "NANO", index: 1 },
-      ]
-    },
-    {base: "VET", name: "Vechain", index: 5, rel: [
-        { ticker: "VET", index: 1 },
-        { ticker: "VTHO", index: 2 },
-      ]
-    },    
-    /*    
-    {base: "XMR", name: "Monero", index: 5, rel: [
-      { ticker: "XMR", index: 1 },
-      ]
-    }, 
-    */   
-  ];
+  @observable currency = coins;
+
+
   public coinStore;
   constructor(coinStore: CoinStore){
       this.coinStore = coinStore;
   }
+
+
   @action
   toggleSort = (value) => {  
     if(value == this.sorter.value){
@@ -82,7 +68,7 @@ export class ExchangeStore {
   @action 
   setRel = (rel) => {
     this.rel = rel;
-    this.omni.set(this.rel, this.isTestnet, config);
+    this.omni.set(this.rel, this.base);
   }
   @action 
   setFeeSlider = (value) => {
@@ -144,92 +130,6 @@ export class ExchangeStore {
   }
   */
 
-  @action
-  syncFee = async () => {
-    let estimatedFees, data, fees = 0;
-    switch (this.rel) {
-      case 'BTC':
-        data =  await axios.get(`https://bitcoinfees.earn.com/api/v1/fees/list`);
-        estimatedFees = data.data.fees;      
-      break;
-      case (btc_forks.indexOf(this.rel)+1 && this.rel):
-        const nstr = ""+Array.from({length: 25}, (_, n) => n+2);
-        data = await axios.get(`${getConfig("api", this.rel, this.isTestnet)}/utils/estimatefee?nbBlocks=${nstr}`);        
-        estimatedFees = data.data;
-        fees = estimatedFees[3];
-      break;
-      case 'ETH':
-      case (eth_assets.indexOf(this.rel) + 1 && this.rel):
-          data =  await axios.get(`https://ethgasstation.info/json/ethgasAPI.json`);
-          estimatedFees = data.data;
-      break;
-    }
-    runInAction(() => {
-      this.estimatedFees = estimatedFees;
-      this.estimateFee(this.feeSlider);
-      this.fees = fees;
-    });    
-  }
-  @action
-  setFees = (fees, kind = 0) => {
-    switch(this.rel){
-      case "BTC":
-      case (btc_forks.indexOf(this.rel)+1 && this.rel):     
-      case "NEO":
-      case (neo_assets.indexOf(this.rel) + 1 && this.rel):
-        this.fees = fees;
-      break;
-      case 'ETH':
-      case (eth_assets.indexOf(this.rel) + 1 && this.rel):
-        switch(kind){
-          case 1:
-            this.gasLimit = parseInt(fees);
-            this.fees = this.gasLimit * this.gasPrice * 1000000000;
-          break;
-          case 2:
-            this.gasPrice = parseFloat(fees);
-            this.fees = this.gasLimit * this.gasPrice * 1000000000;
-          break;
-        }
-      break;
-    }
-  }
-  estimateFee = (percent) => {
-    let max_time = 0,fees = 0, gasLimit = 0, gasPrice = 0;
-    switch (this.rel) {
-      case 'BTC':
-        const bytes = 400; // 400 bytes approx
-        let estimation = 50 - Math.round(percent/100*50);
-        if(estimation < 1) estimation = 1;
-        if(estimation > 49) estimation = 49;
-        
-        const feeBlock = this.estimatedFees[estimation];
-        const sat_per_byte = feeBlock.maxFee;
-        
-        max_time = this.estimatedFees[4].maxMinutes/4*estimation * 60; // in seconds
-        fees = sat_per_byte * bytes;
-      break;
-      case 'ETH':
-      case (eth_assets.indexOf(this.rel) + 1 && this.rel):
-          //https://ethgasstation.info/json/ethgasAPI.json
-          gasLimit = 21000;
-          const atom = (this.estimatedFees.fastest - this.estimatedFees.safeLow)/100;
-          let gasPrice = ((atom*percent)+this.estimatedFees.safeLow);
-          fees = gasLimit * gasPrice * 1000000000;
-
-
-          const atom2 = (this.estimatedFees.safeLowWait - this.estimatedFees.fastestWait)/100;
-          max_time = (this.estimatedFees.safeLowWait - atom2*percent)*60;
-      break;
-    }    
-    runInAction(() => {
-      this.max_time = max_time;
-      this.fees = fees;
-
-      this.gasLimit = gasLimit;
-      this.gasPrice = gasPrice;      
-    });
-  }
   send = (address, amount, _data = "") => {
     let result;
     return new Promise(async(resolve, reject) => {
@@ -267,6 +167,98 @@ export class ExchangeStore {
       }catch(e){reject(e)}
    });
   }
+
+
+
+
+
+
+
+  @action
+  syncFee = async () => {
+    let estimatedFees, data, fees = 0;
+    switch (this.rel) {
+      case 'BTC':
+        data = await axios.get(`https://bitcoinfees.earn.com/api/v1/fees/list`);
+        estimatedFees = data.data.fees;
+        break;
+      case (btc_forks.indexOf(this.rel) + 1 && this.rel):
+        const nstr = "" + Array.from({ length: 25 }, (_, n) => n + 2);
+        data = await axios.get(`${getConfig(this.rel, this.base).api}/utils/estimatefee?nbBlocks=${nstr}`);
+        estimatedFees = data.data;
+        fees = estimatedFees[3];
+        break;
+      case 'ETH':
+      case (eth_assets.indexOf(this.rel) + 1 && this.rel):
+        data = await axios.get(`https://ethgasstation.info/json/ethgasAPI.json`);
+        estimatedFees = data.data;
+        break;
+    }
+    runInAction(() => {
+      this.estimatedFees = estimatedFees;
+      this.estimateFee(this.feeSlider);
+      this.fees = fees;
+    });
+  }
+  @action
+  setFees = (fees, kind = 0) => {
+    switch (this.rel) {
+      case 'ETH':
+      case (eth_assets.indexOf(this.rel) + 1 && this.rel):
+        switch (kind) {
+          case 1:
+            this.gasLimit = parseInt(fees);
+            this.fees = this.gasLimit * this.gasPrice * 1000000000;
+            break;
+          case 2:
+            this.gasPrice = parseFloat(fees);
+            this.fees = this.gasLimit * this.gasPrice * 1000000000;
+            break;
+        }
+        break;
+      default:
+        this.fees = fees;
+        break;
+    }
+  }
+  estimateFee = (percent) => {
+    let max_time = 0, fees = 0, gasLimit = 0, gasPrice = 0;
+    switch (this.rel) {
+      case 'BTC':
+        const bytes = 400; // 400 bytes approx
+        let estimation = 50 - Math.round(percent / 100 * 50);
+        if (estimation < 1) estimation = 1;
+        if (estimation > 49) estimation = 49;
+
+        const feeBlock = this.estimatedFees[estimation];
+        const sat_per_byte = feeBlock.maxFee;
+
+        max_time = this.estimatedFees[4].maxMinutes / 4 * estimation * 60; // in seconds
+        fees = sat_per_byte * bytes;
+        break;
+      case 'ETH':
+      case (eth_assets.indexOf(this.rel) + 1 && this.rel):
+        //https://ethgasstation.info/json/ethgasAPI.json
+        gasLimit = 21000;
+        const atom = (this.estimatedFees.fastest - this.estimatedFees.safeLow) / 100;
+        let gasPrice = ((atom * percent) + this.estimatedFees.safeLow);
+        fees = gasLimit * gasPrice * 1000000000;
+
+
+        const atom2 = (this.estimatedFees.safeLowWait - this.estimatedFees.fastestWait) / 100;
+        max_time = (this.estimatedFees.safeLowWait - atom2 * percent) * 60;
+        break;
+    }
+    runInAction(() => {
+      this.max_time = max_time;
+      this.fees = fees;
+
+      this.gasLimit = gasLimit;
+      this.gasPrice = gasPrice;
+    });
+  }
+
+
 }
 
 export default ExchangeStore;

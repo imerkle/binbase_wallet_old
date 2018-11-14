@@ -1,5 +1,5 @@
 import { runInAction, observable, action } from 'mobx';
-import { allcoins, isTestnet, config } from 'app/constants';
+import { config } from 'app/constants';
 import OmniJs from "app/omnijs/omnijs";
 
 export class CoinStore {
@@ -19,21 +19,23 @@ export class CoinStore {
 
     @action
     generateKeys = () => {
-        allcoins.map(o=>{
-            const omni = new OmniJs(o, isTestnet, config);
+        for(let o in config){
+            const c = config[o];
+            const omni = new OmniJs(o, c.base ? o : c.ofBase);
             
             const seedBase = omni.generateSeed(this.mnemonic, this.passphrase)
             const k = omni.generatePKey(seedBase.seed)
             
             this.keys[o] = k;
             this.mnemonic = seedBase.mnemonic;
-        })
+        }
         this.syncBalances();
     }
     @action
     syncBalances = () => {
-        allcoins.map(async o=>{
-            const omni = new OmniJs(o, isTestnet, config);
+        Object.keys(config).map(async o=>{
+            const c = config[o];
+            const omni = new OmniJs(o, c.base ? o : c.ofBase);
 
             const balances = await omni.getBalance(this.keys[o].address);
             console.log(balances)
@@ -42,7 +44,7 @@ export class CoinStore {
                     this.balances[o] = balances[o];
                 })
             });            
-        });
+        })
     }
 }
 

@@ -1,112 +1,173 @@
-const a =  {
+const a = {
     "BTC": {
-        "explorer": {
-            "main":"https://blocktrail.com/BTC",
-            "test": "https://test-insight.bitpay.com"
-        },
-        "api": {
-            "main": "https://insight.bitpay.com/api",
-            "test": "https://test-insight.bitpay.com/api"
-        },
+        "explorer": "https://blocktrail.com/BTC",
+        "api": "https://insight.bitpay.com/api",
         "code": 0,
-        "decimals": 10**8,
+        "decimals": 10 ** 8,
         "forks": ["LTC", "DASH"],
         "fee_label": "Sats",
         "estimateFee": true,
+        "base": true,
+        "name": "Bitcoin",
+        "network": {
+            name: 'Bitcoin',
+            per1: 1e8,
+            unit: 'BTC',
+            messagePrefix: '\x18Bitcoin Signed Message:\n',
+            hashGenesisBlock: '000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f',
+            // nDefaultPort
+            port: 8333,
+            portRpc: 8332,
+            protocol: {
+                // pchMessageStart
+                magic: 0xd9b4bef9 // careful, sent over wire as little endian
+            },
+            // vSeeds
+            seedsDns: [
+                'seed.bitcoin.sipa.be',
+                'dnsseed.bluematt.me',
+                'dnsseed.bitcoin.dashjr.org',
+                'seed.bitcoinstats.com',
+                'bitseed.xf2.org',
+                'seed.bitcoin.jonasschnelli.ch'
+            ],
+            // base58Prefixes
+            versions: {
+                bip32: {
+                    private: 0x0488ade4,
+                    public: 0x0488b21e
+                },
+                bip44: 0,
+                private: 0x80,
+                public: 0x00,
+                scripthash: 0x05
+            }
+        },
     },
     "LTC": {
-        "explorer": {
-            "main":"https://insight.litecore.io",
-            "test": "https://testnet.litecore.io"
-        },
-        "api": {
-            "main": "https://insight.bitpay.com/api",
-            "test": "https://test-insight.bitpay.com/api"
-        },
+        "explorer": "https://insight.litecore.io",
+        "api": "https://insight.litecore.com/api",
         "code": 2,
         "decimals": 10 ** 8,
         "fee_label": "LTC",
+        "name": "Litecoin",
+        "ofBase": "BTC",
+        "forks": [],
+        "network": {
+            name: 'Litecoin',
+            unit: 'LTC',
+            hashGenesisBlock: '12a765e31ffd4059bada1e25190f6e98c99d9714d334efa41a195a7e7e04bfe2',
+            port: 9333,
+            protocol: {
+                magic: 0xdbb6c0fb
+            },
+            seedsDns: [
+                'dnsseed.litecointools.com',
+                'dnsseed.litecoinpool.org',
+                'dnsseed.ltc.xurious.com',
+                'dnsseed.koin-project.com',
+                'dnsseed.weminemnc.com'
+            ],
+            versions: {
+                bip32: {
+                    private: 0x019d9cfe,
+                    public: 0x019da462
+                },
+                bip44: 2,
+                private: 0xb0,
+                public: 0x30,
+                scripthash: 0x32,
+                scripthash2: 0x05 // old '3' prefix. available for backward compatibility.
+            }
+        },
     },
     "DASH": {
-        "explorer": {
-            "main":"https://insight.dash.org",
-            "test": "https://testnet-insight.dashevo.org/insight"
-        },
-        "api": {
-            "main": "https://insight.dash.org/api",
-            "test": "https://testnet-insight.dashevo.org/insight-api-dash"
-        },
+        "explorer": "https://insight.dash.org",
+        "api": "https://insight.dash.org/api",
         "code": 5,
         "decimals": 10 ** 8,
         "fee_label": "DASH",
+        "name": "Dash",
+        "ofBase": "BTC",
+        "forks": [],
+        "network": {
+            name: 'Dash',
+            unit: 'DASH',            
+            hashGenesisBlock: '00000ffd590b1485b3caadc19b22e6379c733355108f107a430458cdf3407ab6',
+            // nDefaultPort
+            port: 9999,
+            portRpc: 9998,
+            protocol: {
+                magic: 0xbd6b0cbf // careful, sent over wire as little endian
+            },
+            // vSeeds
+            seedsDns: [
+                'dash.org',
+                'dnsseed.dash.org',
+                'dashdot.io',
+                'dnsseed.dashdot.io',
+                'masternode.io',
+                'dnsseed.masternode.io',
+                'dashpay.io',
+                'dnsseed.dashpay.io'
+            ],
+            // base58Prefixes
+            versions: {
+                bip32: {
+                    private: 0x0488ade4,
+                    public: 0x0488b21e
+                },
+                bip44: 5,
+                private: 0xcc,
+                public: 0x4c,
+                scripthash: 0x10
+            }
+        },
     },
     "ETH": {
-        "explorer": {
-            "main": "https://etherscan.io",
-            "test": "https://rinkeby.etherscan.io"
-        },
-        "api": {
-            "main": "https://api.ethplorer.io",
-            "test": "https://api-rinkeby.etherscan.io/api",
-            "test": "https://api.ethplorer.io",
-        },
-        "assets": {
-            "main": require("./eth_assets.json")
-        },        
+        "explorer": "https://etherscan.io",
+        "api": "https://api.ethplorer.io",
+        "assets": require("./eth_assets.json"),
         "code": 60,
         "decimals": 10 ** 18,
         "fee_label": "ETH",
         "estimateFee": true,
+        "base": true,
+        "name": "Ethereum",
+        "forks": [],
     },
     "NEO": {
-        "explorer": {
-            "main": "https://neoscan.io/",
-            "test": "https://35.243.206.176:4000/"
-        },
-        "api": {
-            "main": "https://api.neoscan.io/api/main_net/v1",
-            "test": "http://35.243.206.176:4000/api/main_net/v1"
-        },
-        "rpc":{
-            "main": "http://api.neoscan.io/api/main_net/v1",
-            "test": "http://35.243.206.176:30333/api/main_net/v1"
-        },
+        "explorer": "https://neoscan.io",
+        "api": "https://api.neoscan.io/api/main_net/v1",
         "code": 888,
-        "assets": {
-            "main": require("./neo_assets.json")
-        },
+        "assets": require("./neo_assets.json"),
         "decimals": 10 ** 0,
         "fee_label": "GAS",
+        "base": true,
+        "name": "Neo",
+        "forks": [],
     },
     "NANO": {
-        "explorer": {
-            "main": "https://www.nanode.co",
-            "test": "https://www.nanode.co"
-        },
-        "api": {
-            "main": "http://35.227.18.245:7076/",
-            "test": "http://35.227.18.245:7076/"
-        },
+        "explorer": "https://www.nanode.co",
+        "api": "http://35.227.18.245:7076/",
         "code": 165,
         "decimals": 10 ** 18,
         "fee_label": "",
         "noFee": true,
+        "base": true,
+        "name": "Nano",
+        "forks": [],
     },
     "VET": {
-        "explorer": {
-            "main": "https://explore.veforge.com",
-            "test": "https://testnet.veforge.com"
-        },
-        "api": {
-            "main": "https://explore.veforge.com/api",
-            "test": "https://testnet.veforge.com/api"
-        },
-        "assets": {
-            "main": require("./vet_assets.json")
-        },        
+        "explorer": "https://veforge.com",
+        "api": "https://veforge.com/api",
+        "assets": require("./vet_assets.json"),
         "code": 818,
         "decimals": 10 ** 18,
         "fee_label": "VTHO",
+        "base": true,
+        "name": "Vechain",
+        "forks": [],
     },
     /*
     "XMR": {

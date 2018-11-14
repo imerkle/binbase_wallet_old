@@ -1,21 +1,15 @@
 import bip39 from 'bip39'
 import { getRootNode, deriveAccount, getWallet } from './keys'
-import { broadcastTx, getUtxos } from './insight'
-const Tx = require('ethereumjs-tx')
-import axios from 'axios';
-import BigNumber from 'bignumber.js'
-import * as nanocurrency  from 'nanocurrency';
+import { getBalance as getBalanceBtc , send as sendBTC, getTxs as getBtcTx } from './insight'
+import { sendETH, sendERC20, getEthTxs, getBalance as getBalanceEth } from './eth'
+import { getBalance as getBalanceVet, getVetTxs } from './vet'
+import { getBalance as getBalanceNano } from './nano'
+import { getBalance as getBalanceNeo ,send as sendNeo, getTxs as getNeoTx } from './neo'
+
 import {
-  btc_forks,
-  eth_assets,
-  neo_assets,
-  web3,
   getAtomicValue,
-  etherscan_api_key,
-  ethplorer_api_key,
   getConfig,
-  nano_rep,
-  transferABI,
+  config,
 } from 'app/constants'
 
 
@@ -26,18 +20,15 @@ import {
 
 class OmniJs {
   public rel: string
-  public  isTestnet: boolean
-  public config: any
+  public base: string
 
-  constructor(rel?: string, isTestnet?: boolean, config?: any) {
+  constructor(rel?: string, base?: string) {
     this.rel = rel || ''
-    this.isTestnet = isTestnet || false
-    this.config = config
+    this.base = base || ''
   }
-  set = (rel: string, isTestnet: boolean, config: any) => {
+  set = (rel: string, base: string) => {
     this.rel = rel || ''
-    this.isTestnet = isTestnet || false
-    this.config = config
+    this.base = base || ''
   }
 
   /**
@@ -58,12 +49,14 @@ class OmniJs {
     change: number = 1,
     index: number = 0
   ) => {
-    const rootNode = getRootNode(seed, this.rel, this.isTestnet)
-    const key = deriveAccount(rootNode, account, change, index, this.config, this.rel, this.isTestnet)
-    const { wif, address, publicKey } = getWallet(key, this.rel, this.isTestnet)
+    const { rel, base } = this;
+    const rootNode = getRootNode(seed, rel)
+    const key = deriveAccount(rootNode, account, change, index, config, rel)
+    const { wif, address, publicKey } = getWallet(key, rel)
     
     return { wif, address, publicKey }
   }
+
   send = (
     from: string,
     address: string,
@@ -71,329 +64,82 @@ class OmniJs {
     wif: string,
     options?: any
   ) => {
+    const { rel, base } = this;
     return new Promise(async (resolve, reject) => {
-      switch (this.rel) {
-      case 'BTC':
-        case btc_forks.indexOf(this.rel) + 1 && this.rel:
-        const multiply_by = this.rel == 'BTC' ? 1 : getAtomicValue(this.rel)
-        const utxos = await getUtxos({ isTestnet: this.isTestnet, rel: this.rel, address: from })
-        try {
-          const txid = await broadcastTx({
-            utxos,
-              from: from,
-              to: address,
-              amount: amount * getAtomicValue(this.rel),
-              wif: wif,
-              fee: options.fees * multiply_by,
-              isTestnet: this.isTestnet,
-              rel: this.rel
-            })
-            resolve(txid)
-          } catch (e) {
-            reject(e)
+      let txid;
+      switch (base) {
+        case 'BTC':
+          txid = sendBTC({ from, rel, address, amount, wif, options});
+        case 'ETH':
+          if (rel == base) {
+            txid = sendETH({ from, rel, address, amount, wif, options });
+          } else {
+            txid = sendERC20({ from, rel, base, address, amount, wif, options });
           }
-          break
-          case 'ETH':
-            web3.eth
-            .getTransactionCount(from)
-            .then(txCount => {
-              const txData = {
-                nonce: web3.utils.toHex(txCount.toString()),
-                gasLimit: web3.utils.toHex(options.gasLimit.toString()),
-                gasPrice: web3.utils.toHex(options.gasPrice.toString()),
-                to: address,
-                from: from,
-                //@ts-ignore
-                  value: web3.utils.toHex(toFixed(amount * 10 ** 18).toString())
-                }
-                
-                this.sendSignedWeb3(wif, txData, (err, result) => {
-                  if (err) reject(err)
-                  resolve(result)
-                })
-              })
-              .catch(e => {
-                reject(e)
-              })
-          case eth_assets.indexOf(this.rel) + 1 && this.rel:
-            const asset = this.config["ETH"].assets.main[this.rel];
-
-            let contract = new web3.eth.Contract(transferABI, asset.hash);
-            const data = contract.methods.transfer(address, amount*(10**asset.decimals)).encodeABI();                 
-
-            web3.eth
-            .getTransactionCount(from)
-            .then(txCount => {
-              const txData = {
-                nonce: web3.utils.toHex(txCount.toString()),
-                gasLimit: web3.utils.toHex(options.gasLimit.toString()),
-                gasPrice: web3.utils.toHex(options.gasPrice.toString()),
-                to: asset.hash,
-                from: from,
-                data: data,
-                value: web3.utils.toHex(0)
-              }
-
-              this.sendSignedWeb3(wif, txData, (err, result) => {
-                if (err) reject(err)
-                resolve(result)
-              })
-            })
-            .catch(e => {
-              reject(e)
-            })            
           break;
-          case "NEO":
-          case neo_assets.indexOf(this.rel) + 1 && this.rel:
-            
-          const api = getConfig("api", this.rel, this.isTestnet);
-
-          const balance = (await axios.get(`${api}/get_balance/${address}`)).data;
-          const ne = require("./neo")
-          try{
-            const result = await ne.sendTransaction([{ amount, address, symbol: this.rel }],
-             { balances: balance,
-               wif,
-               address: from,
-               publicKey: options.publicKey,
-               fees: options.fees,
-               isTestnet: this.isTestnet,
-              });
-              resolve(result.txid);
-          }catch(e){ reject(e); }
-         break
+        case "NEO":
+          txid = sendNeo({ from, rel, base, address, amount, wif, options });
+        break
       }
     })
   }
-
-  sendSignedWeb3 = (wif: string, txData: any, cb: any) => {
-    const privateKey = new Buffer(wif, 'hex')
-    const transaction = new Tx(txData)
-    transaction.sign(privateKey)
-    const serializedTx = transaction.serialize().toString('hex')
-    web3.eth.sendSignedTransaction('0x' + serializedTx, cb)
-  }
   getTxs = (address: string) => {
+    const { rel, base } = this;
+
     let data, n_tx, txs = [];
-    const api = getConfig("api", this.rel, this.isTestnet);
-    let decimals = this.config[this.rel] ? this.config[this.rel].decimals : 1;
+    const api = getConfig(rel, base).api;
+    let decimals = getAtomicValue(rel, base);
 
     return new Promise(async (resolve, reject) => {
         try{
-            switch(this.rel){
-              case 'BTC':
-              case (btc_forks.indexOf(this.rel)+1 && this.rel):
-                data = await axios.get(`${api}/txs/?address=${address}`);
-                n_tx = data.data.txAppearances;
-                data.data.txs.map(o=>{
-                  const from = o.vin[0].addr;
-                  let value = 0;
-                  let kind = "got";
-                  let fee = o.fees;
-      
-                  if(from!= address){
-                    kind = "got";
-                    o.vout.map(o=>{ 
-                      if(o.scriptPubKey.addresses[0]  == address){
-                        value += o.value;
-                      }
-                    })
-                  }else{
-                    kind = "sent";
-                    value = o.vout[0].value;
-      
-                  }
-                  const tx = {
-                    from,
-                    hash: o.txid,
-                    confirmations: o.confirmations,
-                    value,
-                    kind,
-                    fee,
-                    timestamp: o.blocktime,
-                  };
-                  txs.push(tx);
-                })
+          switch(base){
+            case 'BTC':
+              txs = await getBtcTx({rel, base, address});
             break;                  
             case 'NEO':
-            case neo_assets.indexOf(this.rel) + 1 && this.rel:
-                data = await axios.get(`${api}/get_address_abstracts/${address}/0`);
-
-                n_tx = data.data.total_entries;
-                data.data.entries.map(o=>{        
-                const tx = {
-                    from: o.address_from,
-                    hash: o.txid,
-                    confirmations: null,
-                    value: o.amount,
-                    kind: o.address_from == address ? "sent" : "got",
-                    fee: 0,
-                    timestamp: o.time,
-                    token_address: o.asset,
-                    asset: this.config[this.rel].assets.main[o.asset] ? this.config[this.rel].assets.main[o.asset] : null,
-                };
-                txs.push(tx);
-                })
+              txs = await getNeoTx({rel, base, address});
             break;
             case 'VET':
-                data = await axios.get(`${api}/transactions?address=${address}&count=10&offset=0`);
-                n_tx = data.data.total;
-                data.data.transactions.map(o=>{
-                  const tx = {
-                    from: o.origin,
-                    hash: o.id,
-                    value: o.totalValue/decimals,
-                    kind: o.origin == address ? "sent": "got",
-                    fee: 0,
-                    timestamp: o.timestamp,
-                  };
-                  txs.push(tx);                  
-                })
+              txs = await getVetTxs({rel, base, address});
             break;
             case 'ETH':
-              data = await axios.get(`${api}/?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=${etherscan_api_key}`);
-    
-              n_tx = data.data.result.length;
-    
-              data.data.result.map(o=>{
-                const from = o.from;
-                let fee = (o.gas * o.gasPrice) / decimals;
-    
-                const tx = {
-                  from,
-                  hash: o.hash,
-                  confirmations: o.confirmations,
-                  value: o.value / decimals,
-                  kind: from == address ? "sent" : "got" ,
-                  fee,
-                  timestamp: o.timeStamp,
-                };
-                txs.push(tx);
-              })
-          break;            
-        }
-            resolve({txs, n_tx});
+              txs = await getEthTxs({rel, base, address});
+            break;            
+          }
+          resolve({txs, n_tx});
         }catch(e){ reject(e)}
     });
 }
   getBalance = (address: string) => {
-    const api = getConfig("api", this.rel, this.isTestnet);
+    const { rel, base } = this;
+
+    const api = getConfig(rel, base).api;
     let data;
     let balances = {};
     let balance: number = 0;
     return new Promise(async (resolve, reject) => {
       try {
-        switch (this.rel) {
+        switch (base) {
           case 'BTC':
-          case (btc_forks.indexOf(this.rel) + 1 && this.rel):
-            data = await axios.get(`${api}/addr/${address}`);
-            balance = data.data.balance;
-            balances = { [this.rel]: {balance} }
-            break;
+            balances = getBalanceBtc({rel, address, base});
+          break;
           case 'NEO':
-          case neo_assets.indexOf(this.rel) + 1 && this.rel:
-          data = await axios.get(`${api}/get_balance/${address}`);
-          data.data.balance.map(o=>{
-            balances[o.asset] = { balance: o.amount, isNeo: true, };
-          });
+            balances = getBalanceNeo({rel, address, base});
           break;
           case 'NANO':
-          data = await axios.post(`${api}`,{
-            "action": "account_balance",
-              "account": address,     
-            });
-            //@ts-ignore
-            balance = nanocurrency.convert(data.data.balance, {from: 'raw', to: 'NANO'});
-            //@ts-ignore
-            const pending = nanocurrency.convert(data.data.pending, { from: 'raw', to: 'NANO' });
-            balances = { [this.rel]: { balance: +balance, pending: +pending } }
-            break;
+            balances = getBalanceNano({rel, address, base});
+          break;
           case 'VET':
-            data = await axios.get(`${api}/accounts/${address}`);
-            balances["VET"] = {balance: data.data.balance/(this.config[this.rel].decimals)};
-            balances["VTHO"] = {balance: data.data.energy/(this.config[this.rel].decimals)};
+            balances = getBalanceVet({rel, address, base});
           break;
           case 'ETH':
-          case eth_assets.indexOf(this.rel) + 1 && this.rel:
-            //ETH and shitcoins
-            if (!this.isTestnet) {
-              data = await axios.get(`${api}/?module=account&action=balance&address=${address}&tag=latest&apikey=${etherscan_api_key}`);
-              balances = { [this.rel]: { balance: data.data.result / this.config["ETH"].decimals } }
-            } else {
-              address = "0x32Be343B94f860124dC4fEe278FDCBD38C102D88";
-              data = await axios.get(`${api}/getAddressInfo/${address}?apiKey=${ethplorer_api_key}`);
-              balances["ETH"] = {balance: data.data.ETH.balance};
-              data.data.tokens.map(o=>{
-                if (eth_assets.indexOf(o.tokenInfo.symbol)+1 && o.balance > 0){
-                  balances[o.tokenInfo.symbol] = {
-                    balance: (o.balance / (10 ** o.tokenInfo.decimals)),
-                    tokenInfo: o.tokenInfo,
-                    isERC20: true,
-                  }
-                }
-              })
-            }
+            balances = getBalanceEth({rel, address, base});
           break;          
         }
         resolve(balances); 
   }catch(e){
     reject(e);
   }  });
-}
-pendingSyncNano = async({balance, pending, address, option}) => {
-  //@ts-ignore
-  balance = nanocurrency.convert(balance, { from: 'NANO', to: 'raw' });
-  //@ts-ignore
-  pending = nanocurrency.convert(pending, { from: 'NANO', to: 'raw' });
-
-  const api = getConfig("api", this.rel, this.isTestnet);
-  if (parseFloat(pending) > 0) {
-    const d1 = await axios.post(`${api}`, {
-      "action": "accounts_pending",
-      "accounts": [address],
-      "source": "true",
-    });
-    const d4 = await axios.post(`${api}`, {
-      "action": "account_representative",
-      "account": address,
-    });
-
-    const d3 = await axios.post(`${api}`, {
-      "action": "accounts_frontiers",
-      "accounts": [address],
-    });
-
-    const representative = d4.data.representative || nano_rep;
-    const frontier = d3.data.frontiers[address];
-
-
-    for (let x1 in d1.data.blocks[address]) {
-      const o = d1.data.blocks[address][x1];
-      const previous = frontier || "0000000000000000000000000000000000000000000000000000000000000000";
-      const link = x1;
-      const w1 = await axios.post(`${api}`, {
-        "action": "work_generate",
-        "hash": frontier || option.publicKey
-      });
-      const bal = new BigNumber(balance).plus(o.amount);
-      console.log(balance,o.amount)
-      console.log(bal)
-      const unsigned_block = {
-        link,
-        previous,
-        work: w1.data.work,
-        balance: bal.c.join(""),
-        representative,
-      };
-      //@ts-ignore
-      const { hash, block } = nanocurrency.createBlock(option.pkey, unsigned_block);
-      //@ts-ignore
-      const r1 = await axios.post(`${api}`, {
-        "action": "process",
-        block: JSON.stringify(block),
-      });
-    }
-  }  
 }
 }
 
