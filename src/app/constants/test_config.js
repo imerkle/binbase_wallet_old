@@ -6,7 +6,7 @@ const a = {
         "decimals": 10 ** 8,
         "forks": ["LTC", "DASH"],
         "fee_label": "Sats",
-        "estimateFee": true,
+        //"estimateFee": true,
         "base": true,
         "name": "Bitcoin",
         "network": {
@@ -99,12 +99,14 @@ const a = {
     },
     "ETH": {
         "explorer":"https://rinkeby.etherscan.io",
-        "api": "https://api.ethplorer.io",
+        "api": "https://api-rinkeby.etherscan.io/api",
+        "api_tokens": "https://tokenbalance.herokuapp.com/api/balance",
+        "rpc": "https://rinkeby.infura.io/v3/2294f3b338ad4524aa9186012810e412",
         "assets": require("./eth_assets.json"),
         "code": 1,
         "decimals": 10 ** 18,
         "fee_label": "ETH",
-        "estimateFee": true,
+        //"estimateFee": true,
         "base": true,
         "name": "Ethereum",
         "forks": [],
@@ -130,10 +132,12 @@ const a = {
         "base": true,
         "name": "Nano",
         "forks": [],
+        "rep": "xrb_17krztbeyz1ubtkgqp9h1bewu1tz8sgnpoiii8q7c9n7gyf9jfmuxcydgufi",
     },
     "VET": {
         "explorer": "https://testnet.veforge.com",
         "api": "https://testnet.veforge.com/api",
+        "rpc": "http://127.0.0.1:8669/",
         "assets": require("./vet_assets.json"),
         "code": 1,
         "decimals": 10 ** 18,
@@ -142,6 +146,17 @@ const a = {
         "name": "Vechain",
         "forks": [],
     },
+    "XRP": {
+        "explorer": "https://testnet.veforge.com",
+        "api": "https://testnet.veforge.com/api",
+        "rpc": "http://127.0.0.1:8669/",
+        "code": 1,
+        "decimals": 10 ** 18,
+        "fee_label": "XRP",
+        "base": true,
+        "name": "Ripple",
+        "forks": [],
+    },    
     /*
     "XMR": {
         "explorer": {

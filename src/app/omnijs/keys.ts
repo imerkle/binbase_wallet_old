@@ -7,6 +7,17 @@ import ethUtil from 'ethereumjs-util'
 import * as nanocurrency from 'nanocurrency';
 import { config, toBitcoinJS } from 'app/constants';
 
+
+export const convertRippleAdrr = (address: string) => {
+  return require('base-x')('rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz').encode(
+    require('base-x')('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').decode(address)
+  )
+}
+
+export const convertRipplePriv  = (priv) => {
+  return require('base-x')('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').decode(priv).toString("hex").slice(2, 66)
+}   
+
 export const getRootNode = (seed: any, rel: string) => {
   let rootNode
   switch (rel) {

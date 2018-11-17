@@ -67,20 +67,25 @@ class OmniJs {
     const { rel, base } = this;
     return new Promise(async (resolve, reject) => {
       let txid;
-      switch (base) {
-        case 'BTC':
-          txid = sendBTC({ from, rel, address, amount, wif, options});
-        case 'ETH':
-          if (rel == base) {
-            txid = sendETH({ from, rel, address, amount, wif, options });
-          } else {
-            txid = sendERC20({ from, rel, base, address, amount, wif, options });
-          }
+      try{
+        switch (base) {
+          case 'BTC':
+            txid = await sendBTC({ from, rel, address, amount, wif, options});
+          case 'ETH':
+            //options.gasLimit *= 1000000000;
+            options.gasPrice *= 1000000000;
+            if (rel == base) {
+              txid = await sendETH({ from, rel, address, amount, wif, options });
+            } else {
+              txid = await sendERC20({ from, rel, base, address, amount, wif, options });
+            }
           break;
-        case "NEO":
-          txid = sendNeo({ from, rel, base, address, amount, wif, options });
-        break
-      }
+          case "NEO":
+            txid = await sendNeo({ from, rel, base, address, amount, wif, options });
+          break
+        }
+        resolve({txid})
+      }catch(e){reject(e)}
     })
   }
   getTxs = (address: string) => {

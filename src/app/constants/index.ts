@@ -1,19 +1,11 @@
 import WAValidator from 'wallet-address-validator';
-import Web3 from 'web3';
+import Web3Utils from 'web3-utils';
 
 //export const config = require('./config.js').default;
 export const config = require('./test_config.js').default;
 
-var options = {
-    timeout: 20000, // milliseconds,
-    headers: [{name: 'Access-Control-Allow-Origin', value: '*'}]
-};
-//@ts-ignore
-export const web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/2294f3b338ad4524aa9186012810e412", options));
-
 export const etherscan_api_key = "8FISWFNZET4P2J451BY5I5GERA5MZG34S2";
 export const ethplorer_api_key = "freekey";
-//?module=account&action=txlist&address=0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae&startblock=0&endblock=99999999&sort=asc&apikey=YourApiKeyToken
 
 export const darkColors = {
     primary: {
@@ -34,14 +26,6 @@ export const testnet = {
 export const btc_forks = config["BTC"]["forks"];
 export const neo_assets = Object.keys(config["NEO"].assets);
 export const eth_assets = Object.keys(config["ETH"].assets);
-
-export const neopriv_config = {
-  name: 'PrivateNet',
-  extra: {
-    neoscan: `${config["NEO"].explorer}/api/main_net`
-  }
-}
-export const nano_rep = "xrb_17krztbeyz1ubtkgqp9h1bewu1tz8sgnpoiii8q7c9n7gyf9jfmuxcydgufi";
 
 export const allcoins = Object.keys(config);
 export const isTestnet = true;
@@ -88,7 +72,7 @@ export const isValidAddress = (address, coin) => {
       return nanocurrency.checkAddress(address);
       break;
     default:
-      if (web3.utils.isAddress(address)) {
+      if (Web3Utils.isAddress(address)) {
         return true;
       }
       break;

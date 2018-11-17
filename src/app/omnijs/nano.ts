@@ -1,6 +1,5 @@
 import {    
     getConfig,
-    nano_rep,
 } from 'app/constants'
 import axios from 'axios';
 import * as nanocurrency from 'nanocurrency';
@@ -30,7 +29,7 @@ export const pendingSyncNano = async ({ balance, pending, address, option }) => 
     //@ts-ignore
     pending = nanocurrency.convert(pending, { from: 'NANO', to: 'raw' });
 
-    const api = getConfig(rel, base).api;
+    const {api, rep} = getConfig(rel, base);
     if (parseFloat(pending) > 0) {
         const d1 = await axios.post(`${api}`, {
             "action": "accounts_pending",
@@ -47,7 +46,7 @@ export const pendingSyncNano = async ({ balance, pending, address, option }) => 
             "accounts": [address],
         });
 
-        const representative = d4.data.representative || nano_rep;
+        const representative = d4.data.representative || rep;
         const frontier = d3.data.frontiers[address];
 
 

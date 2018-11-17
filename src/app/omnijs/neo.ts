@@ -1,17 +1,10 @@
 import Neon, { rpc, api, sc, u, wallet } from '@cityofzion/neon-js'
 import {
-    neopriv_config,
-    isTestnet,
     getConfig,
     config,
 } from 'app/constants'
 import axios from 'axios';
 
-const neo_privateNet = new rpc.Network(neopriv_config)
-Neon.add.network(neo_privateNet)
-
-const mainNetNeoscan = new api.neoscan.instance("MainNet");
-const privNetNeoscan = new api.neoscan.instance("PrivateNet");
 
 //@ts-ignore
 Array.prototype.flatMap = function (lambda) {
@@ -116,8 +109,16 @@ const makeRequest = (sendEntries: Array<SendEntryType>, config: any) => {
 export const sendTransaction = async (sendEntries: Array<SendEntryType>, opts) => {
     const wif = opts.wif;
     const fromAddress = opts.address
-    const net = isTestnet ? "PrivateNet" : "MainNet"
     const publicKey = opts.publicKey
+
+    const net = new rpc.Network({
+        name: 'Net',
+        extra: {
+            neoscan: `${config["NEO"].explorer}/api/main_net`
+        }
+    })
+    Neon.add.network(net)
+    const netNeoscan = new api.neoscan.instance("Net");
 
     return new Promise(async(resolve, reject) => {
         try {
@@ -130,7 +131,7 @@ export const sendTransaction = async (sendEntries: Array<SendEntryType>, opts) =
                 account: new wallet.Account(wif),
                 privateKey: new wallet.Account(wif).privateKey,
                 signingFunction: null,
-                api: isTestnet ? privNetNeoscan : mainNetNeoscan,
+                api: netNeoscan,
             })
             if (!response.result) {
                 reject("Failed")

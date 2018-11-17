@@ -1,6 +1,11 @@
 import axios from 'axios';
 import {getConfig, getAtomicValue} from 'app/constants';
+import { thorify } from "thorify";
+const Web3 = require("web3");
 
+export const getWeb3 = (rpc) => {
+    return thorify(new Web3(), rpc);
+}
 export const getVetTxs = async ({ address, rel, base }) => {
     const api = getConfig(rel, base).api;
     const txs = [];
@@ -20,6 +25,7 @@ export const getVetTxs = async ({ address, rel, base }) => {
     
     return txs;
 }
+/*
 export const getBalance = async ({ address, rel, base }) => {
     const api = getConfig(rel, base).api;
     const balances = {};
@@ -28,5 +34,15 @@ export const getBalance = async ({ address, rel, base }) => {
     balances["VET"] = { balance: data.data.balance / getAtomicValue("VET", base) };
     balances["VTHO"] = { balance: data.data.energy / getAtomicValue("VTHO", base) };
     
+    return balances;
+}
+*/
+export const getBalance = async ({ address, rel, base }) => {
+    const { rpc } = getConfig(rel, base);
+    const web3 = getWeb3(rpc);
+    
+    let balances = {};
+    balances[base] = { balance: (await web3.eth.getBalance(address)) / getAtomicValue(rel, base) };
+    balances["VTHO"] = { balance: (await web3.eth.getEnergy(address)) / getAtomicValue("VTHO", base) };
     return balances;
 }

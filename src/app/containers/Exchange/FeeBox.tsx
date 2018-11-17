@@ -19,23 +19,27 @@ class FeeBox extends React.Component<any, any>{
         advanceToggleDisabled: false,        
     }
     componentDidMount(){
+        this.setConfigs();
+    }
+    setConfigs = () =>{ 
         const { exchangeStore } = this.props.rootStore;
-        const { rel, base } = exchangeStore;        
-
-      if (config[rel] ? config[rel].estimateFee : config[base].estimateFee){
-        this.setState({advanceToggleDisabled: false});
-      } else if (config[rel] ? config[rel].noFee : config[base].noFee){
-        this.setState({showFees: false});
-      }else{
-        this.setState({advanceToggleDisabled: true, showAdvanced: true});
-      }        
+        const { rel, base } = exchangeStore;
+        if (base && rel) {
+            if (config[rel] ? config[rel].estimateFee : config[base].estimateFee) {
+                this.setState({ advanceToggleDisabled: false });
+            } else if (config[rel] ? config[rel].noFee : config[base].noFee) {
+                this.setState({ showFees: false });
+            } else {
+                this.setState({ advanceToggleDisabled: true, showAdvanced: true });
+            }
+        }
     }
     render(){
-        const { showFees, advanceToggleDisabled, showAdvanced } = this.props;
+        const { showFees, advanceToggleDisabled, showAdvanced } = this.state;
         const { exchangeStore, priceStore } = this.props.rootStore;
         const { rel, base } = exchangeStore;
         let fee_label = base ? `Network Fees (${config[base].fee_label})` : "";
-
+        if(!base || !rel){ return (null)}
         return (
             <Div>
                 {

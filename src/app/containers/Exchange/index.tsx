@@ -254,7 +254,7 @@ class Exchange extends React.Component<any, any>{
         }
         appStore.setSnackMsg("Transaction is being broadcasted!");
         try{
-          const txid = await exchangeStore.send(addressField, amt)
+          const {txid} = await exchangeStore.send(addressField, amt)
           appStore.setSnackMsg(`Transaction broadcast completed. tx: ${txid}`);
           this.setState({
             addressField: "",
