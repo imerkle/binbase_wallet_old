@@ -90,7 +90,7 @@ export class ExchangeStore {
     this.publicKey = k.publicKey;
         
     //this.syncBalance();
-    this.syncFee();
+    //this.syncFee();
     this.syncTxs();
   }
 
@@ -172,9 +172,29 @@ export class ExchangeStore {
 
 
 
+  @action
+  setFees = (fees, kind = 0) => {
+    switch (this.rel) {
+      case 'ETH':
+      case (eth_assets.indexOf(this.rel) + 1 && this.rel):
+        switch (kind) {
+          case 1:
+            this.gasLimit = parseInt(fees);
+            this.fees = this.gasLimit * this.gasPrice * 1000000000;
+            break;
+          case 2:
+            this.gasPrice = parseFloat(fees);
+            this.fees = this.gasLimit * this.gasPrice * 1000000000;
+            break;
+        }
+        break;
+      default:
+        this.fees = fees;
+        break;
+    }
+  }
 
-
-
+/*
   @action
   syncFee = async () => {
     let estimatedFees, data, fees = 0;
@@ -201,27 +221,7 @@ export class ExchangeStore {
       this.fees = fees;
     });
   }
-  @action
-  setFees = (fees, kind = 0) => {
-    switch (this.rel) {
-      case 'ETH':
-      case (eth_assets.indexOf(this.rel) + 1 && this.rel):
-        switch (kind) {
-          case 1:
-            this.gasLimit = parseInt(fees);
-            this.fees = this.gasLimit * this.gasPrice * 1000000000;
-            break;
-          case 2:
-            this.gasPrice = parseFloat(fees);
-            this.fees = this.gasLimit * this.gasPrice * 1000000000;
-            break;
-        }
-        break;
-      default:
-        this.fees = fees;
-        break;
-    }
-  }
+  
   estimateFee = (percent) => {
     let max_time = 0, fees = 0, gasLimit = 0, gasPrice = 0;
     switch (this.rel) {
@@ -258,7 +258,7 @@ export class ExchangeStore {
       this.gasPrice = gasPrice;
     });
   }
-
+*/
 
 }
 

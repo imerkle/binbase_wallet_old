@@ -23,11 +23,10 @@ export class CoinStore {
             const c = config[o];
             const omni = new OmniJs(o, c.base ? o : c.ofBase);
             
-            const seedBase = omni.generateSeed(this.mnemonic, this.passphrase)
-            const k = omni.generatePKey(seedBase.seed)
+            const k = omni.generateSeed(this.mnemonic, this.passphrase)
             
             this.keys[o] = k;
-            this.mnemonic = seedBase.mnemonic;
+            this.mnemonic = k.mnemonic;
         }
         this.syncBalances();
     }

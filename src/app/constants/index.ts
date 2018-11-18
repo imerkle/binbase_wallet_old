@@ -1,8 +1,8 @@
 import WAValidator from 'wallet-address-validator';
 import Web3Utils from 'web3-utils';
 
-//export const config = require('./config.js').default;
-export const config = require('./test_config.js').default;
+export const config = require('./config').default;
+//export const config = require('./test_config').default;
 
 export const etherscan_api_key = "8FISWFNZET4P2J451BY5I5GERA5MZG34S2";
 export const ethplorer_api_key = "freekey";

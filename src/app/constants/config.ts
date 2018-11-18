@@ -172,6 +172,17 @@ const a = {
         "name": "Vechain",
         "forks": [],
     },
+    "XRP": {
+        "explorer": "https://testnet.veforge.com",
+        "api": "https://testnet.veforge.com/api",
+        "rpc": "http://127.0.0.1:8669/",
+        "code": 144,
+        "decimals": 10 ** 18,
+        "fee_label": "XRP",
+        "base": true,
+        "name": "Ripple",
+        "forks": [],
+    },     
     /*
     "XMR": {
         "explorer": {

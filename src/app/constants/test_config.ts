@@ -137,7 +137,7 @@ const a = {
     "VET": {
         "explorer": "https://testnet.veforge.com",
         "api": "https://testnet.veforge.com/api",
-        "rpc": "http://127.0.0.1:8669/",
+        "rpc": "https://0e4039cc.ngrok.io",
         "assets": require("./vet_assets.json"),
         "code": 1,
         "decimals": 10 ** 18,

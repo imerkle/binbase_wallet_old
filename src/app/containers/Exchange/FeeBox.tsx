@@ -25,9 +25,9 @@ class FeeBox extends React.Component<any, any>{
         const { exchangeStore } = this.props.rootStore;
         const { rel, base } = exchangeStore;
         if (base && rel) {
-            if (config[rel] ? config[rel].estimateFee : config[base].estimateFee) {
-                this.setState({ advanceToggleDisabled: false });
-            } else if (config[rel] ? config[rel].noFee : config[base].noFee) {
+            //if (config[rel] ? config[rel].estimateFee : config[base].estimateFee) {
+              //  this.setState({ advanceToggleDisabled: false });
+            if (config[rel] ? config[rel].noFee : config[base].noFee) {
                 this.setState({ showFees: false });
             } else {
                 this.setState({ advanceToggleDisabled: true, showAdvanced: true });

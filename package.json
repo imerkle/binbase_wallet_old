@@ -5,7 +5,7 @@
   "description": "A frontend boilerplate with React, MobX and Typescript",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "webpack-dev-server --mode development --hot --progress --colors --port 3001 --open",
     "build": "webpack -p --progress --colors",
     "prettier": "prettier --write \"src/**/*.{ts,tsx,css}\""
@@ -13,6 +13,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/classnames": "^2.2.3",
+    "@types/jest": "^23.3.9",
     "@types/node": "^9.4.6",
     "@types/react": "^16.0.40",
     "@types/react-dom": "^16.0.4",
@@ -25,6 +26,7 @@
     "file-loader": "^1.1.11",
     "html-loader": "^1.0.0-alpha.0",
     "html-webpack-plugin": "^3.0.4",
+    "jest": "^23.6.0",
     "mobx-react-devtools": "^4.2.15",
     "postcss": "^6.0.19",
     "postcss-browser-reporter": "^0.5.0",
@@ -36,6 +38,7 @@
     "prettier": "^1.11.1",
     "react-hot-loader": "^4.0.0",
     "style-loader": "^0.20.2",
+    "ts-jest": "^23.10.4",
     "ts-loader": "^4.0.0",
     "typescript": "^2.7.2",
     "url-loader": "^1.0.0-beta.0",
@@ -77,6 +80,7 @@
     "react-router-dom": "^4.3.1",
     "react-swipeable-views": "^0.12.14",
     "recompose": "^0.27.1",
+    "ripple-keypairs": "^0.11.0",
     "thorify": "^1.0.4",
     "wallet-address-validator": "^0.2.0",
     "web3": "1.0.0-beta.33",

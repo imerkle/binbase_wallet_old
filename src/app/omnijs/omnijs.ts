@@ -31,28 +31,29 @@ class OmniJs {
     this.base = base || ''
   }
 
-  /**
-   * Create a Seed.
-   *
-   * @param mnemonic - bip39 compatible mnemonic words
-   * @param passohrase - passphrase for mnemonic
-   * @returns Seed
-   */
-  generateSeed = (_mnemonic?: string, passphrase: string = '') => {
+
+  generateSeed = (_mnemonic?: string, passphrase: string = '', options?: any) => {
     const mnemonic = _mnemonic ? _mnemonic : bip39.generateMnemonic()
-    const seed = bip39.mnemonicToSeed(mnemonic, passphrase).slice(0,32)
-    return { mnemonic, seed }
+    //const seed = bip39.mnemonicToSeed(mnemonic, passphrase).slice(0,32)
+    const seed = bip39.mnemonicToSeed(mnemonic, passphrase)
+    
+    const { wif, address, publicKey } = this.generatePKey(seed);
+
+    return { wif, address, publicKey, mnemonic }
   }
+  /*
+  https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#Change
+  */
   generatePKey = (
     seed: Buffer,
     account: number = 0,
-    change: number = 1,
+    change: number = 0,
     index: number = 0
   ) => {
     const { rel, base } = this;
-    const rootNode = getRootNode(seed, rel)
+    const rootNode = getRootNode(seed, rel, base)
     const key = deriveAccount(rootNode, account, change, index, config, rel)
-    const { wif, address, publicKey } = getWallet(key, rel)
+    const { wif, address, publicKey } = getWallet(key, rel, base)
     
     return { wif, address, publicKey }
   }

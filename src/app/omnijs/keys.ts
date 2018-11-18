@@ -6,26 +6,15 @@ import { wallet as NeoWallet } from '@cityofzion/neon-core'
 import ethUtil from 'ethereumjs-util'
 import * as nanocurrency from 'nanocurrency';
 import { config, toBitcoinJS } from 'app/constants';
+import rplk from 'ripple-keypairs';
 
 
-export const convertRippleAdrr = (address: string) => {
-  return require('base-x')('rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz').encode(
-    require('base-x')('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').decode(address)
-  )
-}
-
-export const convertRipplePriv  = (priv) => {
-  return require('base-x')('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz').decode(priv).toString("hex").slice(2, 66)
-}   
-
-export const getRootNode = (seed: any, rel: string) => {
+export const getRootNode = (seed: any, rel: string, base: string) => {
   let rootNode
-  switch (rel) {
+  switch (base) {
     case 'BTC':
-    case btc_forks.indexOf(rel) + 1 && rel:
-    const network = toBitcoinJS(config[rel].network);
-    rootNode = bip32.fromSeed(seed, network)
-    
+      const network = toBitcoinJS(config[rel].network);
+      rootNode = bip32.fromSeed(seed, network)
     break
     case 'NEO':
       rootNode = bitcoinSecp256r1.HDNode.fromSeedBuffer(
@@ -34,11 +23,12 @@ export const getRootNode = (seed: any, rel: string) => {
       )
       break
     case 'NANO':
-    case 'XMR':
+    case 'XRP':
+    //case 'XMR':
       return seed.toString("hex");
     default:
       //eth and rest of its shitcoins
-    rootNode = bip32.fromSeed(seed, bitcoin.networks.bitcoin)
+      rootNode = bip32.fromSeed(seed, bitcoin.networks.bitcoin)
     break
   }
   return rootNode
@@ -53,14 +43,14 @@ export const deriveAccount = (
 ) => {
   const networkCode = config[rel].code
   const bip44path = `m/44'/${networkCode}'/${account}'/${change}/${index}`
+  console.log(bip44path)
   return typeof rootNode == "object" ? rootNode.derivePath(bip44path) : rootNode;
 }
 
-export const getWallet = (key: any, rel: string) => {
+export const getWallet = (key: any, rel: string, base: string) => {
   let wif, address, publicKey
-  switch (rel) {
+  switch (base) {
     case 'BTC':
-    case btc_forks.indexOf(rel) + 1 && rel:
       const network = toBitcoinJS(config[rel].network);    
       const derivedWallet = bitcoin.payments.p2pkh({
         pubkey: key.publicKey,
@@ -79,14 +69,23 @@ export const getWallet = (key: any, rel: string) => {
       const account = new NeoWallet.Account(wif)
       address = account.address
       publicKey = account.publicKey 
-      break
+    break
     case 'NANO':
-    wif = nanocurrency.deriveSecretKey(key, 0)
-    publicKey = nanocurrency.derivePublicKey(wif)
-    address = nanocurrency.deriveAddress(publicKey)
+      wif = nanocurrency.deriveSecretKey(key, 0)
+      publicKey = nanocurrency.derivePublicKey(wif)
+      address = nanocurrency.deriveAddress(publicKey)
+    break;  
+    case 'XRP':
+      var entropy = new Buffer(key, 'hex');
+      wif = rplk.generateSeed({ entropy: entropy });
+      var keypair = rplk.deriveKeypair(wif);
+      publicKey = keypair.publicKey;
+      address = rplk.deriveAddress(keypair.publicKey);
+      console.log(wif)
+      
+      
     break;  
     case 'XMR':
-    
     /*
       const monero_utils = require('mymonero-core-js/monero_utils/monero_cryptonote_utils_instance')
       const walletUtils = require('mymonero-core-js/monero_utils/monero_wallet_utils')
@@ -101,11 +100,12 @@ export const getWallet = (key: any, rel: string) => {
       });
       */
     break;  
-    default:
+    case 'ETH':
+    case 'VET':
       //eth and rest of its shitcoins
       //var privKeyBuffer = key.__d.toBuffer(32)
       var privKeyBuffer = key.__d;
-      const privkey = privKeyBuffer.toString('hex')
+      var privkey: string = privKeyBuffer.toString('hex')
       var addressBuffer = ethUtil.privateToAddress(privKeyBuffer)
       var hexAddress = addressBuffer.toString('hex')
       var checksumAddress = ethUtil.toChecksumAddress(hexAddress)
