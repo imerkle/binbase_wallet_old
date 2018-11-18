@@ -26,7 +26,7 @@ describe('Wallet Address Generation', function () {
     it('Vechain', function () {
         const omni = new OmniJs('VET', 'VET');
         const k = omni.generateSeed(mnemonic);
-        expect(k.address).toEqual(`0xb023b80afad0363ab966cf10b5f76E5f625Cf497`);
+        expect(k.address).toEqual(`0x684e90C1e5aB7449988D3180C34A99f92A54b705`);
     })
     it('Ripple', function () {
         const omni = new OmniJs('XRP', 'XRP');
