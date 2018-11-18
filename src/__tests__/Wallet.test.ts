@@ -14,7 +14,7 @@ describe('Wallet Address Generation', function () {
         expect(k.address).toEqual(`LfPqHoYgghwxjJt2BrjrqwPjhRwk69VFZx`);
     })
     it('Dash', function () {
-        const omni = new OmniJs('LTC', 'BTC');
+        const omni = new OmniJs('DASH', 'BTC');
         const k = omni.generateSeed(mnemonic);
         expect(k.address).toEqual(`XyQ5Dc9abDeRpiihst9JY1M5fhTv4nKJL5`);
     })
