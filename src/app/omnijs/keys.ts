@@ -23,7 +23,7 @@ export const getRootNode = (seed: any, rel: string, base: string) => {
       )
       break
     case 'NANO':
-    case 'XRP':
+    //case 'XRP':
     //case 'XMR':
       return seed.toString("hex");
     default:
@@ -43,12 +43,12 @@ export const deriveAccount = (
 ) => {
   const networkCode = config[rel].code
   const bip44path = `m/44'/${networkCode}'/${account}'/${change}/${index}`
-  console.log(bip44path)
   return typeof rootNode == "object" ? rootNode.derivePath(bip44path) : rootNode;
 }
 
 export const getWallet = (key: any, rel: string, base: string) => {
   let wif, address, publicKey
+  
   switch (base) {
     case 'BTC':
       const network = toBitcoinJS(config[rel].network);    
@@ -76,14 +76,9 @@ export const getWallet = (key: any, rel: string, base: string) => {
       address = nanocurrency.deriveAddress(publicKey)
     break;  
     case 'XRP':
-      var entropy = new Buffer(key, 'hex');
-      wif = rplk.generateSeed({ entropy: entropy });
-      var keypair = rplk.deriveKeypair(wif);
-      publicKey = keypair.publicKey;
-      address = rplk.deriveAddress(keypair.publicKey);
-      console.log(wif)
-      
-      
+      wif = key.privateKey.toString(`hex`)
+      publicKey = key.publicKey.toString(`hex`)
+      address = rplk.deriveAddress(publicKey)
     break;  
     case 'XMR':
     /*
