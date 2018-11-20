@@ -148,14 +148,15 @@ const a = {
     },
     "XRP": {
         "explorer": "https://testnet.veforge.com",
-        "api": "https://testnet.veforge.com/api",
-        "rpc": "http://127.0.0.1:8669/",
+        "api": "https://xrpnode.herokuapp.com/api",
+        "rpc": "https://s.altnet.rippletest.net:51234",
         "code": 1,
         "decimals": 10 ** 18,
         "fee_label": "XRP",
         "base": true,
         "name": "Ripple",
         "forks": [],
+        "node": "test",
     },    
     /*
     "XMR": {

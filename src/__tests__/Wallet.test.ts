@@ -36,7 +36,6 @@ describe('Wallet Address Generation', function () {
     it('Neo', function () {
         const omni = new OmniJs('NEO', 'NEO');
         const k = omni.generateSeed(mnemonic);
-        console.log(k)
         expect(k.address).toEqual(`AShDKgLSuCjGZr8Fs5SRLSYvmcSV7S4zwX`);
     })
 });
