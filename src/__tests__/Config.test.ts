@@ -5,7 +5,7 @@ for (let x in config) {
     coins.push(config[x]);
 }
 describe('Check Coin Config', function () {
-    it('Has Codes', function () {
+    it('Must have Properties', function () {
         coins.map(o=>{
             expect(o).toHaveProperty('explorer')
             expect(o).toHaveProperty('api')
@@ -13,6 +13,19 @@ describe('Check Coin Config', function () {
             expect(o).toHaveProperty('fee_label')
             expect(o).toHaveProperty('name')
             expect(o).toHaveProperty('code')
+            expect(o).toHaveProperty('forks')
         })
     });
+    it('Check Assets', function () {
+        coins.map(o => {
+            if(o.assets){
+                for (let ox in o.assets){
+                    expect(ox).toHaveProperty('hash')
+                    expect(ox).toHaveProperty('ticker')
+                    expect(ox).toHaveProperty('name')                    
+                    expect(ox).toHaveProperty('decimals')                    
+                }
+            }
+        });
+    })
 });
