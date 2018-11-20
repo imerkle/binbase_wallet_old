@@ -19,7 +19,8 @@ describe('Check Coin Config', function () {
     it('Check Assets', function () {
         coins.map(o => {
             if(o.assets){
-                for (let ox in o.assets){
+                for (let oxc in o.assets){
+                    const ox = o.assets[oxc];
                     expect(ox).toHaveProperty('hash')
                     expect(ox).toHaveProperty('ticker')
                     expect(ox).toHaveProperty('name')                    
