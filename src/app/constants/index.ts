@@ -37,7 +37,11 @@ export const getAtomicValue = (rel, base) => {
   return config[rel] ? config[rel].decimals : 10**config[base].assets[rel].decimals;
 }
 export const getConfig = (rel: string, base: string) => {
-  return config[rel] ? config[rel] : config[base].assets[rel];
+  return config[rel] ? config[rel] : Object.assign({
+    explorer: config[base].explorer,
+    api: config[base].api,
+    rpc: config[base].rpc,
+  }, config[base].assets[rel]);
 }
 
 export const stringToColour = (str) => {

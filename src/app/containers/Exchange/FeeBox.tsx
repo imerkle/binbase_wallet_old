@@ -22,13 +22,13 @@ class FeeBox extends React.Component<any, any>{
         let showFees = true;
         let dualFees = false;
 
-        if (config[rel].hasOwnProperty("noFee")){
+        if (config[rel] && config[rel].hasOwnProperty("noFee")){
             showFees = config[rel].noFee
         }else if (config[base].hasOwnProperty("noFee")){
             showFees = config[base].noFee
         }
 
-        if (config[rel].hasOwnProperty("dualFee")) {
+        if (config[rel] && config[rel].hasOwnProperty("dualFee")) {
             dualFees = config[rel].dualFee
         } else if (config[base].hasOwnProperty("dualFee")) {
             dualFees = config[base].dualFee

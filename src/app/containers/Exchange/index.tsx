@@ -106,11 +106,13 @@ class Exchange extends React.Component<any, any>{
     const { address, txs } = exchangeStore;
     const { addressField, amountField, addressError } = this.state;
     const { rel, base } = exchangeStore;
-
+    if(!rel || !base){
+      return (null)
+    }
 
     const balance = coinStore.balances[rel] || {balance: 0, pending: 0};
     const balance_usd = priceStore.getFiatPrice(rel) * balance.balance;
-
+    const { explorer } = getConfig(rel, base);
 
   	return (
       <FaDiv c>
@@ -205,7 +207,7 @@ class Exchange extends React.Component<any, any>{
           {txs.map((o,i)=>{ 
             return (
             <tr key={i} className={cx(styles.tx_box_li, {[styles.tx_pending]: o.confirmations == 0})} onClick={()=>{
-                window.open(`${getConfig(rel, base).explorer}/tx/${o.hash}`,"_blank");
+                window.open(`${explorer}/tx/${o.hash}`,"_blank");
                }}>
                 <td>{smartTrim(o.hash, 20)}</td>
                 <td>{o.confirmations == 0 ? <CircularProgress size={18} color="primary" /> : 
@@ -219,7 +221,7 @@ class Exchange extends React.Component<any, any>{
             </tr>
             )
           })}
-            <tr><td><a href={`${getConfig(rel, base).explorer}/address/${exchangeStore.address}`}>View all Transactions</a></td></tr>
+            <tr><td><a href={`${explorer}/address/${exchangeStore.address}`}>View all Transactions</a></td></tr>
           </tbody>
          </table>
         }

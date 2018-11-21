@@ -49,9 +49,9 @@ export const sendETH = ({
 export const sendERC20 = ({
     base, from, rel, address, amount, wif, options
 }) => {
-    const { rpc } = getConfig(rel, base);
+    const { rpc } = getConfig(base, base);
     const web3 = getWeb3(rpc);
-
+    console.log(rel,base)
     return new Promise(async (resolve, reject) => {
         const asset = config[base].assets[rel];
 
@@ -70,7 +70,6 @@ export const sendERC20 = ({
                     data: data,
                     value: web3.utils.toHex(0)
                 }
-
                 sendSignedWeb3(wif, txData, (err, result) => {
                     if (err) reject(err)
                     resolve(result)
@@ -92,27 +91,30 @@ export const sendSignedWeb3 = (wif: string, txData: any, cb: any, web3: any) => 
 
 
 export const getEthTxs = async ({ address, rel, base }) => {
-    const {api} = getConfig(rel, base);
+    const {api} = getConfig(base, base);
     const txs = [];
     
-    const data = await axios.get(`${api}/?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=${etherscan_api_key}`);
-    const decimals = getAtomicValue(rel, base);
+    let isErc20 = false;
+    if (rel != base) isErc20 = true;
+
+    const data = await axios.get(`${api}/?module=account&action=${isErc20 ? "tokentx" : "txlist" }&address=${address}&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=${etherscan_api_key}`);
+    const decimals = getAtomicValue(base, base);
     
-    data.data.result.map(o => {
-        const from = o.from;
-        let fee = (o.gas * o.gasPrice) / decimals;
-        
+    data.data.result.map(o => {        
         const tx = {
-            from,
+            from: o.from,
             hash: o.hash,
             confirmations: o.confirmations,
-            value: o.value / decimals,
-            kind: from == address ? "sent" : "got",
-            fee,
+            value: isErc20 ? o.value / 10 ** o.tokenDecimal : o.value / decimals,
+            kind: o.from.toLowerCase() == address.toLowerCase() ? "sent" : "got",
+            fee: (o.gas * o.gasPrice) / decimals,
             timestamp: o.timeStamp,
+            asset: config[base].assets[o.tokenSymbol] ? config[base].assets[o.tokenSymbol] : null,
         };
+
         txs.push(tx);
     })
+    console.log(txs)
     return txs;
 }
 

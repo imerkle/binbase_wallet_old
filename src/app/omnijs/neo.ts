@@ -177,11 +177,10 @@ export const getTxs = async ({ address, rel, base }) => {
             hash: o.txid,
             confirmations: null,
             value: o.amount,
-            kind: o.address_from == address ? "sent" : "got",
+            kind: o.address_from.toLowerCase() == address.toLowerCase() ? "sent" : "got",
             fee: 0,
             timestamp: o.time,
-            token_address: o.asset,
-            asset: config[rel].assets[o.asset] ? config[rel].assets[o.asset] : null,
+            asset: config[base].assets[o.asset] ? config[base].assets[o.asset] : null,
         };
         txs.push(tx);
     })
