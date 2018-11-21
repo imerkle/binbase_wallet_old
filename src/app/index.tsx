@@ -23,7 +23,7 @@ import AppWrapper from 'app/containers/AppWrapper';
 //const Login = asyncComponent(() => import('app/containers/Login').then(module => module.default), { name: 'Login' });
 import { create } from "jss";
 import JssProvider from "react-jss/lib/JssProvider";
-import * as cx from 'classnames';
+import cx from 'classnames';
 import { ErrorStore } from './stores/ErrorStore';
 import * as styles from './style.css';
 

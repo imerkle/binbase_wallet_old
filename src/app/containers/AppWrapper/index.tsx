@@ -7,7 +7,7 @@ import { Snackbar, List, ListItem, ListItemText, IconButton, Icon } from '@mater
 
 import * as styles from './style.css';
 import * as stylesg from '../..//style.css';
-import * as cx from 'classnames';
+import cx from 'classnames';
 import { compose } from 'recompose';
 import { StyleRules, Theme, withStyles } from '@material-ui/core/styles';
 import { Scrollbars } from 'react-custom-scrollbars';

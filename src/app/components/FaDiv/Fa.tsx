@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { withStyles } from '@material-ui/core/styles';
-import * as cx from 'classnames';
+import cx from 'classnames';
 import { Div } from '../Div';
 
 const styleSheetExport = theme => ({

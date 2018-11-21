@@ -5,7 +5,7 @@ import { observer, inject } from 'mobx-react';
 import { Icon } from '@material-ui/core';
 import { FaDiv, Div, Button } from 'app/components';
 import { StyleRules, Theme, withStyles } from '@material-ui/core/styles';
-import * as cx from 'classnames';
+import cx from 'classnames';
 import { compose } from "recompose";
 
 const styleSheet = (theme: Theme): StyleRules => ({

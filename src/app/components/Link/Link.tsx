@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import { Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
-import * as cx from 'classnames';
+import cx from 'classnames';
 
 export const styleSheet = theme => ({
   root: {

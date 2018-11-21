@@ -34,7 +34,6 @@ export class ExchangeStore {
   @observable publicKey = "";
   @observable seed = "";
   
-  @observable feeSlider = 85;
   @observable estimatedFees = null;
   @observable max_time = 0;
   @observable pkey = "";
@@ -71,16 +70,12 @@ export class ExchangeStore {
     this.rel = rel;
     this.omni.set(this.rel, this.base);
   }
-  @action 
-  setFeeSlider = (value) => {
-    this.feeSlider = value;
-  }
 
   @action 
   generatePKey = () => {
     
     let r = this.rel;
-    if (this.base == "NEO" || this.base == "ETH" || this.base == "VET"){
+    if (config[this.base].hasOwnProperty("assets")){
       r = this.base;
     }
     
@@ -193,73 +188,6 @@ export class ExchangeStore {
         break;
     }
   }
-
-/*
-  @action
-  syncFee = async () => {
-    let estimatedFees, data, fees = 0;
-    switch (this.rel) {
-      case 'BTC':
-        data = await axios.get(`https://bitcoinfees.earn.com/api/v1/fees/list`);
-        estimatedFees = data.data.fees;
-        break;
-      case (btc_forks.indexOf(this.rel) + 1 && this.rel):
-        const nstr = "" + Array.from({ length: 25 }, (_, n) => n + 2);
-        data = await axios.get(`${getConfig(this.rel, this.base).api}/utils/estimatefee?nbBlocks=${nstr}`);
-        estimatedFees = data.data;
-        fees = estimatedFees[3];
-        break;
-      case 'ETH':
-      case (eth_assets.indexOf(this.rel) + 1 && this.rel):
-        data = await axios.get(`https://ethgasstation.info/json/ethgasAPI.json`);
-        estimatedFees = data.data;
-        break;
-    }
-    runInAction(() => {
-      this.estimatedFees = estimatedFees;
-      this.estimateFee(this.feeSlider);
-      this.fees = fees;
-    });
-  }
-  
-  estimateFee = (percent) => {
-    let max_time = 0, fees = 0, gasLimit = 0, gasPrice = 0;
-    switch (this.rel) {
-      case 'BTC':
-        const bytes = 400; // 400 bytes approx
-        let estimation = 50 - Math.round(percent / 100 * 50);
-        if (estimation < 1) estimation = 1;
-        if (estimation > 49) estimation = 49;
-
-        const feeBlock = this.estimatedFees[estimation];
-        const sat_per_byte = feeBlock.maxFee;
-
-        max_time = this.estimatedFees[4].maxMinutes / 4 * estimation * 60; // in seconds
-        fees = sat_per_byte * bytes;
-        break;
-      case 'ETH':
-      case (eth_assets.indexOf(this.rel) + 1 && this.rel):
-        //https://ethgasstation.info/json/ethgasAPI.json
-        gasLimit = 21000;
-        const atom = (this.estimatedFees.fastest - this.estimatedFees.safeLow) / 100;
-        let gasPrice = ((atom * percent) + this.estimatedFees.safeLow);
-        fees = gasLimit * gasPrice * 1000000000;
-
-
-        const atom2 = (this.estimatedFees.safeLowWait - this.estimatedFees.fastestWait) / 100;
-        max_time = (this.estimatedFees.safeLowWait - atom2 * percent) * 60;
-        break;
-    }
-    runInAction(() => {
-      this.max_time = max_time;
-      this.fees = fees;
-
-      this.gasLimit = gasLimit;
-      this.gasPrice = gasPrice;
-    });
-  }
-*/
-
 }
 
 export default ExchangeStore;

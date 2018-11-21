@@ -22,10 +22,10 @@ export const getRootNode = (seed: any, rel: string, base: string) => {
         bitcoinSecp256r1.bitcoin
       )
       break
+      //case 'XRP':
+      //case 'XMR':
     case 'NANO':
-    //case 'XRP':
-    //case 'XMR':
-      return seed.toString("hex");
+      return seed.slice(0, 32).toString("hex");
     default:
       //eth and rest of its shitcoins
       rootNode = bip32.fromSeed(seed, bitcoin.networks.bitcoin)
@@ -108,7 +108,6 @@ export const getWallet = (key: any, rel: string, base: string) => {
       address = ethUtil.addHexPrefix(checksumAddress)
       wif = ethUtil.addHexPrefix(privkey)
       //pubkey = ethUtil.addHexPrefix(pubkey);
-
       break
   }
   return { wif, address, publicKey }

@@ -100,13 +100,21 @@ const a = {
     "ETH": {
         "explorer":"https://rinkeby.etherscan.io",
         "api": "https://api-rinkeby.etherscan.io/api",
-        "api_tokens": "https://tokenbalance.herokuapp.com/api/balance",
+        "api_tokens": "https://tokenbalancerinkeby.herokuapp.com/api/balance",
         "rpc": "https://rinkeby.infura.io/v3/2294f3b338ad4524aa9186012810e412",
-        "assets": require("./eth_assets.json"),
+        "assets": {
+            "TRST": {
+                "hash": "0x87099add3bcc0821b5b151307c147215f839a110",
+                "ticker": "TRST",
+                "name": "WeTrust",
+                "decimals": 6
+            }            
+        },
         "code": 1,
         "decimals": 10 ** 18,
-        "fee_label": "ETH",
+        "fee_label": "gwei",
         //"estimateFee": true,
+        "dualFee": true,
         "base": true,
         "name": "Ethereum",
         "forks": [],
@@ -142,6 +150,7 @@ const a = {
         "code": 1,
         "decimals": 10 ** 18,
         "fee_label": "VTHO",
+        "dualFee": true,
         "base": true,
         "name": "Vechain",
         "forks": [],

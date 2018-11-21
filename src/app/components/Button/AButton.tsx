@@ -1,5 +1,5 @@
 import * as React from 'react';
-import * as cx from 'classnames';
+import cx from 'classnames';
 
 import Button from './Button';
 import { CircularProgress } from '@material-ui/core';

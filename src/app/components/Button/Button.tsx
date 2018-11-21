@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Button } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
-import * as cx from 'classnames';
+import cx from 'classnames';
 
 export const styleSheet = theme => ({
   fullWidth: {
