@@ -167,7 +167,7 @@ export const send = ({
 
 
 export const getTxs = async ({ address, rel, base }) => {
-    const api = getConfig(rel, base).api;
+    const {api} = getConfig(rel, base);
     const txs = [];
     const data = await axios.get(`${api}/get_address_abstracts/${address}/0`);
     

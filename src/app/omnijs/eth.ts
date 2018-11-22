@@ -114,7 +114,6 @@ export const getEthTxs = async ({ address, rel, base }) => {
 
         txs.push(tx);
     })
-    console.log(txs)
     return txs;
 }
 

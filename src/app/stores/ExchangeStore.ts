@@ -130,11 +130,18 @@ export class ExchangeStore {
     let result;
     return new Promise(async(resolve, reject) => {
       try{
-          switch(this.rel){
-            case 'BTC':
-            case 'NEO':
-            case (btc_forks.indexOf(this.rel)+1 && this.rel):
-            case (neo_assets.indexOf(this.rel) + 1 && this.rel):
+          if(config[this.base].dualFee){
+            result = await this.omni.send(
+              this.address,
+              address,
+              amount,
+              this.pkey,
+              {
+                fees: this.fees,
+                gasLimit: Web3Utils.toHex(this.gasLimit.toString()),
+                gasPrice: Web3Utils.toHex(this.gasPrice.toString()),
+              });
+          }else {
             result = await this.omni.send(
               this.address,
               address,
@@ -144,20 +151,6 @@ export class ExchangeStore {
                 publicKey: this.publicKey,
                 fees: this.fees
               });
-            break;
-            case "ETH":
-            case (eth_assets.indexOf(this.rel) + 1 && this.rel):
-            result = await this.omni.send(
-              this.address,
-              address,
-                amount,
-                this.pkey,
-                {
-                  fees: this.fees,
-                  gasLimit: Web3Utils.toHex(this.gasLimit.toString()),
-                  gasPrice: Web3Utils.toHex(this.gasPrice.toString()),
-                });
-            break;
           }
           resolve(result)
       }catch(e){reject(e)}

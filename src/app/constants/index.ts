@@ -1,5 +1,5 @@
 import WAValidator from 'wallet-address-validator';
-import Web3Utils from 'web3-utils';
+import web3Utils from 'web3-utils';
 
 //export const config = require('./config').default;
 export const config = require('./test_config').default;
@@ -74,9 +74,11 @@ export const isValidAddress = (address, coin) => {
     case "NANO":
       const nanocurrency = require("nanocurrency");
       return nanocurrency.checkAddress(address);
-      break;
+    case "XRP":
+    return true;
+    break;
     default:
-      if (Web3Utils.isAddress(address)) {
+      if (web3Utils.isAddress(address)) {
         return true;
       }
       break;

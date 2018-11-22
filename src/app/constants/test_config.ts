@@ -156,16 +156,17 @@ const a = {
         "forks": [],
     },
     "XRP": {
-        "explorer": "https://testnet.veforge.com",
+        "explorer": "https://xrpcharts.ripple.com/#/transactions",
         "api": "https://xrpnode.herokuapp.com/api",
         "rpc": "https://s.altnet.rippletest.net:51234",
         "code": 1,
-        "decimals": 10 ** 18,
+        "decimals": 10 ** 6,
         "fee_label": "XRP",
         "base": true,
         "name": "Ripple",
         "forks": [],
         "node": "test",
+        "noFee": true,
     },    
     /*
     "XMR": {

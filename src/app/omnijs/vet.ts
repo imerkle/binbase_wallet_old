@@ -41,8 +41,11 @@ export const getBalance = async ({ address, rel, base }) => {
     const { rpc } = getConfig(rel, base);
     const web3 = getWeb3(rpc);
     
+    const b = await web3.eth.getBalance(address);
+    const e = await web3.eth.getEnergy(address);
     let balances = {};
-    balances[base] = { balance: (await web3.eth.getBalance(address)) / getAtomicValue(rel, base) };
-    balances["VTHO"] = { balance: (await web3.eth.getEnergy(address)) / getAtomicValue("VTHO", base) };
+    
+    balances[base] = { balance: b / getAtomicValue(rel, base) };
+    balances["VTHO"] = { balance: e / getAtomicValue("VTHO", base) };
     return balances;
 }

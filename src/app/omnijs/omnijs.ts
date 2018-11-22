@@ -3,6 +3,7 @@ import { getRootNode, deriveAccount, getWallet } from './keys'
 import { getBalance as getBalanceBtc , send as sendBTC, getTxs as getBtcTx } from './insight'
 import { sendETH, sendERC20, getEthTxs, getBalance as getBalanceEth } from './eth'
 import { getBalance as getBalanceVet, getVetTxs } from './vet'
+import { getBalance as getBalanceXrp, send as sendXRP, getTxs as getXrpTxs } from './xrp'
 import { getBalance as getBalanceNano } from './nano'
 import { getBalance as getBalanceNeo ,send as sendNeo, getTxs as getNeoTx } from './neo'
 
@@ -80,9 +81,12 @@ class OmniJs {
             } else {
               txid = await sendERC20({ from, rel, base, address, amount, wif, options });
             }
-          break;
+            break;
           case "NEO":
             txid = await sendNeo({ from, rel, base, address, amount, wif, options });
+            break
+          case "XRP":
+            txid = await sendXRP({ from, rel, base, address, amount, wif, options });
           break
         }
         resolve({txid})
@@ -104,6 +108,9 @@ class OmniJs {
             break;                  
             case 'NEO':
               txs = await getNeoTx({rel, base, address});
+            break;
+            case 'XRP':
+              txs = await getXrpTxs({rel, base, address});
             break;
             case 'VET':
               txs = await getVetTxs({rel, base, address});
@@ -133,7 +140,10 @@ class OmniJs {
             balances = getBalanceNeo({rel, address, base});
           break;
           case 'NANO':
-            balances = getBalanceNano({rel, address, base});
+          balances = getBalanceNano({rel, address, base});
+          break;
+          case 'XRP':
+            balances = getBalanceXrp({rel, address, base});
           break;
           case 'VET':
             balances = getBalanceVet({rel, address, base});
