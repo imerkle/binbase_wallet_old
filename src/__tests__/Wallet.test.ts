@@ -1,6 +1,6 @@
 
 const mnemonic = "connect ritual news sand rapid scale behind swamp damp brief explain ankle";
-import OmniJs from '../app/omnijs/omnijs'
+import OmniJs from '../app/omnijs'
 
 describe('Wallet Address Generation', function () {
     it('Bitcoin', function () {

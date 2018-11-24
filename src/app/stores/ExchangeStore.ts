@@ -1,7 +1,7 @@
 import { observable, action, runInAction } from 'mobx';
 import { eth_assets, neo_assets, config, btc_forks , getConfig} from 'app/constants';
 import axios from 'axios';
-import OmniJs from "app/omnijs/omnijs";
+import OmniJs from "app/omnijs"
 import { CoinStore } from './CoinStore';
 import Web3Utils from 'web3-utils';
 

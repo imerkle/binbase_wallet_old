@@ -1,6 +1,6 @@
 import { runInAction, observable, action } from 'mobx';
 import { config } from 'app/constants';
-import OmniJs from "app/omnijs/omnijs";
+import OmniJs from "app/omnijs";
 
 export class CoinStore {
     @observable keys: any;
