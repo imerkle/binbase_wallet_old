@@ -6,3 +6,7 @@
 	path = src/app/stores/shared_stores
 	url = https://github.com/imerkle/binbase_wallet.git
 	branch = shared_stores
+[submodule "src/app/constants"]
+	path = src/app/constants
+	url = git@github.com:imerkle/binbase_wallet.git
+	branch = constants
