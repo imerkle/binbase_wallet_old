@@ -123,7 +123,7 @@ class AppFragment extends React.Component<any, any>{
 			  	<Error overlayClassName={classes.overlay} />
 		  		<AppWrapper>
 			      <Switch>
-	            	<Route path="/exchange/:pairs" component={Exchange} />
+								<Route path="/coin/:base/:rel" component={Exchange} />
 			      </Switch>
 		  		</AppWrapper>
 			</div>

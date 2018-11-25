@@ -39,7 +39,7 @@ const sortByPriceDesc = (a,b) => { return b.price - a.price }
 
 const arrows = ["Coin","Price"];
 @compose(withStyles(styleSheet))
-  @inject('rootStore')
+@inject('rootStore')
 @observer
 class AppWrapper extends React.Component<any, any>{
 
@@ -54,14 +54,14 @@ class AppWrapper extends React.Component<any, any>{
     const { exchangeStore } = this.props.rootStore;
     const { currency } = exchangeStore;
     const regex = /^\/markets\/(\w{3,5})/;
-    const regex2 = /^\/exchange\/(\w{5,12})/;
+    const regex2 = /^\/coin\/(\w{3,5})\/(\w{3,5})/;
     const str = window.location.pathname;
     let m;
     if ((m = regex.exec(str)) !== null) {
       this.setState({ selected: currency.filter(o => o.base == m[1].toUpperCase())[0].index });
     }else if((m = regex2.exec(str)) !== null){
-      const _base = m[1].split("_")[0].toUpperCase();
-      const _rel = m[1].split("_")[1].toUpperCase();
+      const _base = m[1].toUpperCase();
+      const _rel = m[2].toUpperCase();
       const index = currency.filter(o => o.base == _base)[0].index;
       
       this.setState({ 
@@ -124,7 +124,7 @@ class AppWrapper extends React.Component<any, any>{
                         <FaDiv className={cx(styles.fabdiv)}>
                             <Div className={cx(styles.nib, {[styles.selected]: selected == o.index})}></Div>
                             <Button className={cx(styles.fab, {[styles.selected]: selected == o.index})} variant="fab" color="primary" >
-                              <img className={cx(styles.fabicon)} src={`/assets/cryptocurrency-icons/color/${o.base.toLowerCase()}.svg`} />
+                          <img className={cx(styles.fabicon)} src={require(`cc-icons/color/${o.base.toLowerCase()}.svg`)} />
                               {/*o.base.substr(0,1)*/}
                             </Button>
                         </FaDiv>
@@ -166,12 +166,16 @@ class AppWrapper extends React.Component<any, any>{
                      if (!(balance.balance > 0 || c_currency.base == o.ticker || btc_forks.indexOf(o.ticker)+1 ) ){
                       return (null)
                      }
+                    let icon;
+                    try{
+                      icon = require(`cc-icons/color/${o.ticker.toLowerCase()}.svg`);
+                    }catch(e){}
                     return (
-                    <Link key={i} onClick={()=>{ this.setState({ select2: i+1 }) }} ey={i} clearfix to={`/exchange/${c_currency.base}_${o.ticker}`}>
+                    <Link key={i} onClick={()=>{ this.setState({ select2: i+1 }) }} ey={i} clearfix to={`/coin/${c_currency.base}/${o.ticker}`}>
                       <FaDiv className={cx(stylesg.pad_20,styles.li,{[styles.selected]: select2 == i+1})}>
 
                       <FaDiv vcenter fs style={{width: "18px"}}>
-                            <Div className={cx(styles.col_icon)} style={{ backgroundImage: `url(/assets/cryptocurrency-icons/color/${o.ticker.toLowerCase()}.svg)` }} ></Div>
+                            <Div className={cx(styles.col_icon)} style={{ backgroundImage: `url(${icon})` }} ></Div>
                       </FaDiv>
                       <Fa fs style={{width: "100px"}}>
                         <FaDiv vcenter>

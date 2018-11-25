@@ -9,9 +9,16 @@ import * as stylesg from '../../style.css';
 import cx from 'classnames';
 import { compose } from 'recompose';
 import { StyleRules, Theme, withStyles } from '@material-ui/core/styles';
-import { btc_forks, getAtomicValue, getConfig, isValidAddress } from 'app/constants';
+import { 
+  btc_forks,
+  getAtomicValue,
+  getConfig,
+  isValidAddress,
+  numberWithCommas,
+  smartTrim,
+ } from 'app/constants';
 
-//@ts-ignore
+ //@ts-ignore
 import formatDistance from 'date-fns/formatDistance';
 import FeeBox from './FeeBox';
 
@@ -49,26 +56,6 @@ const styleSheet = (theme: Theme): StyleRules => ({
   },  
 });
 
-//@ts-ignore
-const numberWithCommas = (x) => {
-  var parts = x.toString().split(".");
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return parts.join(".");
-}
-const smartTrim = (string, maxLength) => {
-    if (!string) return string;
-    if (maxLength < 1) return string;
-    if (string.length <= maxLength) return string;
-    if (maxLength == 1) return string.substring(0,1) + '...';
-
-    var midpoint = Math.ceil(string.length / 2);
-    var toremove = string.length - maxLength;
-    var lstrip = Math.ceil(toremove/2);
-    var rstrip = toremove - lstrip;
-    return string.substring(0, midpoint-lstrip) + '...' 
-    + string.substring(midpoint+rstrip);
-}   
-
 @compose(withStyles(styleSheet))
 @inject('rootStore')
 @observer
@@ -81,19 +68,12 @@ class Exchange extends React.Component<any, any>{
   }
   init = () => {
     const { exchangeStore } = this.props.rootStore;
-    const regex2 = /^\/exchange\/(\w{5,12})/;
-    const str = window.location.pathname;
-    let m;
-
-    if((m = regex2.exec(str)) !== null){
-      const _base = m[1].split("_")[0].toUpperCase();
-      const _rel = m[1].split("_")[1].toUpperCase();
-      
-      exchangeStore.setBase(_base);
-      exchangeStore.setRel(_rel);
-      exchangeStore.generatePKey();
-    }
+    const { base, rel } = this.props.match.params;
+    
+    exchangeStore.setBase(base);
+    exchangeStore.setRel(rel);
   }
+
   state = {
     addressField: "",
     amountField: "",

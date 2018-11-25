@@ -10,8 +10,6 @@ var outPath = path.join(__dirname, './dist');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var WebpackCleanupPlugin = require('webpack-cleanup-plugin');
-var CopyPlugin = require('copy-webpack-plugin');
-var WriteFilePlugin = require('write-file-webpack-plugin');
 
 module.exports = {
   context: sourcePath,
@@ -31,7 +29,8 @@ module.exports = {
     // (jsnext:main directs not usually distributable es6 format, but es6 sources)
     mainFields: ['module', 'browser', 'main'],
     alias: {
-      'app': path.resolve(__dirname, 'src/app/')
+      'app': path.resolve(__dirname, 'src/app/'),
+      'cc-icons': path.resolve(__dirname, 'src/cc-icons/svg/'),
     }
   },
   module: {
@@ -112,15 +111,7 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       template: 'assets/index.html'
-    }),
-    new WriteFilePlugin(),
-    new CopyPlugin([
-      {
-        context: 'node_modules/cryptocurrency-icons/svg/color',
-        from: '*.svg',
-        to: 'assets/cryptocurrency-icons',
-      },
-    ]),    
+    }),    
   ],
   devServer: {
     contentBase: sourcePath,
