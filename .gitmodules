@@ -1,8 +1,8 @@
 [submodule "src/app/omnijs"]
 	path = src/app/omnijs
-	url = git@github.com:imerkle/binbase_wallet.git
+	url = https://github.com/imerkle/binbase_wallet.git
 	branch = omni
 [submodule "src/app/stores/shared_stores"]
 	path = src/app/stores/shared_stores
-	url = git@github.com:imerkle/binbase_wallet.git
+	url = https://github.com/imerkle/binbase_wallet.git
 	branch = shared_stores
