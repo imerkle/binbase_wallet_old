@@ -18,27 +18,18 @@ export {
   default as Button,
   AButton,
 } from './Button';
-export {
-  //default as List,
-  ListItem,
-  ListItemText,
-} from './List';
-
-export {
-  LinearIndeterminate,
-} from './Progress';
 
 export {
   default as Link,
 } from './Link';
 
 export {
-  default as TextField,
-} from './TextField';
+  LinearIndeterminate,
+} from './Progress';
 
 export {
-  default as Avatar,
-} from './Avatar';
+  default as TextField,
+} from './TextField';
 
 export {
   default as TabContainer,

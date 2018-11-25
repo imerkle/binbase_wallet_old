@@ -10,3 +10,7 @@
 	path = src/app/constants
 	url = https://github.com/imerkle/binbase_wallet.git
 	branch = constants
+[submodule "src/cc-icons"]
+	path = src/cc-icons
+	url = git@github.com:imerkle/cryptocurrency-icons.git
+	branch = minimal
