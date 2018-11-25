@@ -1,7 +1,0 @@
-[submodule "omnijs"]
-	path = omnijs
-	url = https://github.com/imerkle/omnijs
-[submodule "src/app/omnijs"]
-	path = src/app/omnijs
-	url = git@github.com:imerkle/binbase_wallet.git
-	branch = omni
