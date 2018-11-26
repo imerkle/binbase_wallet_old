@@ -12,5 +12,5 @@
 	branch = constants
 [submodule "src/cc-icons"]
 	path = src/cc-icons
-	url = git@github.com:imerkle/cryptocurrency-icons.git
+	url = https://github.com/imerkle/binbase_wallet.git
 	branch = minimal
