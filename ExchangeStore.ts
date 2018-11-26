@@ -1,29 +1,10 @@
 import { observable, action, runInAction } from 'mobx';
-import { eth_assets, neo_assets, config, btc_forks , getConfig} from 'app/constants';
-import axios from 'axios';
 import OmniJs from "app/omnijs"
 import { CoinStore } from './CoinStore';
+import { ConfigStore } from '../ConfigStore';
 import Web3Utils from 'web3-utils';
 
-const coins = [];
-let ig = 1;
-for(let x in config){
-  const c = config[x];
-  if(c.base){
-    const assets = c.assets ? Object.keys(c.assets): [];
-    coins.push(
-      {
-        base: x, name: c.name, index: ig, rel: [
-          { ticker: x, index: 1 },
-          ...c.forks.map((o, i) => { return { ticker: o, index: i + 2 } }),
-          ...assets.map((o, i) => { return { ticker: o, index: c.forks.length + 2 } }),
-        ]
-      }      
 
-    )
-    ig++;
-  }
-}
 export class ExchangeStore {
   public omni = new OmniJs();
 
@@ -43,14 +24,39 @@ export class ExchangeStore {
   @observable gasPrice = 0;
 
   @observable sorter = {value: 1, dir: 1};
-  @observable currency = coins;
+  @observable currency = [];
 
 
   public coinStore;
-  constructor(coinStore: CoinStore){
+  public configStore;
+  constructor(coinStore: CoinStore, configStore: ConfigStore){
       this.coinStore = coinStore;
+      this.configStore = configStore;
   }
 
+  @action
+  setCurrency = () => {
+    const coins = [];
+    let ig = 1;
+    for (let x in this.configStore.config) {
+      const c = this.configStore.config[x];
+      if (c.base) {
+        const assets = c.assets ? Object.keys(c.assets) : [];
+        coins.push(
+          {
+            base: x, name: c.name, index: ig, rel: [
+              { ticker: x, index: 1 },
+              ...c.forks.map((o, i) => { return { ticker: o, index: i + 2 } }),
+              ...assets.map((o, i) => { return { ticker: o, index: c.forks.length + 2 } }),
+            ]
+          }
+
+        )
+        ig++;
+      }
+    }
+    this.currency = coins;    
+  }
 
   @action
   toggleSort = (value) => {  
@@ -75,7 +81,7 @@ export class ExchangeStore {
   generatePKey = () => {
     
     let r = this.rel;
-    if (config[this.base].hasOwnProperty("assets")){
+    if (this.configStore.config[this.base].hasOwnProperty("assets")){
       r = this.base;
     }
     
@@ -130,7 +136,7 @@ export class ExchangeStore {
     let result;
     return new Promise(async(resolve, reject) => {
       try{
-          if(config[this.base].dualFee){
+        if (this.configStore.config[this.base].dualFee){
             result = await this.omni.send(
               this.address,
               address,
@@ -140,6 +146,7 @@ export class ExchangeStore {
                 fees: this.fees,
                 gasLimit: Web3Utils.toHex(this.gasLimit.toString()),
                 gasPrice: Web3Utils.toHex(this.gasPrice.toString()),
+                config: this.configStore.config
               });
           }else {
             result = await this.omni.send(
@@ -149,7 +156,8 @@ export class ExchangeStore {
               this.pkey,
               {
                 publicKey: this.publicKey,
-                fees: this.fees
+                fees: this.fees,
+                config: this.configStore.config
               });
           }
           resolve(result)
@@ -160,25 +168,22 @@ export class ExchangeStore {
 
 
 
+
   @action
   setFees = (fees, kind = 0) => {
-    switch (this.rel) {
-      case 'ETH':
-      case (eth_assets.indexOf(this.rel) + 1 && this.rel):
-        switch (kind) {
-          case 1:
-            this.gasLimit = parseInt(fees);
-            this.fees = this.gasLimit * this.gasPrice * 1000000000;
-            break;
-          case 2:
-            this.gasPrice = parseFloat(fees);
-            this.fees = this.gasLimit * this.gasPrice * 1000000000;
-            break;
-        }
-        break;
-      default:
-        this.fees = fees;
-        break;
+    if (this.configStore.config[this.base].dualFee) {
+      switch (kind) {
+        case 1:
+          this.gasLimit = parseInt(fees);
+          this.fees = this.gasLimit * this.gasPrice * 1000000000;
+          break;
+        case 2:
+          this.gasPrice = parseFloat(fees);
+          this.fees = this.gasLimit * this.gasPrice * 1000000000;
+          break;
+      }
+    } else {
+      this.fees = fees;
     }
   }
 }

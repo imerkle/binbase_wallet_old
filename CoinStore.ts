@@ -1,5 +1,4 @@
 import { runInAction, observable, action } from 'mobx';
-import { config } from 'app/constants';
 import OmniJs from "app/omnijs";
 
 export class CoinStore {
@@ -8,7 +7,10 @@ export class CoinStore {
     @observable mnemonic: string;
     @observable passphrase: string;
 
-    constructor() {
+    public configStore;
+    constructor(configStore) {
+        this.configStore = configStore;
+        
         this.keys = {};
         this.balances = {};
         this.mnemonic = "connect ritual news sand rapid scale behind swamp damp brief explain ankle";
@@ -19,11 +21,11 @@ export class CoinStore {
 
     @action
     generateKeys = () => {
-        for(let o in config){
-            const c = config[o];
+        for (let o in this.configStore.config){
+            const c = this.configStore.config[o];
             const omni = new OmniJs(o, c.base ? o : c.ofBase);
             
-            const k = omni.generateSeed(this.mnemonic, this.passphrase)
+            const k = omni.generateSeed(this.mnemonic, this.passphrase, { config: this.configStore.config })
             
             this.keys[o] = k;
             this.mnemonic = k.mnemonic;
@@ -32,11 +34,11 @@ export class CoinStore {
     }
     @action
     syncBalances = () => {
-        Object.keys(config).map(async o=>{
-            const c = config[o];
+        Object.keys(this.configStore.config).map(async o=>{
+            const c = this.configStore.config[o];
             const omni = new OmniJs(o, c.base ? o : c.ofBase);
 
-            const balances = await omni.getBalance(this.keys[o].address);
+            const balances = await omni.getBalance(this.keys[o].address, this.configStore.config);
             runInAction(() => {
                 Object.keys(balances).map(o=>{
                     this.balances[o] = balances[o];
