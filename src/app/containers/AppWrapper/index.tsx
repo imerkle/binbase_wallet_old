@@ -11,7 +11,7 @@ import cx from 'classnames';
 import { compose } from 'recompose';
 import { StyleRules, Theme, withStyles } from '@material-ui/core/styles';
 import { Scrollbars } from 'react-custom-scrollbars';
-import { btc_forks } from 'app/constants';
+import { config } from 'app/constants';
 
 const styleSheet = (theme: Theme): StyleRules => ({
   icon: {
@@ -163,7 +163,7 @@ class AppWrapper extends React.Component<any, any>{
                   {rel.map( (o, i) =>  {
                      const balance = coinStore.balances[o.ticker] || {balance: 0};
                      const price_usd = priceStore.getFiatPrice(o.ticker);
-                     if (!(balance.balance > 0 || c_currency.base == o.ticker || btc_forks.indexOf(o.ticker)+1 ) ){
+                     if (!(balance.balance > 0 || c_currency.base == o.ticker || config[o.ticker] ) ){
                       return (null)
                      }
                     let icon;

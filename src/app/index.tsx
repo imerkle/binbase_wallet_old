@@ -29,6 +29,22 @@ import * as styles from './style.css';
 
 import Exchange from 'app/containers/Exchange';
 
+import Storage from 'react-native-storage';
+
+const storage = new Storage({
+	size: 1000,
+	storageBackend: window.localStorage,
+	defaultExpires: null,
+	enableCache: true,
+	sync: {
+	}
+});
+(window as any).storage = storage;
+storage.save({
+	key: 'config',
+	data: require('app/constants/test_config').default,
+});
+
 const styleNode = document.createComment("insertion-point-jss");
 document.head.insertBefore(styleNode, document.head.firstChild);
 

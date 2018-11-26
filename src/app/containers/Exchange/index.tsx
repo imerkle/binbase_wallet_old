@@ -10,7 +10,6 @@ import cx from 'classnames';
 import { compose } from 'recompose';
 import { StyleRules, Theme, withStyles } from '@material-ui/core/styles';
 import { 
-  btc_forks,
   getAtomicValue,
   getConfig,
   isValidAddress,
@@ -145,7 +144,7 @@ class Exchange extends React.Component<any, any>{
               value={addressField}
               onChange={(e)=>{ 
                   let _addressError = false;
-                  if(!isValidAddress(e.target.value, rel)){
+                  if(!isValidAddress(e.target.value, rel, base)){
                     _addressError = true;
                   }
                   this.setState({addressField: e.target.value, addressError: _addressError })
@@ -162,10 +161,8 @@ class Exchange extends React.Component<any, any>{
                 type="text"
                 fullWidth />             
                 <IconButton onClick={()=>{
-
-                 const divide_by = (btc_forks.indexOf(rel) != -1) ? 1 : getAtomicValue(rel, base);
-                 this.setState({amountField: balance.balance - (exchangeStore.fees/divide_by)})
-              }} color="primary" ><Icon style={{fontSize: 14}} className={cx(classes.icon)}>call_made</Icon></IconButton>
+                  this.setState({ amountField: balance.balance - (exchangeStore.fees / getAtomicValue(rel, base))})
+                }} color="primary" ><Icon style={{fontSize: 14}} className={cx(classes.icon)}>call_made</Icon></IconButton>
             </FaDiv>
           </FaDiv>
           <FeeBox />
@@ -215,8 +212,7 @@ class Exchange extends React.Component<any, any>{
     const balance = coinStore.balances[rel];
       return new Promise(async (resolve, reject) => {
         const amt = parseFloat(amountField);
-        const divide_by = (btc_forks.indexOf(rel) != -1) ? 1 : getAtomicValue(rel, base);
-        let fees = exchangeStore.fees/divide_by;
+        let fees = exchangeStore.fees / getAtomicValue(rel, base);
           
         if(addressError || !addressField){
           appStore.setSnackMsg("Invalid Bitcoin Address");
