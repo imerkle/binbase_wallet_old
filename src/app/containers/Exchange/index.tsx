@@ -81,8 +81,9 @@ class Exchange extends React.Component<any, any>{
 
   render(){
     const { classes } = this.props;
-    const { exchangeStore, coinStore, priceStore, appStore } = this.props.rootStore;
+    const { configStore, exchangeStore, coinStore, priceStore, appStore } = this.props.rootStore;
     const { address, txs } = exchangeStore;
+    const { config } = configStore;
     const { addressField, amountField, addressError } = this.state;
     const { rel, base } = exchangeStore;
     if(!rel || !base){
@@ -91,7 +92,7 @@ class Exchange extends React.Component<any, any>{
 
     const balance = coinStore.balances[rel] || {balance: 0, pending: 0};
     const balance_usd = priceStore.getFiatPrice(rel) * balance.balance;
-    const { explorer } = getConfig(rel, base);
+    const { explorer } = getConfig(config, rel, base);
 
   	return (
       <FaDiv c>
@@ -144,7 +145,7 @@ class Exchange extends React.Component<any, any>{
               value={addressField}
               onChange={(e)=>{ 
                   let _addressError = false;
-                  if(!isValidAddress(e.target.value, rel, base)){
+                if (!isValidAddress(config, e.target.value, rel, base)){
                     _addressError = true;
                   }
                   this.setState({addressField: e.target.value, addressError: _addressError })
@@ -161,7 +162,7 @@ class Exchange extends React.Component<any, any>{
                 type="text"
                 fullWidth />             
                 <IconButton onClick={()=>{
-                  this.setState({ amountField: balance.balance - (exchangeStore.fees / getAtomicValue(rel, base))})
+                this.setState({ amountField: balance.balance - (exchangeStore.fees / getAtomicValue(config, rel, base))})
                 }} color="primary" ><Icon style={{fontSize: 14}} className={cx(classes.icon)}>call_made</Icon></IconButton>
             </FaDiv>
           </FaDiv>
@@ -206,13 +207,14 @@ class Exchange extends React.Component<any, any>{
     )
   }
   send = () => {
-    const { coinStore, exchangeStore, appStore} = this.props.rootStore;
+    const { configStore, coinStore, exchangeStore, appStore} = this.props.rootStore;
     const { rel, base } = exchangeStore;
+    const { config } = configStore;
     const { addressError, addressField, amountField } = this.state;
     const balance = coinStore.balances[rel];
       return new Promise(async (resolve, reject) => {
         const amt = parseFloat(amountField);
-        let fees = exchangeStore.fees / getAtomicValue(rel, base);
+        let fees = exchangeStore.fees / getAtomicValue(config, rel, base);
           
         if(addressError || !addressField){
           appStore.setSnackMsg("Invalid Bitcoin Address");

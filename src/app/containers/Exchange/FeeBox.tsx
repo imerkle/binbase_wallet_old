@@ -7,15 +7,15 @@ import Slider from '@material-ui/lab/Slider';
 
 import * as stylesg from '../../style.css';
 import cx from 'classnames';
-import { config } from 'app/constants';
 
 @inject('rootStore')
 @observer
 class FeeBox extends React.Component<any, any>{
 
     render(){
-        const { exchangeStore } = this.props.rootStore;
+        const { exchangeStore, configStore } = this.props.rootStore;
         const { rel, base } = exchangeStore;
+        const { config } = configStore;
         if(!base || !rel){ return (null)}
         
         const fee_label = config[base].fee_label;

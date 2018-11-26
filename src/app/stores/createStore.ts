@@ -1,16 +1,19 @@
 import { History } from 'history';
 import { RouterStore } from './RouterStore';
-import { AppStore } from './AppStore';
-import { ExchangeStore } from './ExchangeStore';
-import { PriceStore } from './PriceStore';
-import { CoinStore } from './CoinStore';
+import { AppStore } from './shared_stores/AppStore';
+import { ExchangeStore } from './shared_stores/ExchangeStore';
+import { PriceStore } from './shared_stores/PriceStore';
+import { CoinStore } from './shared_stores/CoinStore';
+import { ConfigStore } from './ConfigStore';
 
 export function createStores(history: History) {
   const routerStore = new RouterStore(history);
+  const configStore = new ConfigStore();
+
   const appStore = new AppStore();
-  const coinStore = new CoinStore();
-  const exchangeStore = new ExchangeStore(coinStore);
-  const priceStore = new PriceStore();
+  const coinStore = new CoinStore(configStore);
+  const exchangeStore = new ExchangeStore(coinStore, configStore);
+  const priceStore = new PriceStore(configStore);
 
   return {
     routerStore,
@@ -18,5 +21,6 @@ export function createStores(history: History) {
     exchangeStore,
     priceStore,
     coinStore,
+    configStore,
   };
 }

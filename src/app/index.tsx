@@ -40,10 +40,7 @@ const storage = new Storage({
 	}
 });
 (window as any).storage = storage;
-storage.save({
-	key: 'config',
-	data: require('app/constants/test_config').default,
-});
+
 
 const styleNode = document.createComment("insertion-point-jss");
 document.head.insertBefore(styleNode, document.head.firstChild);
@@ -121,6 +118,7 @@ class AppFragment extends React.Component<any, any>{
       		inVisibleClass: classes.dark_invisible,
       		rootClass: classes.app_container,			
 		});
+		rootStore.configStore.setConfig();
 	}
 	render(){
 		const {classes} = this.props;

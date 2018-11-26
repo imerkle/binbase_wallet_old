@@ -11,7 +11,6 @@ import cx from 'classnames';
 import { compose } from 'recompose';
 import { StyleRules, Theme, withStyles } from '@material-ui/core/styles';
 import { Scrollbars } from 'react-custom-scrollbars';
-import { config } from 'app/constants';
 
 const styleSheet = (theme: Theme): StyleRules => ({
   icon: {
@@ -74,7 +73,7 @@ class AppWrapper extends React.Component<any, any>{
   }
   render(){
     const { classes, children} = this.props;
-    const { appStore, exchangeStore, priceStore, coinStore } = this.props.rootStore;
+    const { appStore, exchangeStore, priceStore, coinStore, configStore } = this.props.rootStore;
     const { select2, selected, slideLeft} = this.state;
   	const { sorter, currency } = exchangeStore;
 
@@ -163,7 +162,7 @@ class AppWrapper extends React.Component<any, any>{
                   {rel.map( (o, i) =>  {
                      const balance = coinStore.balances[o.ticker] || {balance: 0};
                      const price_usd = priceStore.getFiatPrice(o.ticker);
-                     if (!(balance.balance > 0 || c_currency.base == o.ticker || config[o.ticker] ) ){
+                      if (!(balance.balance > 0 || c_currency.base == o.ticker || configStore.config[o.ticker] ) ){
                       return (null)
                      }
                     let icon;

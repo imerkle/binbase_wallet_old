@@ -8,11 +8,6 @@ import { App } from 'app';
 // enable MobX strict mode
 useStrict(true);
 
-// default fixtures for TodoStore
-
-// prepare MobX stores
-
-
 // render react DOM
 ReactDOM.render(
     <App />

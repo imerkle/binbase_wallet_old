@@ -1,5 +1,4 @@
-import {config} from '../app/constants'
-
+const config = require('app/constants/config').default
 const coins = [];
 for (let x in config) {
     coins.push(config[x]);
