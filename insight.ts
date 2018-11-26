@@ -1,12 +1,12 @@
 import axios from 'axios'
-import { getAtomicValue, toBitcoinJS, getConfig, config } from 'app/constants'
+import { getAtomicValue, toBitcoinJS, getConfig } from 'app/constants'
 import bitcoin from 'bitcoinjs-lib'
 
 
-export const getUtxos = ({ rel, address }) => {
+export const getUtxos = ({ config, rel, address }) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const data = await axios.post(`${getConfig(rel, "BTC").api}/addrs/utxo`, {
+      const data = await axios.post(`${getConfig(config, rel, "BTC").api}/addrs/utxo`, {
         addrs: address
       })
       resolve(data.data)
@@ -22,7 +22,8 @@ export const broadcastTx = ({
   to,
   amount,
   wif,
-  fee
+  fee,
+  config
 }) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -42,7 +43,7 @@ export const broadcastTx = ({
         tx.sign(i, key)
       })
       const rawtx = tx.build().toHex()
-      const data = await axios.post(`${getConfig( rel, "BTC").api}/tx/send`, {
+      const data = await axios.post(`${getConfig(config, rel, "BTC").api}/tx/send`, {
         rawtx
       })
       resolve(data.data.txid)
@@ -57,17 +58,18 @@ export const send = ({
 }) => {
   const base = "BTC";
   return new Promise(async (resolve, reject) => {
-    const multiply_by = rel == 'BTC' ? 1 : getAtomicValue(rel, base)
-    const utxos = await getUtxos({ rel: rel, address: from })
+    const multiply_by = rel == 'BTC' ? 1 : getAtomicValue(options.config, rel, base)
+    const utxos = await getUtxos({ config: options.config, rel: rel, address: from })
     try {
       const txid = await broadcastTx({
         utxos,
         from: from,
         to: address,
-        amount: amount * getAtomicValue(rel, base),
+        amount: amount * getAtomicValue(options.config, rel, base),
         wif: wif,
         fee: options.fees * multiply_by,
-        rel: rel
+        rel: rel,
+        config: options.config
       })
       resolve(txid)
     } catch (e) {
@@ -76,8 +78,8 @@ export const send = ({
   });
 }
 
-export const getTxs = async ({address, rel, base}) => {
-  const api = getConfig(rel, base).api;
+export const getTxs = async ({config, address, rel, base}) => {
+  const api = getConfig(config, rel, base).api;
   const txs = [];
   const data = await axios.get(`${api}/txs/?address=${address}`);
   data.data.txs.map(o => {
@@ -111,8 +113,8 @@ export const getTxs = async ({address, rel, base}) => {
   })  
   return txs;
 }
-export const getBalance = async ({rel, base, address}) => {
-  const api = getConfig(rel, base).api;
+export const getBalance = async ({config, rel, base, address}) => {
+  const api = getConfig(config, rel, base).api;
   const data = await axios.get(`${api}/addr/${address}`);
   const balance = data.data.balance;
   return { [rel]: { balance } };

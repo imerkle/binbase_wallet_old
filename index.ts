@@ -10,7 +10,6 @@ import { getBalance as getBalanceNeo ,send as sendNeo, getTxs as getNeoTx } from
 import {
   getAtomicValue,
   getConfig,
-  config,
 } from 'app/constants'
 
 
@@ -23,13 +22,13 @@ class OmniJs {
   public rel: string
   public base: string
 
-  constructor(rel?: string, base?: string) {
-    this.rel = rel || ''
-    this.base = base || ''
+  constructor(rel: string = '', base: string = '') {
+    this.rel = rel
+    this.base = base
   }
-  set = (rel: string, base: string) => {
-    this.rel = rel || ''
-    this.base = base || ''
+  set = (rel: string = '', base: string = '') => {
+    this.rel = rel
+    this.base = base
   }
 
 
@@ -38,7 +37,7 @@ class OmniJs {
     //const seed = bip39.mnemonicToSeed(mnemonic, passphrase).slice(0,32)
     const seed = bip39.mnemonicToSeed(mnemonic, passphrase)
     
-    const { wif, address, publicKey } = this.generatePKey(seed);
+    const { wif, address, publicKey } = this.generatePKey(options.config, seed);
 
     return { wif, address, publicKey, mnemonic }
   }
@@ -46,15 +45,16 @@ class OmniJs {
   https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#Change
   */
   generatePKey = (
+    config,
     seed: Buffer,
     account: number = 0,
     change: number = 0,
     index: number = 0
   ) => {
     const { rel, base } = this;
-    const rootNode = getRootNode(seed, rel, base)
-    const key = deriveAccount(rootNode, account, change, index, config, rel)
-    const { wif, address, publicKey } = getWallet(key, rel, base)
+    const rootNode = getRootNode(seed, rel, base, config)
+    const key = deriveAccount(rootNode, account, change, index, rel, config)
+    const { wif, address, publicKey } = getWallet(key, rel, base, config)
     
     return { wif, address, publicKey }
   }
@@ -93,40 +93,40 @@ class OmniJs {
       }catch(e){reject(e)}
     })
   }
-  getTxs = (address: string) => {
+  getTxs = (address: string, config) => {
     const { rel, base } = this;
 
     let data, n_tx, txs = [];
-    const api = getConfig(rel, base).api;
-    let decimals = getAtomicValue(rel, base);
+    const api = getConfig(config, rel, base).api;
+    let decimals = getAtomicValue(config, rel, base);
 
     return new Promise(async (resolve, reject) => {
         try{
           switch(base){
             case 'BTC':
-              txs = await getBtcTx({rel, base, address});
+              txs = await getBtcTx({ config, rel, base, address});
             break;                  
             case 'NEO':
-              txs = await getNeoTx({rel, base, address});
+              txs = await getNeoTx({ config, rel, base, address});
             break;
             case 'XRP':
-              txs = await getXrpTxs({rel, base, address});
+              txs = await getXrpTxs({ config, rel, base, address});
             break;
             case 'VET':
-              txs = await getVetTxs({rel, base, address});
+              txs = await getVetTxs({ config, rel, base, address});
             break;
             case 'ETH':
-              txs = await getEthTxs({rel, base, address});
+              txs = await getEthTxs({ config, rel, base, address});
             break;            
           }
           resolve({txs, n_tx});
         }catch(e){ reject(e)}
     });
 }
-  getBalance = (address: string) => {
+  getBalance = (address: string, config) => {
     const { rel, base } = this;
 
-    const api = getConfig(rel, base).api;
+    const api = getConfig(config, rel, base).api;
     let data;
     let balances = {};
     let balance: number = 0;
@@ -134,22 +134,22 @@ class OmniJs {
       try {
         switch (base) {
           case 'BTC':
-            balances = getBalanceBtc({rel, address, base});
+            balances = getBalanceBtc({config, rel, address, base});
           break;
           case 'NEO':
-            balances = getBalanceNeo({rel, address, base});
+            balances = getBalanceNeo({ config, rel, address, base});
           break;
           case 'NANO':
-          balances = getBalanceNano({rel, address, base});
+            balances = getBalanceNano({ config, rel, address, base});
           break;
           case 'XRP':
-            balances = getBalanceXrp({rel, address, base});
+            balances = getBalanceXrp({ config, rel, address, base});
           break;
           case 'VET':
-            balances = getBalanceVet({rel, address, base});
+            balances = getBalanceVet({ config, rel, address, base});
           break;
           case 'ETH':
-            balances = getBalanceEth({rel, address, base});
+            balances = getBalanceEth({config, rel, address, base});
           break;          
         }
         resolve(balances); 

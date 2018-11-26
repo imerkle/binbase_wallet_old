@@ -1,15 +1,14 @@
-import { btc_forks } from 'app/constants'
 import bip32 from 'bip32'
 import bitcoin from 'bitcoinjs-lib'
 import bitcoinSecp256r1 from 'bitcoinjs-lib-secp256r1'
 import { wallet as NeoWallet } from '@cityofzion/neon-core'
 import ethUtil from 'ethereumjs-util'
 import * as nanocurrency from 'nanocurrency';
-import { config, toBitcoinJS } from 'app/constants';
+import { toBitcoinJS } from 'app/constants';
 import rplk from 'ripple-keypairs';
 
 
-export const getRootNode = (seed: any, rel: string, base: string) => {
+export const getRootNode = (seed: any, rel: string, base: string, config) => {
   let rootNode
   switch (base) {
     case 'BTC':
@@ -38,15 +37,15 @@ export const deriveAccount = (
   account: number,
   change: number,
   index: number,
-  config: any,
   rel: string,
+  config: any,
 ) => {
   const networkCode = config[rel].code
   const bip44path = `m/44'/${networkCode}'/${account}'/${change}/${index}`
   return typeof rootNode == "object" ? rootNode.derivePath(bip44path) : rootNode;
 }
 
-export const getWallet = (key: any, rel: string, base: string) => {
+export const getWallet = (key: any, rel: string, base: string, config) => {
   let wif, address, publicKey
   
   switch (base) {

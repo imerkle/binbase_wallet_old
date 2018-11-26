@@ -5,8 +5,8 @@ import axios from 'axios';
 import * as nanocurrency from 'nanocurrency';
 import BigNumber from 'bignumber.js'
 
-export const getBalance = async ({ address, rel, base }) => {
-    const api = getConfig(rel, base).api;
+export const getBalance = async ({ config, address, rel, base }) => {
+    const api = getConfig(config, rel, base).api;
 
     const data = await axios.post(`${api}`, {
         "action": "account_balance",
@@ -21,7 +21,7 @@ export const getBalance = async ({ address, rel, base }) => {
     return balances;
 }
 
-export const pendingSyncNano = async ({ balance, pending, address, option }) => {
+export const pendingSyncNano = async ({ config, balance, pending, address, option }) => {
     const { rel, base } = this;
 
     //@ts-ignore
@@ -29,7 +29,7 @@ export const pendingSyncNano = async ({ balance, pending, address, option }) => 
     //@ts-ignore
     pending = nanocurrency.convert(pending, { from: 'NANO', to: 'raw' });
 
-    const {api, rep} = getConfig(rel, base);
+    const { api, rep } = getConfig(config, rel, base);
     if (parseFloat(pending) > 0) {
         const d1 = await axios.post(`${api}`, {
             "action": "accounts_pending",

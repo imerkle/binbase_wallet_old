@@ -2,17 +2,17 @@ import axios from "axios";
 import { getConfig, getAtomicValue } from "app/constants";
 import {RippleAPI} from 'ripple-lib';
 
-export const getBalance = async ({address, rel, base}) => {
-    const { api, node } = getConfig(rel, base);
+export const getBalance = async ({config, address, rel, base}) => {
+    const { api, node } = getConfig(config, rel, base);
     const balances = {};
     const data = await axios.get(`${api}/account_info/?node=${node}&address=${address}`);
     if (data.data.result.account_data){
-        balances[rel] = { balance: data.data.result.account_data.Balance / getAtomicValue(rel, base) }
+        balances[rel] = { balance: data.data.result.account_data.Balance / getAtomicValue(config, rel, base) }
     }
     return balances;    
 }
-export const getTxs = async ({ address, rel, base }) => {
-    const {api} = getConfig(rel, base);
+export const getTxs = async ({ address, rel, base, config }) => {
+    const { api } = getConfig(config, rel, base);
     const txs = [];
     const data = await axios.get(`${api}/account_tx?node=test&address=${address}&limit=10`);
 
@@ -22,7 +22,7 @@ export const getTxs = async ({ address, rel, base }) => {
                 from: o.tx.Account,
                 hash: o.tx.hash,
                 confirmations: null,
-                value: Number(o.tx.Amount) / getAtomicValue(rel, base),
+                value: Number(o.tx.Amount) / getAtomicValue(config, rel, base),
                 kind: o.tx.Account.toLowerCase() == address.toLowerCase() ? "sent" : "got",
                 fee: o.tx.Fee,
                 //https://github.com/ripple/ripple-lib/issues/41
@@ -36,7 +36,7 @@ export const getTxs = async ({ address, rel, base }) => {
 export const send = ({
     base, from, rel, address, amount, wif, options
 }) => {
-    const { api, node } = getConfig(base, base);
+    const { api, node } = getConfig(options.config, base, base);
     let rapi;
 return new Promise(async (resolve, reject) => {
     try{

@@ -1,7 +1,6 @@
 import Neon, { rpc, api, sc, u, wallet } from '@cityofzion/neon-js'
 import {
     getConfig,
-    config,
 } from 'app/constants'
 import axios from 'axios';
 
@@ -114,7 +113,7 @@ export const sendTransaction = async (sendEntries: Array<SendEntryType>, opts) =
     const net = new rpc.Network({
         name: 'Net',
         extra: {
-            neoscan: `${config["NEO"].explorer}/api/main_net`
+            neoscan: `${opts.config[opts.base].explorer}/api/main_net`
         }
     })
     Neon.add.network(net)
@@ -147,7 +146,7 @@ export const send = ({
     base, from, rel, address, amount, wif, options
 }) => {
     return new Promise(async (resolve, reject) => {
-    const api = getConfig(rel, base).api;
+    const api = getConfig(options.config, rel, base).api;
 
     const balance = (await axios.get(`${api}/get_balance/${address}`)).data;
     try {
@@ -158,6 +157,7 @@ export const send = ({
                 address: from,
                 publicKey: options.publicKey,
                 fees: options.fees,
+                base
             });
             //@ts-ignore
         resolve(result.txid);
@@ -166,8 +166,8 @@ export const send = ({
 }
 
 
-export const getTxs = async ({ address, rel, base }) => {
-    const {api} = getConfig(rel, base);
+export const getTxs = async ({ config, address, rel, base }) => {
+    const { api } = getConfig(config, rel, base);
     const txs = [];
     const data = await axios.get(`${api}/get_address_abstracts/${address}/0`);
     
@@ -186,8 +186,8 @@ export const getTxs = async ({ address, rel, base }) => {
     })
     return txs;
 }
-export const getBalance = async ({ address, rel, base }) => {
-    const api = getConfig(rel, base).api;
+export const getBalance = async ({ config, address, rel, base }) => {
+    const api = getConfig(config, rel, base).api;
     const balances = {};
     
     const data = await axios.get(`${api}/get_balance/${address}`);
