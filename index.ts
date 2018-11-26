@@ -1,11 +1,7 @@
 import WAValidator from 'wallet-address-validator';
 import web3Utils from 'web3-utils';
-//export const config = require('./config').default;
-export const config = require('./test_config').default;
-
+export const config_file = "test_config";
 export const etherscan_api_key = "8FISWFNZET4P2J451BY5I5GERA5MZG34S2";
-export const ethplorer_api_key = "freekey";
-
 export const darkColors = {
     primary: {
         light: "#d3d9ee",
@@ -15,19 +11,14 @@ export const darkColors = {
     }
 }
 
-export const btc_forks = config["BTC"]["forks"];
-export const neo_assets = Object.keys(config["NEO"].assets);
-export const eth_assets = Object.keys(config["ETH"].assets);
-
-export const allcoins = Object.keys(config);
 export const isTestnet = true;
 
 export const transferABI = [{ constant: !1, inputs: [{ name: "_to", type: "address" }, { name: "_value", type: "uint256" }], name: "transfer", outputs: [{ name: "", type: "bool" }], type: "function" }];
 
-export const getAtomicValue = (rel, base) => {
+export const getAtomicValue = (config: any, rel, base) => {
     return config[rel] ? config[rel].decimals : 10 ** config[base].assets[rel].decimals;
 }
-export const getConfig = (rel: string, base: string) => {
+export const getConfig = (config: any, rel: string, base: string) => {
     return config[rel] ? config[rel] : Object.assign({
         explorer: config[base].explorer,
         api: config[base].api,
@@ -35,29 +26,16 @@ export const getConfig = (rel: string, base: string) => {
     }, config[base].assets[rel]);
 }
 
-export const isValidAddress = (address, coin) => {
+export const isValidAddress = (config: any, address, rel, base) => {
     let networkType = `prod`;
-    if (config[coin].code == 1) {
+    if (config[rel].code == 1) {
         networkType = `testnet`;
     }
-    switch (coin) {
+    switch (base) {
         case 'BTC':
-        case 'DASH':
-        case 'LTC':
-            if (WAValidator.validate(address, coin, networkType)) {
-                return true;
-            }
-            break;
         case "NEO":
-            return true;
-            if (WAValidator.validate(address, 'neo', networkType)) {
-                return true;
-            }
-            break;
         case "NANO":
-            //const nanocurrency = require("nanocurrency");
-            //return nanocurrency.checkAddress(address);
-            if (WAValidator.validate(address, 'nano', networkType)) {
+            if (WAValidator.validate(address, rel, networkType)) {
                 return true;
             }
         case "XRP":
@@ -85,4 +63,23 @@ export const toBitcoinJS = (o) => {
         wif: o.versions.private,
         dustThreshold: null // TODO
     })
+}
+
+export const numberWithCommas = (x) => {
+    var parts = x.toString().split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+}
+export const smartTrim = (string, maxLength) => {
+    if (!string) return string;
+    if (maxLength < 1) return string;
+    if (string.length <= maxLength) return string;
+    if (maxLength == 1) return string.substring(0, 1) + '...';
+
+    var midpoint = Math.ceil(string.length / 2);
+    var toremove = string.length - maxLength;
+    var lstrip = Math.ceil(toremove / 2);
+    var rstrip = toremove - lstrip;
+    return string.substring(0, midpoint - lstrip) + '...'
+        + string.substring(midpoint + rstrip);
 }
