@@ -15,8 +15,6 @@ export class CoinStore {
         this.balances = {};
         this.mnemonic = "connect ritual news sand rapid scale behind swamp damp brief explain ankle";
         this.passphrase = "";
-
-        this.generateKeys();
     }
 
     @action

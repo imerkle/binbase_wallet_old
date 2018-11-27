@@ -6,66 +6,31 @@ import Web3Utils from 'web3-utils';
 
 
 export class ExchangeStore {
-  public omni = new OmniJs();
-
-  @observable txs = [];
+  
   @observable base = "";
   @observable rel = "";
+
   @observable address = "";
   @observable publicKey = "";
   @observable seed = "";
   
-  @observable estimatedFees = null;
-  @observable max_time = 0;
   @observable pkey = "";
   @observable fees = 0;
   
   @observable gasLimit = 0;
   @observable gasPrice = 0;
 
-  @observable sorter = {value: 1, dir: 1};
-  @observable currency = [];
+  @observable txs = [];
 
 
   public coinStore;
   public configStore;
+  public omni = new OmniJs();
+
   constructor(coinStore: CoinStore, configStore: ConfigStore){
       this.coinStore = coinStore;
       this.configStore = configStore;
   }
-
-  @action
-  setCurrency = () => {
-    const coins = [];
-    let ig = 1;
-    for (let x in this.configStore.config) {
-      const c = this.configStore.config[x];
-      if (c.base) {
-        const assets = c.assets ? Object.keys(c.assets) : [];
-        coins.push(
-          {
-            base: x, name: c.name, index: ig, rel: [
-              { ticker: x, index: 1 },
-              ...c.forks.map((o, i) => { return { ticker: o, index: i + 2 } }),
-              ...assets.map((o, i) => { return { ticker: o, index: c.forks.length + 2 } }),
-            ]
-          }
-
-        )
-        ig++;
-      }
-    }
-    this.currency = coins;    
-  }
-
-  @action
-  toggleSort = (value) => {  
-    if(value == this.sorter.value){
-      this.sorter = {value, dir: +!this.sorter.dir};
-    }else{
-      this.sorter = {value, dir: this.sorter.dir};
-    }
-  };
 
   @action 
   setBase = (base) => {

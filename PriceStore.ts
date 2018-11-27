@@ -9,8 +9,6 @@ export class PriceStore {
     constructor(configStore) {
         this.fiat_prices = {};
         this.configStore = configStore;
-        this.syncFiatPrices();
-
     }
     getFiatPrice = (ticker: string) => {
         return this.fiat_prices[ticker] ? this.fiat_prices[ticker][this.fiat.name] : 0;
