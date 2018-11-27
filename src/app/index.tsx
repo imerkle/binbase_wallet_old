@@ -142,8 +142,8 @@ class AppFragment extends React.Component<any, any>{
 			  	<Error overlayClassName={classes.overlay} />
 		  		<AppWrapper>
 			      <Switch>
-								<Route path="/coin/:base/:rel" component={Exchange} />
-								<Route path="/coin/:base" component={CoinFake} />
+						<Route path="/coin/:base/:rel" component={Exchange} />
+						<Route path="/coin/:base" component={CoinFake} />
 			      </Switch>
 		  		</AppWrapper>
 			</div>
