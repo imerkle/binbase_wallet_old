@@ -1,6 +1,5 @@
 import WAValidator from 'wallet-address-validator';
 import web3Utils from 'web3-utils';
-export const config_file = "test_config";
 export const etherscan_api_key = "8FISWFNZET4P2J451BY5I5GERA5MZG34S2";
 export const darkColors = {
     primary: {
