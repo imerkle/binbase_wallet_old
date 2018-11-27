@@ -28,6 +28,7 @@ import { ErrorStore } from './stores/ErrorStore';
 import * as styles from './style.css';
 
 import Exchange from 'app/containers/Exchange';
+import CoinFake from 'app/containers/CoinFake';
 
 import Storage from 'react-native-storage';
 
@@ -119,6 +120,10 @@ class AppFragment extends React.Component<any, any>{
       		rootClass: classes.app_container,			
 		});
 		rootStore.configStore.setConfig();
+	    setTimeout(()=>{
+	      rootStore.priceStore.syncFiatPrices();
+	      rootStore.coinStore.generateKeys();
+	    }, 5000);    		
 	}
 	render(){
 		const {classes} = this.props;
@@ -138,6 +143,7 @@ class AppFragment extends React.Component<any, any>{
 		  		<AppWrapper>
 			      <Switch>
 								<Route path="/coin/:base/:rel" component={Exchange} />
+								<Route path="/coin/:base" component={CoinFake} />
 			      </Switch>
 		  		</AppWrapper>
 			</div>

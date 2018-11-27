@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { observer, inject } from 'mobx-react';
+import { toJS } from 'mobx';
 
 import { Fa, FaDiv, Div, AButton, TextField } from 'app/components';
 import { CircularProgress, IconButton, Icon } from '@material-ui/core';
@@ -86,10 +87,9 @@ class Exchange extends React.Component<any, any>{
     const { config } = configStore;
     const { addressField, amountField, addressError } = this.state;
     const { rel, base } = exchangeStore;
-    if(!rel || !base){
+    if(!rel || !base || Object.keys(toJS(config)).length == 0 ){
       return (null)
     }
-
     const balance = coinStore.balances[rel] || {balance: 0, pending: 0};
     const balance_usd = priceStore.getFiatPrice(rel) * balance.balance;
     const { explorer } = getConfig(config, rel, base);

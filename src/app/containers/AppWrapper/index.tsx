@@ -43,87 +43,46 @@ const arrows = ["Coin","Price"];
 class AppWrapper extends React.Component<any, any>{
 
   state = {
-    selected: 0,
-  	select2: 0,
-    market: "",
     slideLeft: false,
-    _base: "",
-  } 		
-  componentDidMount(){
-    const { exchangeStore } = this.props.rootStore;
-    const { currency } = exchangeStore;
-    const regex = /^\/markets\/(\w{3,5})/;
-    const regex2 = /^\/coin\/(\w{3,5})\/(\w{3,5})/;
-    const str = window.location.pathname;
-    let m;
-    if ((m = regex.exec(str)) !== null) {
-      this.setState({ selected: currency.filter(o => o.base == m[1].toUpperCase())[0].index });
-    }else if((m = regex2.exec(str)) !== null){
-      const _base = m[1].toUpperCase();
-      const _rel = m[2].toUpperCase();
-      const index = currency.filter(o => o.base == _base)[0].index;
-      
-      this.setState({ 
-          _base,
-          selected: index,
-          select2: currency[index-1].rel.filter(o => o.ticker == _rel)[0].index,
-      });
-    }
-
   }
   render(){
     const { classes, children} = this.props;
     const { appStore, exchangeStore, priceStore, coinStore, configStore } = this.props.rootStore;
-    const { select2, selected, slideLeft} = this.state;
-  	const { sorter, currency } = exchangeStore;
+    const { slideLeft } = this.state;
+    const { base, rel} = exchangeStore;
+    const {config} = configStore;
+    const sorter = {value: 1, dir: 1};
 
-    let rel = [];
-    let c_currency;
-    if(selected > 0){
-      c_currency = currency[selected-1];
-      switch(sorter.value){
-        case 0:
-          if(sorter.dir){
-            rel = c_currency.rel.sort(sortByNameAsc);
-          }else{
-            rel = c_currency.rel.sort(sortByNameDesc);
-          }
-        break;
-        case 1:
-          if(sorter.dir){
-            rel = c_currency.rel.sort(sortByPriceAsc);
-          }else{
-            rel = c_currency.rel.sort(sortByPriceDesc);
-          }
-        break;
-      }    
-    }
   	return (
   			<FaDiv fs className={cx(styles.root)}>
-        <Snackbar message={appStore.snackmsg} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-          open={appStore.snackopen}
-          onClose={()=>{appStore.snackOpen(false)}}
-         />
+          <Snackbar message={appStore.snackmsg} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            open={appStore.snackopen}
+            onClose={()=>{appStore.snackOpen(false)}}
+          />
 
 	  		{
   				<FaDiv fa className={cx(stylesg._100vh)}>
 
   					<FaDiv c className={cx(styles.left_bar, {[styles.slideLeft]: slideLeft})}>
 
-            <Link onClick={()=>{ this.setState({ selected: 0 }) }} clearfix to="/">
-              <FaDiv className={cx(styles.fabdiv)}>
-                  <Div className={cx(styles.nib, {[styles.selected]: selected == 0})}></Div>
-                  <Button className={cx(styles.fab, {[styles.selected]: selected == 0})} variant="fab" color="primary" ><Icon>home</Icon></Button>
-              </FaDiv>
-            </Link>
+                <Link onClick={()=>{ this.setState({ selected: 0 }) }} clearfix to="/">
+                  <FaDiv className={cx(styles.fabdiv)}>
+                      <Div className={cx(styles.nib, {[styles.selected]: !base})}></Div>
+                      <Button className={cx(styles.fab, {[styles.selected]: !base})} variant="fab" color="primary" ><Icon>home</Icon></Button>
+                  </FaDiv>
+                </Link>
 
-                {currency.map( (o, i) => {
+                {Object.keys(config).map( (ox, i) => {
+                  const o = config[ox];
+                  if(!o.base){
+                    return (null)
+                  }
                   return (
-                      <Link key={i} onClick={()=>{ this.setState({ selected: o.index }) }} clearfix to={`/markets/${o.base}/`}>
+                      <Link key={i} onClick={()=>{exchangeStore.setBase(ox)}} clearfix to={`/coin/${ox}/`}>
                         <FaDiv className={cx(styles.fabdiv)}>
-                            <Div className={cx(styles.nib, {[styles.selected]: selected == o.index})}></Div>
-                            <Button className={cx(styles.fab, {[styles.selected]: selected == o.index})} variant="fab" color="primary" >
-                          <img className={cx(styles.fabicon)} src={require(`cc-icons/color/${o.base.toLowerCase()}.svg`)} />
+                            <Div className={cx(styles.nib, {[styles.selected]: ox == base })}></Div>
+                            <Button className={cx(styles.fab, {[styles.selected]: ox == base })} variant="fab" color="primary" >
+                          <img className={cx(styles.fabicon)} src={require(`cc-icons/color/${ox.toLowerCase()}.svg`)} />
                               {/*o.base.substr(0,1)*/}
                             </Button>
                         </FaDiv>
@@ -136,7 +95,7 @@ class AppWrapper extends React.Component<any, any>{
   					<FaDiv c className={cx(styles.mid_bar)}>
   						<FaDiv className={cx(styles.top_bar)}>
 							
-              {selected == 0 &&
+              {!base &&
                 <List component="nav" >
                   <Link clearfix to="/history">
                     <ListItem button>
@@ -145,11 +104,11 @@ class AppWrapper extends React.Component<any, any>{
                   </Link>
                 </List>
               }
-              {selected != 0 &&
+              {base && Object.keys(config).length > 0 &&
                
                <FaDiv fs c> 
                 <Div className={cx(styles.baseheader)}> 
-                   {c_currency.name}
+                   {config[base].name}
                 </Div>
                 <FaDiv>
                   {arrows.map( (o, i) =>{
@@ -159,26 +118,27 @@ class AppWrapper extends React.Component<any, any>{
                   })}
                 </FaDiv>
                 <Scrollbars className={cx(styles.assets_menu_container)}>
-                  {rel.map( (o, i) =>  {
-                     const balance = coinStore.balances[o.ticker] || {balance: 0};
-                     const price_usd = priceStore.getFiatPrice(o.ticker);
-                      if (!(balance.balance > 0 || c_currency.base == o.ticker || configStore.config[o.ticker] ) ){
+                  { ([base]).concat(config[base].forks || [], Object.keys(config[base].assets || {})).map( (ox, i) =>  {
+
+                    const balance = coinStore.balances[ox] || {balance: 0};
+                    const price_usd = priceStore.getFiatPrice(ox);
+                    if (!(balance.balance > 0 || base == ox ) ){
                       return (null)
-                     }
+                    }
                     let icon;
                     try{
-                      icon = require(`cc-icons/color/${o.ticker.toLowerCase()}.svg`);
+                      icon = require(`cc-icons/color/${ox.toLowerCase()}.svg`);
                     }catch(e){}
                     return (
-                    <Link key={i} onClick={()=>{ this.setState({ select2: i+1 }) }} ey={i} clearfix to={`/coin/${c_currency.base}/${o.ticker}`}>
-                      <FaDiv className={cx(stylesg.pad_20,styles.li,{[styles.selected]: select2 == i+1})}>
+                    <Link key={i} onClick={()=>{exchangeStore.setRel(ox)}} clearfix to={`/coin/${base}/${ox}`}>
+                      <FaDiv className={cx(stylesg.pad_20,styles.li,{[styles.selected]: ox == rel})}>
 
                       <FaDiv vcenter fs style={{width: "18px"}}>
                             <Div className={cx(styles.col_icon)} style={{ backgroundImage: `url(${icon})` }} ></Div>
                       </FaDiv>
                       <Fa fs style={{width: "100px"}}>
                         <FaDiv vcenter>
-                          <Div className={cx(styles.rel)}>{o.ticker}</Div>
+                          <Div className={cx(styles.rel)}>{ox}</Div>
                         </FaDiv>
                       <FaDiv vcenter>
                               <Div className={cx(styles.vol)}>{priceStore.fiat.symbol}{+(

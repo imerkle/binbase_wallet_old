@@ -1,15 +1,16 @@
 import { observable, action, runInAction } from 'mobx';
-import { config_file } from 'app/constants';
 import { setTimeout } from 'timers';
-const time_ms = 5000;
+const time_ms = 2000;
 export class ConfigStore {
     @observable config = {};
     
     @action
     storeConfig = () =>{
+        let config = require(`app/constants/test_config`).default;
+        this.config = config;
         (window as any).storage.save({
             key: 'config',
-            data: require(`app/constants/${config_file}`).default,
+            data: config,
         });
     }
     @action
