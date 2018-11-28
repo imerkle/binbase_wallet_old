@@ -72,6 +72,7 @@ class Exchange extends React.Component<any, any>{
     
     exchangeStore.setBase(base);
     exchangeStore.setRel(rel);
+    exchangeStore.init();
   }
 
   state = {
@@ -84,10 +85,10 @@ class Exchange extends React.Component<any, any>{
     const { classes } = this.props;
     const { configStore, exchangeStore, coinStore, priceStore, appStore } = this.props.rootStore;
     const { address, txs } = exchangeStore;
-    const { config } = configStore;
     const { addressField, amountField, addressError } = this.state;
     const { rel, base } = exchangeStore;
-    if(!rel || !base || Object.keys(toJS(config)).length == 0 ){
+    const config = toJS(configStore.config);
+    if(!rel || !base || Object.keys(config).length == 0 ){
       return (null)
     }
     const balance = coinStore.balances[rel] || {balance: 0, pending: 0};
@@ -209,8 +210,9 @@ class Exchange extends React.Component<any, any>{
   send = () => {
     const { configStore, coinStore, exchangeStore, appStore} = this.props.rootStore;
     const { rel, base } = exchangeStore;
-    const { config } = configStore;
     const { addressError, addressField, amountField } = this.state;
+    const config = toJS(configStore.config);
+    
     const balance = coinStore.balances[rel];
       return new Promise(async (resolve, reject) => {
         const amt = parseFloat(amountField);

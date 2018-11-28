@@ -11,30 +11,13 @@ import cx from 'classnames';
 import { compose } from 'recompose';
 import { StyleRules, Theme, withStyles } from '@material-ui/core/styles';
 import { Scrollbars } from 'react-custom-scrollbars';
+import {toJS} from  'mobx';
 
 const styleSheet = (theme: Theme): StyleRules => ({
   icon: {
     color: "#a7a7a7"
   },
 });
-
-const sortByNameAsc = (a,b) => {
-  if (a.ticker < b.ticker)
-    return -1;
-  if (a.ticker > b.ticker)
-    return 1;
-  return 0;
-}
-const sortByNameDesc = (a,b) => {
-  if (b.ticker < a.ticker)
-    return -1;
-  if (b.ticker > a.ticker)
-    return 1;
-  return 0;
-}
-
-const sortByPriceAsc = (a,b) => { return a.price - b.price }
-const sortByPriceDesc = (a,b) => { return b.price - a.price }
 
 const arrows = ["Coin","Price"];
 @compose(withStyles(styleSheet))
@@ -118,8 +101,7 @@ class AppWrapper extends React.Component<any, any>{
                   })}
                 </FaDiv>
                 <Scrollbars className={cx(styles.assets_menu_container)}>
-                  { ([base]).concat(config[base].forks || [], Object.keys(config[base].assets || {})).map( (ox, i) =>  {
-
+                  { ([base]).concat(toJS(config)[base].forks || [], Object.keys(config[base].assets || {})).map( (ox, i) =>  {
                     const balance = coinStore.balances[ox] || {balance: 0};
                     const price_usd = priceStore.getFiatPrice(ox);
                     if (!(balance.balance > 0 || base == ox ) ){

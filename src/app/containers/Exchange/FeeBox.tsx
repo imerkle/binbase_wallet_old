@@ -1,9 +1,8 @@
 import * as React from 'react';
 import { observer, inject } from 'mobx-react';
+import { toJS } from 'mobx';
 
-import { Fa, FaDiv, Div, TextField } from 'app/components';
-import { Switch } from '@material-ui/core';
-import Slider from '@material-ui/lab/Slider';
+import { FaDiv, Div, TextField } from 'app/components';
 
 import * as stylesg from '../../style.css';
 import cx from 'classnames';
@@ -15,23 +14,18 @@ class FeeBox extends React.Component<any, any>{
     render(){
         const { exchangeStore, configStore } = this.props.rootStore;
         const { rel, base } = exchangeStore;
-        const { config } = configStore;
+        const config = toJS(configStore.config);
         if(!base || !rel){ return (null)}
         
         const fee_label = config[base].fee_label;
         let showFees = true;
         let dualFees = false;
 
-        if (config[rel] && config[rel].hasOwnProperty("noFee")){
-            showFees = config[rel].noFee
-        }else if (config[base].hasOwnProperty("noFee")){
-            showFees = config[base].noFee
+        if ((config[rel] && config[rel].hasOwnProperty("noFee")) || config[base].hasOwnProperty("noFee")){
+            showFees = false
         }
-
-        if (config[rel] && config[rel].hasOwnProperty("dualFee")) {
-            dualFees = config[rel].dualFee
-        } else if (config[base].hasOwnProperty("dualFee")) {
-            dualFees = config[base].dualFee
+        if ((config[rel] && config[rel].hasOwnProperty("dualFee")) || config[base].hasOwnProperty("dualFee") ) {
+            dualFees = true
         }
                 
         return (
