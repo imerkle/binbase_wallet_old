@@ -21,8 +21,7 @@ export const getBalance = async ({ config, address, rel, base }) => {
     return balances;
 }
 
-export const pendingSyncNano = async ({ config, balance, pending, address, option }) => {
-    const { rel, base } = this;
+export const pendingSyncNano = async ({ rel, base, config, balance, pending, address, option }) => {
 
     //@ts-ignore
     balance = nanocurrency.convert(balance, { from: 'NANO', to: 'raw' });
