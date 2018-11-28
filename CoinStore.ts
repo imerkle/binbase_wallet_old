@@ -1,5 +1,6 @@
-import { runInAction, observable, action } from 'mobx';
+import { toJS, runInAction, observable, action } from 'mobx';
 import OmniJs from "app/omnijs";
+import { pendingSyncNano } from "app/omnijs/nano";
 
 export class CoinStore {
     @observable keys: any;
@@ -19,11 +20,13 @@ export class CoinStore {
 
     @action
     generateKeys = () => {
-        for (let o in this.configStore.config){
-            const c = this.configStore.config[o];
+        const config = toJS(this.configStore.config);
+
+        for (let o in config){
+            const c = config[o];
             const omni = new OmniJs(o, c.base ? o : c.ofBase);
             
-            const k = omni.generateSeed(this.mnemonic, this.passphrase, { config: this.configStore.config })
+            const k = omni.generateSeed(this.mnemonic, this.passphrase, { config })
             
             this.keys[o] = k;
             this.mnemonic = k.mnemonic;
@@ -32,11 +35,16 @@ export class CoinStore {
     }
     @action
     syncBalances = () => {
-        Object.keys(this.configStore.config).map(async o=>{
-            const c = this.configStore.config[o];
-            const omni = new OmniJs(o, c.base ? o : c.ofBase);
+        const config = toJS(this.configStore.config);
+        Object.keys(config).map(async o=>{
+            const c = config[o];
+            const b = c.base ? o : c.ofBase
+            const omni = new OmniJs(o, b);
+            const balances = await omni.getBalance(this.keys[o].address, config);
+            if (b == "NANO" && balances[b].pending > 0){
+                await pendingSyncNano({ config, rel: o, base: b, balance: balances[b].balance, pending: balances[b].pending, address: this.keys[o].address, option: { publicKey: this.keys[o].publicKey, wif: this.keys[o].wif } });
+            }
 
-            const balances = await omni.getBalance(this.keys[o].address, this.configStore.config);
             runInAction(() => {
                 Object.keys(balances).map(o=>{
                     this.balances[o] = balances[o];

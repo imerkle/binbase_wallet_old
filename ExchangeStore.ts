@@ -1,4 +1,4 @@
-import { observable, action, runInAction } from 'mobx';
+import { observable, action, runInAction, toJS } from 'mobx';
 import OmniJs from "app/omnijs"
 import { CoinStore } from './CoinStore';
 import { ConfigStore } from '../ConfigStore';
@@ -14,7 +14,7 @@ export class ExchangeStore {
   @observable publicKey = "";
   @observable seed = "";
   
-  @observable pkey = "";
+  @observable wif = "";
   @observable fees = 0;
   
   @observable gasLimit = 0;
@@ -43,86 +43,65 @@ export class ExchangeStore {
   }
 
   @action 
-  generatePKey = () => {
+  init = () => {
     
-    let r = this.rel;
-    if (this.configStore.config[this.base].hasOwnProperty("assets")){
-      r = this.base;
+    const config = toJS(this.configStore.config)
+    if (Object.keys(config).length > 0){
+      let r = this.rel;
+      if (config[this.base].hasOwnProperty("assets")){
+        r = this.base;
+      }
+      
+      const k = this.coinStore.keys[r];
+      this.wif = k.wif;
+      this.address = k.address;
+      this.publicKey = k.publicKey;
+      
+      //this.syncBalance();
+      //this.syncFee();
+      this.syncTxs();
     }
-    
-    const k = this.coinStore.keys[r];
-    this.pkey = k.wif;
-    this.address = k.address;
-    this.publicKey = k.publicKey;
-        
-    //this.syncBalance();
-    //this.syncFee();
-    this.syncTxs();
   }
 
   @action 
   syncTxs = async (timeout = true) => {
+    const config = toJS(this.configStore.config)
+
     //@ts-ignore
-    const { txs } = await this.omni.getTxs(this.address);
+    const { txs } = await this.omni.getTxs(this.address, config);
     runInAction(() => {
       this.txs = txs;
     });    
   }
-  /*
-  @action 
-  syncBalance = async (timeout = true) => {
-    //@ts-ignore
-    let data, data2 = null;
-    //@ts-ignore
-    const { txs } = await this.omni.getTxs(this.address);
-    //@ts-ignore
-    const { balance, pending } = await this.omni.getBalance(this.address);
-    if (this.rel == "NANO") {
-      this.omni.pendingSyncNano({ balance, pending, address: this.address, option: { publicKey: this.publicKey, pkey: this.pkey } })
-    }
-    runInAction(() => {
-      this.txs = txs;
-      this.balance = balance;
-      this.balances[this.rel] = balance;
-      if (this.rel == "NANO"){
-        this.pending = pending;
-      }else{
-      }
-    });
-    if (timeout) {
-      setTimeout(() => {
-        this.syncBalance();
-      },60000)
-    }
-  }
-  */
 
   send = (address, amount, _data = "") => {
     let result;
+    const config = toJS(this.configStore.config)
+
     return new Promise(async(resolve, reject) => {
       try{
-        if (this.configStore.config[this.base].dualFee){
+        if (config[this.base].dualFee){
             result = await this.omni.send(
               this.address,
               address,
               amount,
-              this.pkey,
+              this.wif,
               {
                 fees: this.fees,
                 gasLimit: Web3Utils.toHex(this.gasLimit.toString()),
                 gasPrice: Web3Utils.toHex(this.gasPrice.toString()),
-                config: this.configStore.config
+                config: config
               });
           }else {
             result = await this.omni.send(
               this.address,
               address,
               amount,
-              this.pkey,
+              this.wif,
               {
                 publicKey: this.publicKey,
                 fees: this.fees,
-                config: this.configStore.config
+                config: config
               });
           }
           resolve(result)
@@ -136,7 +115,9 @@ export class ExchangeStore {
 
   @action
   setFees = (fees, kind = 0) => {
-    if (this.configStore.config[this.base].dualFee) {
+    const config = toJS(this.configStore.config)
+
+    if (config[this.base].dualFee) {
       switch (kind) {
         case 1:
           this.gasLimit = parseInt(fees);
