@@ -30,19 +30,6 @@ import * as styles from './style.css';
 import Exchange from 'app/containers/Exchange';
 import CoinFake from 'app/containers/CoinFake';
 
-import Storage from 'react-native-storage';
-
-const storage = new Storage({
-	size: 1000,
-	storageBackend: window.localStorage,
-	defaultExpires: null,
-	enableCache: true,
-	sync: {
-	}
-});
-(window as any).storage = storage;
-
-
 const styleNode = document.createComment("insertion-point-jss");
 document.head.insertBefore(styleNode, document.head.firstChild);
 
@@ -119,11 +106,12 @@ class AppFragment extends React.Component<any, any>{
       		inVisibleClass: classes.dark_invisible,
       		rootClass: classes.app_container,			
 		});
-		rootStore.configStore.setConfig();
-	    setTimeout(()=>{
-	      rootStore.priceStore.syncFiatPrices();
-	      rootStore.coinStore.generateKeys();
-	    }, 5000);    		
+		this.initiate();
+	}
+	initiate = async () => {
+		await rootStore.configStore.setConfig();
+		rootStore.priceStore.syncFiatPrices();
+		rootStore.coinStore.generateKeys();
 	}
 	render(){
 		const {classes} = this.props;
