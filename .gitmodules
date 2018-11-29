@@ -1,16 +1,13 @@
-[submodule "src/app/omnijs"]
-	path = src/app/omnijs
-	url = https://github.com/imerkle/binbase_wallet.git
-	branch = omni
-[submodule "src/app/stores/shared_stores"]
-	path = src/app/stores/shared_stores
-	url = https://github.com/imerkle/binbase_wallet.git
-	branch = shared_stores
-[submodule "src/app/constants"]
-	path = src/app/constants
-	url = https://github.com/imerkle/binbase_wallet.git
-	branch = constants
 [submodule "src/cc-icons"]
 	path = src/cc-icons
 	url = https://github.com/imerkle/cryptocurrency-icons.git
 	branch = minimal
+[submodule "src/app/constants"]
+	path = src/app/constants
+	url = git@github.com:bbase/constants.git
+[submodule "src/app/omnijs"]
+	path = src/app/omnijs
+	url = git@github.com:bbase/omnijs.git
+[submodule "src/app/stores/shared_stores"]
+	path = src/app/stores/shared_stores
+	url = git@github.com:bbase/shared_stores.git
