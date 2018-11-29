@@ -1,6 +1,4 @@
 import { observable, action, runInAction } from 'mobx';
-import { setTimeout } from 'timers';
-const time_ms = 2000;
 import Storage from 'react-native-storage';
 
 export class ConfigStore {
@@ -47,7 +45,6 @@ export class ConfigStore {
     @action
     setConfig = async () => {
         let res;
-        //setTimeout(async ()=>{
             try{
                res = await (window as any).storage.load({
                     key: 'config',
@@ -58,7 +55,6 @@ export class ConfigStore {
             }catch(e){
                 this.storeConfig();
             }
-        //}, time_ms)
     };
 }
 
