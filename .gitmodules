@@ -4,10 +4,10 @@
 	branch = minimal
 [submodule "src/app/constants"]
 	path = src/app/constants
-	url = git@github.com:bbase/constants.git
+	url = https://github.com/bbase/constants.git
 [submodule "src/app/omnijs"]
 	path = src/app/omnijs
-	url = git@github.com:bbase/omnijs.git
+	url = https://github.com/bbase/omnijs.git
 [submodule "src/app/stores/shared_stores"]
 	path = src/app/stores/shared_stores
-	url = git@github.com:bbase/shared_stores.git
+	url = https://github.com/bbase/shared_stores.git
