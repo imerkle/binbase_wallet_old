@@ -12,6 +12,10 @@ import { compose } from 'recompose';
 import { StyleRules, Theme, withStyles } from '@material-ui/core/styles';
 import { Scrollbars } from 'react-custom-scrollbars';
 import {toJS} from  'mobx';
+import { 
+  MAX_DECIMAL,
+  MAX_DECIMAL_FIAT
+} from 'app/constants';
 
 const styleSheet = (theme: Theme): StyleRules => ({
   icon: {
@@ -124,11 +128,11 @@ class AppWrapper extends React.Component<any, any>{
                         </FaDiv>
                       <FaDiv vcenter>
                               <Div className={cx(styles.vol)}>{priceStore.fiat.symbol}{+(
-                                price_usd* balance.balance).toFixed(2)}</Div>
+                                price_usd* balance.balance).toFixed(MAX_DECIMAL_FIAT)}</Div>
                         </FaDiv>                      
                       </Fa>
                       <FaDiv fs c style={{width: "86px"}}>
-                            <Div className={cx(styles.price)}>{+(balance.balance).toFixed(8)}</Div>
+                            <Div className={cx(styles.price)}>{+(balance.balance).toFixed(MAX_DECIMAL)}</Div>
                       </FaDiv>
                         
                       </FaDiv>

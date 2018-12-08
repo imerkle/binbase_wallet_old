@@ -16,6 +16,8 @@ import {
   isValidAddress,
   numberWithCommas,
   smartTrim,
+  MAX_DECIMAL,
+  MAX_DECIMAL_FIAT,
  } from 'app/constants';
 
  //@ts-ignore
@@ -101,15 +103,15 @@ class Exchange extends React.Component<any, any>{
           <FaDiv fs c>
             <Fa className={cx(stylesg.uppercase)}>{rel} Balance</Fa>
             <FaDiv vcenter className={cx(styles.balance)}>
-              <Fa fa className={cx(styles.balance)}>{balance.balance}</Fa>
-              <Fa fs className={cx(styles.pending)}>{balance.pending > 0 ? `(${balance.pending} pending)` : ""}</Fa>
+              <Fa fa className={cx(styles.balance)}>{+balance.balance.toFixed(MAX_DECIMAL_FIAT)}</Fa>
+              <Fa fs className={cx(styles.pending)}>{balance.pending > 0 ? `(${+balance.pending.toFixed(MAX_DECIMAL_FIAT)} pending)` : ""}</Fa>
             </FaDiv>
           </FaDiv>
           <FaDiv c>
             <Fa className={cx(stylesg.uppercase)}>{priceStore.fiat.name} Value</Fa>
-            <Fa className={cx(styles.balance)}>{priceStore.fiat.symbol}{numberWithCommas(balance_usd)}</Fa>
+            <Fa className={cx(styles.balance)}>{priceStore.fiat.symbol}{numberWithCommas(+balance_usd.toFixed(MAX_DECIMAL_FIAT))}</Fa>
           </FaDiv>
-        </FaDiv>      
+        </FaDiv>
         <FaDiv vcenter>
           <TextField
             className={cx(stylesg.mar_20_0)}
@@ -195,7 +197,7 @@ class Exchange extends React.Component<any, any>{
                 }</td>
                 <td className={cx(stylesg.tcenter)}><span className={cx({[styles.got]: o.kind == "got"},
                 {[styles.sent]: o.kind == "sent"})}>{o.kind == "got" ? "IN": "OUT" }</span></td>
-                <td>{o.value} {o.asset ? o.asset.ticker : rel}</td>
+                <td>{+o.value.toFixed(MAX_DECIMAL)} {o.asset ? o.asset.ticker : rel}</td>
                 <td>{o.fee}</td>
             </tr>
             )

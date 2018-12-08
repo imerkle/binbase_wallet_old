@@ -1693,13 +1693,6 @@ base-x@^3.0.2, base-x@^3.0.4:
   dependencies:
     safe-buffer "^5.0.1"
 
-base-x@^3.0.5:
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/base-x/-/base-x-3.0.5.tgz#d3ada59afed05b921ab581ec3112e6444ba0795a"
-  integrity sha512-C3picSgzPSLE+jW3tcBzJoGwitOtazb5B+5YmAxZm2ybmTi9LNgAtDO/jjVEBZwHoXmDBZ9m/IELj3elJVRBcA==
-  dependencies:
-    safe-buffer "^5.0.1"
-
 base64-js@0.0.8:
   version "0.0.8"
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-0.0.8.tgz#1101e9544f4a76b1bc3b26d452ca96d7a35e7978"
@@ -2888,11 +2881,6 @@ crypto-js@^3.1.9-1:
   version "3.1.9-1"
   resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-3.1.9-1.tgz#fda19e761fc077e01ffbfdc6e9fdfc59e8806cd8"
   integrity sha1-/aGedh/Ad+Af+/3G6f38WeiAbNg=
-
-cryptocurrency-icons@^0.9.0:
-  version "0.9.0"
-  resolved "https://registry.yarnpkg.com/cryptocurrency-icons/-/cryptocurrency-icons-0.9.0.tgz#2a6a439c1a8afe01b8ad9224acbf59e06d561583"
-  integrity sha512-hwjtJVauV6TFG5Z8pJnTG+4REjbjdE9ZHiribM1JeEcEbXpHs+qLfPEMBP5dSMPv3J7tgrp9OPai2eSr85pSOQ==
 
 css-color-function@~1.3.3:
   version "1.3.3"
@@ -10591,6 +10579,21 @@ thor-devkit@^0.2.3:
     secp256k1 "^3.5.0"
     web3-eth-abi "^1.0.0-beta.34"
 
+thor-devkit@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/thor-devkit/-/thor-devkit-0.3.0.tgz#07f3cd76182d9aec8fa70c37ce75b391af84602f"
+  integrity sha512-1XPFhOLeTflD/XnSdFuZukFggZ0Ez7F7OKbjXX1qW9Qr7Vn+dzswnepOkzgpNAyz2l1Pq6mcxnEq44h4jeVrpg==
+  dependencies:
+    bignumber.js "^7.2.1"
+    bip39 "^2.5.0"
+    blakejs "^1.1.0"
+    hdkey "^1.0.0"
+    keccak "^1.4.0"
+    keythereum "^1.0.4"
+    rlp "^2.0.0"
+    secp256k1 "^3.5.0"
+    web3-eth-abi "1.0.0-beta.34"
+
 thorify@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/thorify/-/thorify-1.0.4.tgz#45940a74bbc3d96faa1f218e5d9f63baf46cc209"
@@ -11281,6 +11284,15 @@ web3-core-helpers@1.0.0-beta.33:
     web3-eth-iban "1.0.0-beta.33"
     web3-utils "1.0.0-beta.33"
 
+web3-core-helpers@1.0.0-beta.34:
+  version "1.0.0-beta.34"
+  resolved "https://registry.yarnpkg.com/web3-core-helpers/-/web3-core-helpers-1.0.0-beta.34.tgz#b168da00d3e19e156bc15ae203203dd4dfee2d03"
+  integrity sha1-sWjaANPhnhVrwVriAyA91N/uLQM=
+  dependencies:
+    underscore "1.8.3"
+    web3-eth-iban "1.0.0-beta.34"
+    web3-utils "1.0.0-beta.34"
+
 web3-core-helpers@1.0.0-beta.36:
   version "1.0.0-beta.36"
   resolved "https://registry.yarnpkg.com/web3-core-helpers/-/web3-core-helpers-1.0.0-beta.36.tgz#6f618e80f1a6588d846efbfdc28f92ae0477f8d2"
@@ -11358,6 +11370,16 @@ web3-eth-abi@1.0.0-beta.33:
     web3-core-helpers "1.0.0-beta.33"
     web3-utils "1.0.0-beta.33"
 
+web3-eth-abi@1.0.0-beta.34:
+  version "1.0.0-beta.34"
+  resolved "https://registry.yarnpkg.com/web3-eth-abi/-/web3-eth-abi-1.0.0-beta.34.tgz#034533e3aa2f7e59ff31793eaea685c0ed5af67a"
+  integrity sha1-A0Uz46ovfln/MXk+rqaFwO1a9no=
+  dependencies:
+    bn.js "4.11.6"
+    underscore "1.8.3"
+    web3-core-helpers "1.0.0-beta.34"
+    web3-utils "1.0.0-beta.34"
+
 web3-eth-abi@^1.0.0-beta.34:
   version "1.0.0-beta.36"
   resolved "https://registry.yarnpkg.com/web3-eth-abi/-/web3-eth-abi-1.0.0-beta.36.tgz#21c0f222701db827a8a269accb9cd18bbd8f70f9"
@@ -11404,6 +11426,14 @@ web3-eth-iban@1.0.0-beta.33:
   dependencies:
     bn.js "4.11.6"
     web3-utils "1.0.0-beta.33"
+
+web3-eth-iban@1.0.0-beta.34:
+  version "1.0.0-beta.34"
+  resolved "https://registry.yarnpkg.com/web3-eth-iban/-/web3-eth-iban-1.0.0-beta.34.tgz#9af458605867ccf74ea979aaf326b38ba6a5ba0c"
+  integrity sha1-mvRYYFhnzPdOqXmq8yazi6alugw=
+  dependencies:
+    bn.js "4.11.6"
+    web3-utils "1.0.0-beta.34"
 
 web3-eth-iban@1.0.0-beta.36:
   version "1.0.0-beta.36"
@@ -11491,6 +11521,19 @@ web3-utils@1.0.0-beta.33:
   version "1.0.0-beta.33"
   resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.0.0-beta.33.tgz#e091b7994f09b714b0198a4057d3ad2eb8cbe238"
   integrity sha1-4JG3mU8JtxSwGYpAV9OtLrjL4jg=
+  dependencies:
+    bn.js "4.11.6"
+    eth-lib "0.1.27"
+    ethjs-unit "0.1.6"
+    number-to-bn "1.7.0"
+    randomhex "0.1.5"
+    underscore "1.8.3"
+    utf8 "2.1.1"
+
+web3-utils@1.0.0-beta.34:
+  version "1.0.0-beta.34"
+  resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-1.0.0-beta.34.tgz#9411fc39aaef39ca4e06169f762297d9ff020970"
+  integrity sha1-lBH8OarvOcpOBhafdiKX2f8CCXA=
   dependencies:
     bn.js "4.11.6"
     eth-lib "0.1.27"
