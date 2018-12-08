@@ -69,8 +69,7 @@ class AppWrapper extends React.Component<any, any>{
                         <FaDiv className={cx(styles.fabdiv)}>
                             <Div className={cx(styles.nib, {[styles.selected]: ox == base })}></Div>
                             <Button className={cx(styles.fab, {[styles.selected]: ox == base })} variant="fab" color="primary" >
-                          <img className={cx(styles.fabicon)} src={require(`cc-icons/color/${ox.toLowerCase()}.svg`)} />
-                              {/*o.base.substr(0,1)*/}
+                              <img className={cx(styles.fabicon)} src={require(`cc-icons/color/${ox.toLowerCase()}.svg`)} />
                             </Button>
                         </FaDiv>
                       </Link>

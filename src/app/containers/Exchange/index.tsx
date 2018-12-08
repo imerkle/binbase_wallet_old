@@ -193,7 +193,6 @@ class Exchange extends React.Component<any, any>{
                 <td>{smartTrim(o.hash, 20)}</td>
                 <td>{o.confirmations == 0 ? <CircularProgress size={18} color="primary" /> : 
                   formatDistance(new Date(o.timestamp*1000), new Date(), { addSuffix: true })
-                  //moment.unix(o.timestamp).fromNow()
                 }</td>
                 <td className={cx(stylesg.tcenter)}><span className={cx({[styles.got]: o.kind == "got"},
                 {[styles.sent]: o.kind == "sent"})}>{o.kind == "got" ? "IN": "OUT" }</span></td>
@@ -246,6 +245,7 @@ class Exchange extends React.Component<any, any>{
           });
           resolve();
         }catch(e){
+          console.log(e)
           appStore.setSnackMsg("Transaction Failed to broadcast!");
           reject(e);
         }
