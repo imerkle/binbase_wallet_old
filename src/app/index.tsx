@@ -29,6 +29,7 @@ import * as styles from './style.css';
 
 import Exchange from 'app/containers/Exchange';
 import CoinFake from 'app/containers/CoinFake';
+import Home from 'app/containers/Home';
 
 const styleNode = document.createComment("insertion-point-jss");
 document.head.insertBefore(styleNode, document.head.firstChild);
@@ -130,6 +131,7 @@ class AppFragment extends React.Component<any, any>{
 			  	<Error overlayClassName={classes.overlay} />
 		  		<AppWrapper>
 			      <Switch>
+						<Route path="/" exact component={Home} />
 						<Route path="/coin/:base/:rel" component={Exchange} />
 						<Route path="/coin/:base" component={CoinFake} />
 			      </Switch>

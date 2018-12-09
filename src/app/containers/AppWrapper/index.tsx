@@ -52,7 +52,7 @@ class AppWrapper extends React.Component<any, any>{
 
   					<FaDiv c className={cx(styles.left_bar, {[styles.slideLeft]: slideLeft})}>
 
-                <Link onClick={()=>{ this.setState({ selected: 0 }) }} clearfix to="/">
+                <Link onClick={()=>{ exchangeStore.setBase("");exchangeStore.setRel("") }} clearfix to="/">
                   <FaDiv className={cx(styles.fabdiv)}>
                       <Div className={cx(styles.nib, {[styles.selected]: !base})}></Div>
                       <Button className={cx(styles.fab, {[styles.selected]: !base})} variant="fab" color="primary" ><Icon>home</Icon></Button>
@@ -83,9 +83,9 @@ class AppWrapper extends React.Component<any, any>{
 							
               {!base &&
                 <List component="nav" >
-                  <Link clearfix to="/history">
+                  <Link clearfix to="/">
                     <ListItem button>
-                      <ListItemText primary="Transaction History" secondary="Show Withdraw and Deposit History" />
+                      <ListItemText primary="Home" secondary="Generate, Restore or Export Wallet" />
                     </ListItem>
                   </Link>
                 </List>

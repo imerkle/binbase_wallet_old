@@ -172,7 +172,7 @@ class Exchange extends React.Component<any, any>{
           <FeeBox />
           <AButton 
           className={cx(stylesg.mar_20_0,stylesg.pad_20)}
-          variant="contained" color="primary" disabled={!!addressError} 
+          variant="contained" color="primary" disabled={!!addressError}
           onClick={this.send}>Send</AButton>
         </FaDiv>
         {txs.length > 0 &&
