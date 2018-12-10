@@ -3,7 +3,7 @@ import { observer, inject } from 'mobx-react';
 
 import { Link, Fa, Button, FaDiv, Div } from 'app/components';
 //Avatar
-import { Snackbar, List, ListItem, ListItemText, IconButton, Icon } from '@material-ui/core';
+import { Fab, Snackbar, List, ListItem, ListItemText, IconButton, Icon } from '@material-ui/core';
 
 import * as styles from './style.css';
 import * as stylesg from '../..//style.css';
@@ -55,7 +55,7 @@ class AppWrapper extends React.Component<any, any>{
                 <Link onClick={()=>{ exchangeStore.setBase("");exchangeStore.setRel("") }} clearfix to="/">
                   <FaDiv className={cx(styles.fabdiv)}>
                       <Div className={cx(styles.nib, {[styles.selected]: !base})}></Div>
-                      <Button className={cx(styles.fab, {[styles.selected]: !base})} variant="fab" color="primary" ><Icon>home</Icon></Button>
+                      <Fab className={cx(styles.fab, {[styles.selected]: !base})} color="primary" ><Icon>home</Icon></Fab>
                   </FaDiv>
                 </Link>
 
@@ -68,9 +68,9 @@ class AppWrapper extends React.Component<any, any>{
                       <Link key={i} onClick={()=>{exchangeStore.setBase(ox)}} clearfix to={`/coin/${ox}/`}>
                         <FaDiv className={cx(styles.fabdiv)}>
                             <Div className={cx(styles.nib, {[styles.selected]: ox == base })}></Div>
-                            <Button className={cx(styles.fab, {[styles.selected]: ox == base })} variant="fab" color="primary" >
+                            <Fab className={cx(styles.fab, {[styles.selected]: ox == base })} color="primary" >
                               <img className={cx(styles.fabicon)} src={require(`cc-icons/color/${ox.toLowerCase()}.svg`)} />
-                            </Button>
+                            </Fab>
                         </FaDiv>
                       </Link>
                     )

@@ -5,30 +5,6 @@ import Button from './Button';
 import { CircularProgress } from '@material-ui/core';
 
 class AButton extends React.Component<any, any>{
-/*
-  static propTypes = {
-    children: PropTypes.oneOfType([PropTypes.func, PropTypes.node]),
-    className: PropTypes.string,
-    loadingClass: PropTypes.string,
-    fulFilledClass: PropTypes.string,
-    rejectedClass: PropTypes.string,
-    disabled: PropTypes.bool,
-    text: PropTypes.node,
-    pendingText: PropTypes.node,
-    fulFilledText: PropTypes.node,
-    rejectedText: PropTypes.node,
-    onClick: PropTypes.func,
-    loadingSize: PropTypes.number,
-  };
-
-  static defaultProps = {
-    loadingClass: 'AButton--loading',
-    fulFilledClass: 'AButton--fulfilled',
-    rejectedClass: 'AButton--rejected',
-    loadingSize: 14,
-  };
-*/
-
   state = {
     asyncState: null,
   };

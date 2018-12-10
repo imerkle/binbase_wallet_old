@@ -99,7 +99,10 @@ class AppFragment extends React.Component<any, any>{
 				        dark: "#3c50a3",
 				        contrastText: "#fff",
 				    }
-		      	}
+		      	},
+				typography: {
+				  useNextVariants: true,
+				},
 	      });
 		const {classes} = props;
 		this.errorStore = new ErrorStore({ 

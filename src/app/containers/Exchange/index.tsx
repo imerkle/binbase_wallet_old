@@ -86,7 +86,7 @@ class Exchange extends React.Component<any, any>{
   render(){
     const { classes } = this.props;
     const { configStore, exchangeStore, coinStore, priceStore, appStore } = this.props.rootStore;
-    const { address, txs } = exchangeStore;
+    const { address, txs: _txs } = exchangeStore;
     const { addressField, amountField, addressError } = this.state;
     const { rel, base } = exchangeStore;
     const config = toJS(configStore.config);
@@ -96,7 +96,8 @@ class Exchange extends React.Component<any, any>{
     const balance = coinStore.balances[rel] || {balance: 0, pending: 0};
     const balance_usd = priceStore.getFiatPrice(rel) * balance.balance;
     const { explorer } = getConfig(config, rel, base);
-
+    const txs = toJS(_txs);
+    console.log(base, rel, txs);
   	return (
       <FaDiv c>
         <FaDiv>
@@ -196,7 +197,7 @@ class Exchange extends React.Component<any, any>{
                 }</td>
                 <td className={cx(stylesg.tcenter)}><span className={cx({[styles.got]: o.kind == "got"},
                 {[styles.sent]: o.kind == "sent"})}>{o.kind == "got" ? "IN": "OUT" }</span></td>
-                <td>{+o.value.toFixed(MAX_DECIMAL)} {o.asset ? o.asset.ticker : rel}</td>
+                <td>{o.value ? +Number(o.value).toFixed(MAX_DECIMAL) : 0} {o.asset ? o.asset.ticker : rel}</td>
                 <td>{o.fee}</td>
             </tr>
             )
