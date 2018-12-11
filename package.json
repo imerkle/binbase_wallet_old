@@ -9,7 +9,7 @@
     "start": "webpack-dev-server --mode development --hot --progress --colors --port 3001 --open",
     "build": "webpack -p --progress --colors",
     "prettier": "prettier --write \"src/**/*.{ts,tsx,css}\"",
-    "coveralls": "cat lcov.info | node node_modules/.bin/coveralls"
+    "coveralls": "cat ./coverage/lcov.info | node node_modules/.bin/coveralls",
   },
   "license": "MIT",
   "devDependencies": {
