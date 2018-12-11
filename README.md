@@ -1,8 +1,8 @@
-[![Build Status](https://img.shields.io/travis/imerkle/binbase_wallet/master.svg?style=for-the-badge)](https://travis-ci.org/imerkle/binbase_wallet)
-[![Test Coverage](http://img.shields.io/coveralls/https://github.com/imerkle/binbase_wallet/master.svg)](https://coveralls.io/r/https://github.com/imerkle/binbase_wallet?branch=master)
-[![Maintainability](https://img.shields.io/codeclimate/maintainability-percentage/imerkle/binbase_wallet.svg?style=for-the-badge)](https://codeclimate.com/github/imerkle/binbase_wallet)
-[![Dependency Status](https://img.shields.io/david/imerkle/binbase_wallet.svg?style=for-the-badge)](https://david-dm.org/imerkle/binbase_wallet)
-[![devDependency Status](https://img.shields.io/david/dev/imerkle/binbase_wallet.svg?style=for-the-badge)](https://david-dm.org/imerkle/binbase_wallet#info=devDependencies)
+[![Build Status](https://img.shields.io/travis/imerkle/binbase_wallet/master.svg)](https://travis-ci.org/imerkle/binbase_wallet)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/144482571a2c532f9f0a/test_coverage)](https://codeclimate.com/github/imerkle/binbase_wallet/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/144482571a2c532f9f0a/maintainability)](https://codeclimate.com/github/imerkle/binbase_wallet/maintainability)
+[![Dependency Status](https://img.shields.io/david/imerkle/binbase_wallet.svg)](https://david-dm.org/imerkle/binbase_wallet)
+[![devDependency Status](https://img.shields.io/david/dev/imerkle/binbase_wallet.svg)](https://david-dm.org/imerkle/binbase_wallet#info=devDependencies)
 
 
 # [WIP] Universal multi currency wallet.
