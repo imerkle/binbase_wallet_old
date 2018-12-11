@@ -59,7 +59,7 @@ class AppWrapper extends React.Component<any, any>{
                   </FaDiv>
                 </Link>
 
-                {Object.keys(config).map( (ox, i) => {
+                {coinStore.isUnlocked && Object.keys(config).map( (ox, i) => {
                   const o = config[ox];
                   if(!o.base){
                     return (null)

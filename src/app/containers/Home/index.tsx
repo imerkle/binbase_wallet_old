@@ -14,36 +14,44 @@ class Home extends React.Component<any, any>{
         mnemonic_copy: "",
         mnemonic_paste: "",
         passphrase_paste: "",
+        passphrase_unlock: "",
     }
-    generateNewWallet = () => {
-      return new Promise(async (resolve, reject) => {
-        try{
-            const mnemonic = await this.props.rootStore.coinStore.generateKeys(true, this.state.passphrase);
-            this.props.rootStore.appStore.setSnackMsg("New Wallet Generated!");
-            this.setState({mnemonic_copy: mnemonic})
-            resolve();
-        }catch(e){
-            reject(e)
-        }
-      });
+    unlockWallet = async () => {
+        await this.props.rootStore.coinStore.generateKeys(false, this.state.passphrase_unlock)
+        this.props.rootStore.appStore.setSnackMsg("Wallet unlocked!");
     }
-    restoreWallet = () => {
-      return new Promise(async (resolve, reject) => {
-        try{
-            const mnemonic = await this.props.rootStore.coinStore.generateKeys(false, this.state.passphrase_paste, this.state.mnemonic_paste);
-            this.props.rootStore.appStore.setSnackMsg("Wallet restored!");
-
-            resolve();
-        }catch(e){
-            reject(e)
-        }
-      });
+    generateNewWallet = async () => {
+        const mnemonic = await this.props.rootStore.coinStore.generateKeys(true, this.state.passphrase);
+        this.props.rootStore.appStore.setSnackMsg("New Wallet Generated!");
+        this.setState({mnemonic_copy: mnemonic})
+    }
+    restoreWallet = async () => {
+        const mnemonic = await this.props.rootStore.coinStore.generateKeys(false, this.state.passphrase_paste, this.state.mnemonic_paste);
+        this.props.rootStore.appStore.setSnackMsg("Wallet restored!");
     }
     render() {
-        const {appStore} = this.props.rootStore;
+        const {appStore, coinStore} = this.props.rootStore;
         const {mnemonic_copy} = this.state;
 
         return (
+        <FaDiv fs c>
+           {!coinStore.isUnlocked &&    
+            <FaDiv fs c className={cx(stylesg.mar_20)}>
+              <Typography variant="h4">Unlock Wallet</Typography>
+              <TextField
+                className={cx(stylesg.mar_20_0)}
+                value={this.state.passphrase_unlock}
+                onChange={(e)=>{ this.setState({passphrase_unlock: e.target.value }) }}
+                label={`Your Passphrase`}
+                type="text" 
+                fullWidth
+              />
+              <AButton 
+              className={cx(stylesg.mar_20_0,stylesg.pad_20)}
+              variant="contained" color="secondary"
+              onClick={this.unlockWallet}>Unlock Wallet</AButton>
+            </FaDiv>                
+            }        
             <FaDiv>
                 <FaDiv fs c className={cx(stylesg.mar_0_20)} style={{flex: 0.5}}>
                   <Typography variant="h4">Generate New Wallet</Typography>
@@ -111,6 +119,7 @@ class Home extends React.Component<any, any>{
                   onClick={this.restoreWallet}>Restore Wallet</AButton>                  
                 </FaDiv>
             </FaDiv>
+        </FaDiv>
             );
     }
 }

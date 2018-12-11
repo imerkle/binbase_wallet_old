@@ -115,7 +115,6 @@ class AppFragment extends React.Component<any, any>{
 	initiate = async () => {
 		await rootStore.configStore.setConfig();
 		rootStore.priceStore.syncFiatPrices();
-		rootStore.coinStore.generateKeys();
 	}
 	render(){
 		const {classes} = this.props;
