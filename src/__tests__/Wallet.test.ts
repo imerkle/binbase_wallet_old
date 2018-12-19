@@ -51,6 +51,7 @@ describe('Wallet Address Generation', () => {
     wallets.map(o=>{
         it(o.name, () => {
             const k = omnijs.generateSeed(mnemonic, '', {config, rel: o.rel, base: o.base});
+            //console.log(k)
             expect(k.address).toEqual(o.address);
         });
     })

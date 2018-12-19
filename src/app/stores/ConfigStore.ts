@@ -18,37 +18,34 @@ export class ConfigStore {
         (window as any).storage = storage;        
     }
 
-    setMnemonic = (mnemonic) => {
-        (window as any).storage.save({
-            key: 'mnemonic',
-            data: mnemonic,
+    setKey = async (key, data) => {
+        await (window as any).storage.save({
+            key,
+            data,
         });
     }
-    getMnemonic = async () => {
+    getKey = async (key) => {
         let res;
         try {
             res = await (window as any).storage.load({
-                key: 'mnemonic',
+                key
             });
-        }catch(e){}
+        }catch(e){
+            throw e;
+        }
         return res;
     }
     @action
     storeConfig = () => {
         let config = require(`app/constants/test_config`).default;
         this.config = config;
-        (window as any).storage.save({
-            key: 'config',
-            data: config,
-        });
+        this.setKey('config', config)
     }    
     @action
     setConfig = async () => {
         let res;
             try{
-               res = await (window as any).storage.load({
-                    key: 'config',
-                });
+               res = await this.getKey('config')
                 runInAction(() => {
                     this.config = res;
                 });                
