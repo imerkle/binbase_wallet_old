@@ -39,7 +39,6 @@ class AppWrapper extends React.Component<any, any>{
     const { base, rel} = exchangeStore;
     const {config} = configStore;
     const sorter = {value: 1, dir: 1};
-
   	return (
   			<FaDiv fs className={cx(styles.root)}>
           <Snackbar message={appStore.snackmsg} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
@@ -52,7 +51,10 @@ class AppWrapper extends React.Component<any, any>{
 
   					<FaDiv c className={cx(styles.left_bar, {[styles.slideLeft]: slideLeft})}>
 
-                <Link onClick={()=>{ exchangeStore.setBase("");exchangeStore.setRel("") }} clearfix to="/">
+                <Link onClick={()=>{ 
+                  exchangeStore.setBase("");
+                  exchangeStore.setRel("")
+                }} clearfix to="/">
                   <FaDiv className={cx(styles.fabdiv)}>
                       <Div className={cx(styles.nib, {[styles.selected]: !base})}></Div>
                       <Fab className={cx(styles.fab, {[styles.selected]: !base})} color="primary" ><Icon>home</Icon></Fab>

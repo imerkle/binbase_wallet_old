@@ -246,8 +246,8 @@ class Exchange extends React.Component<any, any>{
           });
           resolve();
         }catch(e){
-          console.log(e)
           appStore.setSnackMsg("Transaction Failed to broadcast!");
+          throw e;
           reject(e);
         }
         //exchangeStore.syncBalance(false)

@@ -16,7 +16,7 @@ class CoinFake extends React.Component<any, any>{
         const { base } = this.props.match.params;
 
         exchangeStore.setBase(base);
-        exchangeStore.setRel(null);
+        exchangeStore.setRel(null);   
     }
     render() {
         return (null);

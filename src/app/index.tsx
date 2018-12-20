@@ -19,6 +19,8 @@ import asyncComponent from 'app/utils/asyncComponent';
 
 
 import AppWrapper from 'app/containers/AppWrapper';
+import Sentry from 'app/containers/Sentry';
+
 //@ts-ignore
 //const Login = asyncComponent(() => import('app/containers/Login').then(module => module.default), { name: 'Login' });
 import { create } from "jss";
@@ -122,7 +124,7 @@ class AppFragment extends React.Component<any, any>{
 		  <MuiThemeProvider theme={this.theme} >
 		  	<CssBaseline />
 				<Provider {...this.props} rootStore={rootStore} errorStore={this.errorStore} >
-		  	<div
+		  	<Sentry
 		  	   className={cx(
 		  	   	styles.app_container,
                 classes.app_container,
@@ -138,7 +140,7 @@ class AppFragment extends React.Component<any, any>{
 						<Route path="/coin/:base" component={CoinFake} />
 			      </Switch>
 		  		</AppWrapper>
-			</div>
+			</Sentry>
 			</Provider>
 		  </MuiThemeProvider>
 		)		
