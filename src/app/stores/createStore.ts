@@ -1,10 +1,10 @@
-import { History } from 'history';
-import { RouterStore } from './RouterStore';
-import { AppStore } from './shared_stores/AppStore';
-import { ExchangeStore } from './shared_stores/ExchangeStore';
-import { PriceStore } from './shared_stores/PriceStore';
-import { CoinStore } from './shared_stores/CoinStore';
-import { ConfigStore } from './ConfigStore';
+import { History } from "history";
+import { ConfigStore } from "./ConfigStore";
+import { RouterStore } from "./RouterStore";
+import { AppStore } from "./shared_stores/AppStore";
+import { CoinStore } from "./shared_stores/CoinStore";
+import { ExchangeStore } from "./shared_stores/ExchangeStore";
+import { PriceStore } from "./shared_stores/PriceStore";
 
 export function createStores(history: History) {
   const routerStore = new RouterStore(history);

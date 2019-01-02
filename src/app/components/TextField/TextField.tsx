@@ -1,23 +1,23 @@
-//@flow weak
+// @flow weak
 
-import * as React from 'react';
+import * as React from "react";
 
-import { TextField } from '@material-ui/core';
-import { withStyles } from '@material-ui/core/styles';
+import { TextField } from "@material-ui/core";
+import { withStyles } from "@material-ui/core/styles";
 
-export const styleSheet = theme => ({
+export const styleSheet = (theme) => ({
   disabled: {},
   underline: {
-    '&:hover:not($disabled):before': {
+    "&:hover:not($disabled):before": {
       backgroundColor: theme.palette.primary.main,
       height: 1,
     },
   },
 });
 
-class TextFieldX extends React.Component<any>{
+class TextFieldX extends React.Component<any> {
 
-  render(){
+  public render() {
     const {
       withUnderline,
       classes,
@@ -27,30 +27,30 @@ class TextFieldX extends React.Component<any>{
     } = this.props;
 
     let IP;
-    if(!InputProps){
+    if (!InputProps) {
       IP = {};
-    }else{
+    } else {
       IP = InputProps;
     }
-    const {classes: classesInputProps,...otherInputProps} = IP;
+    const {classes: classesInputProps, ...otherInputProps} = IP;
 
     return(
       <TextField
 
-          InputProps = {{
+          InputProps={{
               classes: {
                 ...classesInputProps,
                 disabled: classes.disabled,
                 underline: classes.underline,
               },
-              ...otherInputProps
+              ...otherInputProps,
             }}
          {...other}
          >
         {children}
       </TextField>
     );
-  }  
+  }
 }
 
-export default withStyles(styleSheet)(TextFieldX)
+export default withStyles(styleSheet)(TextFieldX);

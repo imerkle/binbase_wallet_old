@@ -1,35 +1,35 @@
-//@flow weak
+// @flow weak
 
-import * as React from 'react';
+import * as React from "react";
 
-import { Link } from 'react-router-dom';
-import { withStyles } from '@material-ui/core/styles';
-import cx from 'classnames';
+import { withStyles } from "@material-ui/core/styles";
+import cx from "classnames";
+import { Link } from "react-router-dom";
 
-export const styleSheet = theme => ({
+export const styleSheet = (theme) => ({
   root: {
-    color: theme.palette.text.primary,
-    textDecoration: 'none',
-    paddingBottom: '5px',
-    borderBottom: `2px solid transparent`,
-    '&:hover': {
+    "color": theme.palette.text.primary,
+    "textDecoration": "none",
+    "paddingBottom": "5px",
+    "borderBottom": `2px solid transparent`,
+    "&:hover": {
       borderColor: theme.palette.text.primary,
     },
   },
   clearfix: {
-    borderBottom: `0px solid transparent`,
-    textDecoration: 'none',
-    outline: 'none',
-    '&:hover': {
-      borderColor: 'transparent',
-    },    
+    "borderBottom": `0px solid transparent`,
+    "textDecoration": "none",
+    "outline": "none",
+    "&:hover": {
+      borderColor: "transparent",
+    },
   },
   faded: {
-    transition: '.15s linear color',
-    color: theme.palette.text.hint,
-    '&:hover': {
+    "transition": ".15s linear color",
+    "color": theme.palette.text.hint,
+    "&:hover": {
       color: theme.palette.text.primary,
-      textDecoration: 'none',
+      textDecoration: "none",
       borderColor: `transparent`,
     },
   },
@@ -46,11 +46,11 @@ const LinkX = (props) => {
   } = props;
   return(
     <Link
-       className = {cx(
+       className={cx(
          { [classes.clearfix]: clearfix},
          { [classes.root]: clearfix},
          { [classes.faded] : faded },
-         className
+         className,
        )}
        {...other}
        >
@@ -66,6 +66,6 @@ const LinkX = (props) => {
     children: PropTypes.node,
   }
   */
-}
+};
 
-export default withStyles(styleSheet)(LinkX)
+export default withStyles(styleSheet)(LinkX);

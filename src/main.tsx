@@ -1,9 +1,9 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { useStrict } from 'mobx';
-//import { Provider } from 'mobx-react';
+import { useStrict } from "mobx";
+import * as React from "react";
+import * as ReactDOM from "react-dom";
+// import { Provider } from 'mobx-react';
 
-import { App } from 'app';
+import { App } from "app";
 
 // enable MobX strict mode
 useStrict(true);
@@ -12,5 +12,5 @@ useStrict(true);
 ReactDOM.render(
     <App />
     ,
-  document.getElementById("root")
+  document.getElementById("root"),
 );

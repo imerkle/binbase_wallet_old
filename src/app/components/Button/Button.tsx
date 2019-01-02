@@ -1,14 +1,14 @@
-//@flow weak
+// @flow weak
 
-import * as React from 'react';
-import { Button } from '@material-ui/core';
-import { withStyles } from '@material-ui/core/styles';
-import cx from 'classnames';
+import { Button } from "@material-ui/core";
+import { withStyles } from "@material-ui/core/styles";
+import cx from "classnames";
+import * as React from "react";
 
-export const styleSheet = theme => ({
+export const styleSheet = (theme) => ({
   fullWidth: {
-    width: "100%"
-  }
+    width: "100%",
+  },
 });
 
 const ButtonX = (props) => {
@@ -21,9 +21,9 @@ const ButtonX = (props) => {
 
   return(
     <Button
-       className = {cx(
+       className={cx(
          { [fullWidth]: fW },
-         className
+         className,
        )}
        classes={{...otherClasses}}
        {...other}
@@ -31,6 +31,6 @@ const ButtonX = (props) => {
       {children}
     </Button>
   );
-}
+};
 
-export default withStyles(styleSheet)(ButtonX)
+export default withStyles(styleSheet)(ButtonX);

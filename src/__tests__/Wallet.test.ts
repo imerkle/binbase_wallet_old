@@ -1,6 +1,6 @@
 
 const mnemonic = "connect ritual news sand rapid scale behind swamp damp brief explain ankle";
-import * as omnijs from '../app/omnijs'
+import * as omnijs from "../app/omnijs";
 
 const wallets = [
 {
@@ -45,14 +45,14 @@ const wallets = [
     base: "NEO",
     address: "AShDKgLSuCjGZr8Fs5SRLSYvmcSV7S4zwX",
 }];
-const config = require('app/constants/config').default
-describe('Wallet Address Generation', () => {
+const config = require("app/constants/config").default;
+describe("Wallet Address Generation", () => {
     const options = {config};
-    wallets.map(o=>{
+    wallets.map((o) => {
         it(o.name, () => {
-            const k = omnijs.generateSeed(mnemonic, '', {config, rel: o.rel, base: o.base});
-            //console.log(k)
+            const k = omnijs.generateSeed(mnemonic, "", {config, rel: o.rel, base: o.base});
+            // console.log(k)
             expect(k.address).toEqual(o.address);
         });
-    })
+    });
 });

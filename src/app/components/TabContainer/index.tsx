@@ -1,9 +1,9 @@
-import * as React  from 'react';
-import { Div } from 'app/components';
+import { Div } from "app/components";
+import * as React  from "react";
 
-const TabContainer = (props) => 
+const TabContainer = (props) =>
   (<Div style={{minHeight: props.swipeableHeight}} className={props.className}>
     {props.children}
-  </Div>)
+  </Div>);
 
 export default TabContainer;

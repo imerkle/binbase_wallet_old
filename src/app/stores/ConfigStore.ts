@@ -1,58 +1,58 @@
-import { observable, action, runInAction } from 'mobx';
-import Storage from 'react-native-storage';
+import { action, observable, runInAction } from "mobx";
+import Storage from "react-native-storage";
 
 export class ConfigStore {
-    @observable config = {};
-    constructor(){
+    @observable public config = {};
+    constructor() {
         this.init();
     }
-    init = () => {
+    public init = () => {
         const storage = new Storage({
             size: 1000,
             storageBackend: window.localStorage,
             defaultExpires: null,
             enableCache: true,
             sync: {
-            }
+            },
         });
-        (window as any).storage = storage;        
+        (window as any).storage = storage;
     }
 
-    setKey = async (key, data) => {
+    public setKey = async (key, data) => {
         await (window as any).storage.save({
             key,
             data,
         });
     }
-    getKey = async (key) => {
+    public getKey = async (key) => {
         let res;
         try {
             res = await (window as any).storage.load({
-                key
+                key,
             });
-        }catch(e){
+        } catch (e) {
             throw e;
         }
         return res;
     }
     @action
-    storeConfig = () => {
-        let config = require(`app/constants/test_config`).default;
+    public storeConfig = () => {
+        const config = require(`app/constants/test_config`).default;
         this.config = config;
-        this.setKey('config', config)
-    }    
+        this.setKey("config", config);
+    }
     @action
-    setConfig = async () => {
+    public setConfig = async () => {
         let res;
-            try{
-               res = await this.getKey('config')
-                runInAction(() => {
+        try {
+               res = await this.getKey("config");
+               runInAction(() => {
                     this.config = res;
-                });                
-            }catch(e){
+                });
+            } catch (e) {
                 this.storeConfig();
             }
-    };
+    }
 }
 
 export default ConfigStore;

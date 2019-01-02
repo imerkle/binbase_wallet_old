@@ -1,6 +1,6 @@
-//@flow weak
+// @flow weak
 
-import * as React from 'react';
+import * as React from "react";
 
 const Span = (props) => {
   const {children, ...other} = props;
@@ -10,6 +10,6 @@ const Span = (props) => {
       {children}
     </span>
   );
-}
+};
 
 export default Span;

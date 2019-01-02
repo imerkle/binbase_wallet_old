@@ -1,23 +1,23 @@
-//@flow weak
+// @flow weak
 
-import * as React from 'react';
-import {IconButton, Icon} from '@material-ui/core';
-import { default as FaDiv, Fa} from '../FaDiv';
+import {Icon, IconButton} from "@material-ui/core";
+import * as React from "react";
+import { default as FaDiv, Fa} from "../FaDiv";
 
-class IconDiv extends React.Component<any>{
+class IconDiv extends React.Component<any> {
 
-  static defaultProps = {
-    icon: 'close'
-  }
-  constructor(props){
+  public static defaultProps = {
+    icon: "close",
+  };
+  constructor(props) {
     super(props);
   }
-  render(){
-    const {children, icon, onIconClick,...other} = this.props;
+  public render() {
+    const {children, icon, onIconClick, ...other} = this.props;
 
     return (
       <FaDiv {...other}>
-        <Fa fs>
+        <Fa fs={true}>
           {children}
         </Fa>
         <Fa>

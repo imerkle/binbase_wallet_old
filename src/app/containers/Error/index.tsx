@@ -1,111 +1,111 @@
 // @flow
-import * as React from 'react';
-import { observer, inject } from 'mobx-react';
+import { inject, observer } from "mobx-react";
+import * as React from "react";
 
-import { Icon } from '@material-ui/core';
-import { FaDiv, Div, Button } from 'app/components';
-import { StyleRules, Theme, withStyles } from '@material-ui/core/styles';
-import cx from 'classnames';
+import { Icon } from "@material-ui/core";
+import { StyleRules, Theme, withStyles } from "@material-ui/core/styles";
+import { Button, Div, FaDiv } from "app/components";
+import cx from "classnames";
 import { compose } from "recompose";
 
 const styleSheet = (theme: Theme): StyleRules => ({
-  icon: {
-    fontSize: '65px',
-    color: '#98a9b4'
+  "icon": {
+    fontSize: "65px",
+    color: "#98a9b4",
   },
-  overlay: {
-    position: 'fixed',
-    width: '100%',
-    height: '100%',
-    top: '0',
-    left: '0',
-		zIndex: 150,
-		transform: 'scale(0)',
-		animation: '.15s transform',
+  "overlay": {
+    position: "fixed",
+    width: "100%",
+    height: "100%",
+    top: "0",
+    left: "0",
+		  zIndex: 150,
+		  transform: "scale(0)",
+		  animation: ".15s transform",
   },
-  root: {
-    background: '#FFF',
-    textAlign: 'center',
-    padding: '60px 25px 25px 25px',
-    borderRadius: '6px',
-    position: 'relative',
-    width: '369px',
+  "root": {
+    background: "#FFF",
+    textAlign: "center",
+    padding: "60px 25px 25px 25px",
+    borderRadius: "6px",
+    position: "relative",
+    width: "369px",
   },
-  '@keyframes growDarkOverlay': {
+  "@keyframes growDarkOverlay": {
     from: {
-      transform: 'scale(0)',
+      transform: "scale(0)",
     },
     to: {
-      transform: 'scale(1)',
-      background: 'rgba(0,0,0,.3)',
+      transform: "scale(1)",
+      background: "rgba(0,0,0,.3)",
     },
-  },  
-  iconRoot:{
-    position: 'absolute',
-    top: '-30px',
-    background: '#fff',
-    padding: '10px',
-    left: '50%',
-    transform: 'translate(-50%, 0%)',
-    borderRadius: '50%',
   },
-  title: {
+  "iconRoot": {
+    position: "absolute",
+    top: "-30px",
+    background: "#fff",
+    padding: "10px",
+    left: "50%",
+    transform: "translate(-50%, 0%)",
+    borderRadius: "50%",
+  },
+  "title": {
     fontWeight: 700,
-    fontSize: '24px',
-    color: '#535559',
+    fontSize: "24px",
+    color: "#535559",
   },
-  description: {
-    marginTop: '14px',
+  "description": {
+    marginTop: "14px",
     marginBottom: 0,
     fontWeight: 300,
-    lineHeight: '28px',
-    fontSize: '18px',
-    color: '#96a6b1',
-    wordWrap: 'break-word',
+    lineHeight: "28px",
+    fontSize: "18px",
+    color: "#96a6b1",
+    wordWrap: "break-word",
   },
-  controls: {
-    marginTop: '28px',
-  },  
+  "controls": {
+    marginTop: "28px",
+  },
 });
 
-interface ErrorProps{
-  errorStore?: any,
-  langStore?: any,
-  overlayClassName: string,
-  classes?: any,
+interface ErrorProps {
+  errorStore?: any;
+  langStore?: any;
+  overlayClassName: string;
+  classes?: any;
 }
 
 @compose(
     withStyles(styleSheet),
 )
-@inject('errorStore','rootStore') 
+@inject("errorStore", "rootStore")
 @observer
-class Error extends React.Component<ErrorProps, any>{
+class Error extends React.Component<ErrorProps, any> {
 
   public static defaultProps: Partial<ErrorProps> = {
-    overlayClassName: ""
-  }
+    overlayClassName: "",
+  };
 
-  handleContainerClick(e){
+  public handleContainerClick(e) {
     e.stopPropagation();
   }
-  parseErrorCode(){
-    //const { langStore } = this.props.rootStore;
+  public parseErrorCode() {
+    // const { langStore } = this.props.rootStore;
     const {errorStore } = this.props;
-    if(errorStore.errorCode > -1 && errorStore.errorActive){
-      //errorStore.setErrorParams(langStore.getE(errorStore.errorCode));
+    if (errorStore.errorCode > -1 && errorStore.errorActive) {
+      // errorStore.setErrorParams(langStore.getE(errorStore.errorCode));
     }
   }
-  render() {
+  public render() {
     const { errorStore, classes, overlayClassName } = this.props;
 
-     if(!errorStore.errorActive){
-       return (null)
+    if (!errorStore.errorActive) {
+       return (null);
      }
-      return (
-          <FaDiv hcenter vcenter className={cx(classes.overlay, overlayClassName)} onClick={()=>{errorStore.deactivateError()}} >
+    return (
+          <FaDiv hcenter={true} vcenter={true} className={cx(classes.overlay, overlayClassName)} onClick={() => {errorStore.deactivateError(); }} >
             <Div className={cx(classes.root)} onClick={this.handleContainerClick}>
-              {errorStore.errorIcon && 
+              {errorStore.errorIcon &&
                <Div className={classes.iconRoot}>
                 <Icon className={classes.icon} >{errorStore.errorIcon}</Icon>
                 </Div>

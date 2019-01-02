@@ -1,24 +1,24 @@
 // @flow
-import * as React from 'react';
-import { observer, inject } from 'mobx-react';
+import { inject, observer } from "mobx-react";
+import * as React from "react";
 
-@inject('rootStore')
+@inject("rootStore")
 @observer
-class CoinFake extends React.Component<any, any>{
-    componentDidMount() {
-        this.init()
+class CoinFake extends React.Component<any, any> {
+    public componentDidMount() {
+        this.init();
     }
-    componentWillReceiveProps(){
-       this.init()
-    }    
-    init = () => {
+    public componentWillReceiveProps() {
+       this.init();
+    }
+    public init = () => {
         const { exchangeStore } = this.props.rootStore;
         const { base } = this.props.match.params;
 
         exchangeStore.setBase(base);
-        exchangeStore.setRel(null);   
+        exchangeStore.setRel(null);
     }
-    render() {
+    public render() {
         return (null);
     }
 }

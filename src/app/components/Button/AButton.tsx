@@ -1,49 +1,49 @@
-import * as React from 'react';
-import cx from 'classnames';
+import cx from "classnames";
+import * as React from "react";
 
-import Button from './Button';
-import { CircularProgress } from '@material-ui/core';
+import { CircularProgress } from "@material-ui/core";
+import Button from "./Button";
 
-class AButton extends React.Component<any, any>{
-  state = {
+class AButton extends React.Component<any, any> {
+  public state = {
     asyncState: null,
   };
   public isUnmounted;
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     this.isUnmounted = true;
   }
 
-  resetState() {
+  public resetState() {
     this.setState({
       asyncState: null,
     });
   }
 
-  handleClick(...args) {
+  public handleClick(...args) {
     const clickHandler = this.props.onClick;
-    if (typeof clickHandler === 'function') {
+    if (typeof clickHandler === "function") {
       this.setState({
-        asyncState: 'pending',
+        asyncState: "pending",
       });
 
       const returnFn = clickHandler.apply(null, args);
-      if (returnFn && typeof returnFn.then === 'function') {
+      if (returnFn && typeof returnFn.then === "function") {
         returnFn
           .then(() => {
             if (this.isUnmounted) {
               return;
             }
             this.setState({
-              asyncState: 'fulfilled',
+              asyncState: "fulfilled",
             });
           })
-          .catch(error => {
+          .catch((error) => {
             if (this.isUnmounted) {
               return;
             }
             this.setState({
-              asyncState: 'rejected',
+              asyncState: "rejected",
             });
             throw error;
           });
@@ -53,10 +53,10 @@ class AButton extends React.Component<any, any>{
     }
   }
 
-  render() {
+  public render() {
     const children: any = this.props.children;
-    //some stupid ts error 
-    
+    // some stupid ts error
+
     const {
       text,
       pendingText,
@@ -72,9 +72,9 @@ class AButton extends React.Component<any, any>{
     } = this.props;
 
     const { asyncState } = this.state;
-    const isPending = asyncState === 'pending';
-    const isFulfilled = asyncState === 'fulfilled';
-    const isRejected = asyncState === 'rejected';
+    const isPending = asyncState === "pending";
+    const isFulfilled = asyncState === "fulfilled";
+    const isRejected = asyncState === "rejected";
     const isDisabled = disabled || isPending;
     let buttonText;
 
@@ -96,10 +96,10 @@ class AButton extends React.Component<any, any>{
           [rejectedClass]: isRejected,
         })}
         disabled={isDisabled}
-        onClick={event => this.handleClick(event)}
-      > 
+        onClick={(event) => this.handleClick(event)}
+      >
         {/*@ts-ignore*/}
-        {typeof children === 'function' ?  children({ buttonText, isPending, isFulfilled, isRejected, }) : buttonText || children}
+        {typeof children === "function" ?  children({ buttonText, isPending, isFulfilled, isRejected }) : buttonText || children}
       </Button>
     );
   }

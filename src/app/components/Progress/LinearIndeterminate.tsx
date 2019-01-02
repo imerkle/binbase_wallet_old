@@ -1,16 +1,16 @@
 // @flow
-import * as React from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import { LinearProgress } from '@material-ui/core';
+import { LinearProgress } from "@material-ui/core";
+import { withStyles } from "@material-ui/core/styles";
+import * as React from "react";
 
 const styleSheet = {
   root: {
-    width: '100%'
+    width: "100%",
   },
 };
 
-interface LinearIndeterminateProps{
-  classes: any,
+interface LinearIndeterminateProps {
+  classes: any;
 }
 
 function LinearIndeterminate(props: LinearIndeterminateProps) {

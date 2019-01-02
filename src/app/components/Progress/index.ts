@@ -1,2 +1,2 @@
-// @flow 
-export {default as LinearIndeterminate} from './LinearIndeterminate';
+// @flow
+export {default as LinearIndeterminate} from "./LinearIndeterminate";

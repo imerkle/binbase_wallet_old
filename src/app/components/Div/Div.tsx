@@ -1,6 +1,6 @@
-//@flow weak
+// @flow weak
 
-import * as React from 'react';
+import * as React from "react";
 
 const Div = (props) => {
   const {children, ...other} = props;
@@ -10,6 +10,6 @@ const Div = (props) => {
       {children}
     </div>
   );
-}
+};
 
 export default Div;
