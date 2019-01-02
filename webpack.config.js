@@ -10,6 +10,7 @@ var outPath = path.join(__dirname, './dist');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var WebpackCleanupPlugin = require('webpack-cleanup-plugin');
+var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = {
   context: sourcePath,
@@ -112,6 +113,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: 'assets/index.html'
     }),    
+    new BundleAnalyzerPlugin(),
   ],
   devServer: {
     contentBase: sourcePath,
