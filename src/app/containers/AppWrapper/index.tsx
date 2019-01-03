@@ -71,13 +71,12 @@ class AppWrapper extends React.Component<any, any> {
                         <FaDiv className={cx(styles.fabdiv)}>
                             <Div className={cx(styles.nib, {[styles.selected]: ox == base })}></Div>
                             <Fab className={cx(styles.fab, {[styles.selected]: ox == base })} color="primary" >
-                              <img className={cx(styles.fabicon)} src={require(`cc-icons/color/${ox.toLowerCase()}.svg`)} />
+                              <img className={cx(styles.fabicon)} src={`https://raw.githack.com/imerkle/cryptocurrency-icons/master/128/color/${ox.toLowerCase()}.png`} />
                             </Fab>
                         </FaDiv>
                       </Link>
                     );
                 })}
-
   					</FaDiv>
 
   					<FaDiv c={true} className={cx(styles.mid_bar)}>
@@ -114,7 +113,7 @@ class AppWrapper extends React.Component<any, any> {
                     }
                     let icon;
                     try {
-                      icon = require(`cc-icons/color/${ox.toLowerCase()}.svg`);
+                      icon = `https://raw.githack.com/imerkle/cryptocurrency-icons/master/32/color/${ox.toLowerCase()}.png`
                     } catch (e) {}
                     return (
                     <Link key={i} onClick={() => {exchangeStore.setRel(ox); }} clearfix={true} to={`/coin/${base}/${ox}`}>

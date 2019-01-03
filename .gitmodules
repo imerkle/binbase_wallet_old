@@ -1,7 +1,3 @@
-[submodule "src/cc-icons"]
-	path = src/cc-icons
-	url = https://github.com/imerkle/cryptocurrency-icons.git
-	branch = minimal
 [submodule "src/app/constants"]
 	path = src/app/constants
 	url = https://github.com/bbase/constants.git
