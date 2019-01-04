@@ -13,7 +13,7 @@ interface LinearIndeterminateProps {
   classes: any;
 }
 
-function LinearIndeterminate(props: LinearIndeterminateProps) {
+const LinearIndeterminate = (props: LinearIndeterminateProps) => {
   const classes = props.classes;
   return (
     <div className={classes.root}>

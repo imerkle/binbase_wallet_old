@@ -6,7 +6,7 @@ import { CoinStore } from "./shared_stores/CoinStore";
 import { ExchangeStore } from "./shared_stores/ExchangeStore";
 import { PriceStore } from "./shared_stores/PriceStore";
 
-export function createStores(history: History) {
+export const createStores = (history: History) => {
   const routerStore = new RouterStore(history);
   const configStore = new ConfigStore();
 

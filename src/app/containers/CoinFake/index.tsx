@@ -8,13 +8,13 @@ class CoinFake extends React.Component<any, any> {
     public componentDidMount() {
         this.init();
     }
-    public componentWillReceiveProps() {
-       this.init();
+    public componentDidUpdate(prevProps, prevState, snapshot){
+        this.init();
     }
     public init = () => {
         const { exchangeStore } = this.props.rootStore;
         const { base } = this.props.match.params;
-
+        console.log(base)
         exchangeStore.setBase(base);
         exchangeStore.setRel(null);
     }

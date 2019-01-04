@@ -11,9 +11,24 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var WebpackCleanupPlugin = require('webpack-cleanup-plugin');
 var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+var BrotliPlugin = require('brotli-webpack-plugin');
 
+let plugins = [];
+if (isProduction){
+  plugins = [
+    new BundleAnalyzerPlugin({}),
+    new BrotliPlugin({
+      asset: '[path].br[query]',
+      test: /\.(js|css|html|svg)$/,
+      threshold: 10240,
+      minRatio: 0.8,
+    }),
+  ]
+}
 module.exports = {
   context: sourcePath,
+  devtool: "",
+  mode: isProduction ? "production" : "development",
   entry: {
     main: './main.tsx'
   },
@@ -112,8 +127,8 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       template: 'assets/index.html'
-    }),    
-    new BundleAnalyzerPlugin(),
+    }),
+    ...plugins,
   ],
   devServer: {
     contentBase: sourcePath,
@@ -125,7 +140,7 @@ module.exports = {
     stats: 'minimal',
     disableHostCheck: true,
   },
-  devtool: 'cheap-module-eval-source-map',
+  devtool: isProduction ? false : 'cheap-module-eval-source-map',
   node: {
     // workaround for webpack-dev-server issue
     // https://github.com/webpack/webpack-dev-server/issues/60#issuecomment-103411179

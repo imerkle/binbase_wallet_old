@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "Multi Currency Wallet",
-  "main": "index.js",
+  "main": "./src/main.tsx",
   "scripts": {
     "test": "jest",
     "start": "webpack-dev-server --mode development --hot --progress --colors --port 3001 --open",
@@ -22,6 +22,7 @@
     "@types/react-router": "^4.0.22",
     "@types/webpack": "^3.8.8",
     "babel-loader": "^7.1.3",
+    "brotli-webpack-plugin": "^1.0.0",
     "css-loader": "^0.28.10",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "file-loader": "^1.1.11",
@@ -53,7 +54,8 @@
     "webpack-hot-middleware": "^2.21.1"
   },
   "dependencies": {
-    "@cityofzion/neon-js": "^4.0.2",
+    "@cityofzion/neon-api": "^4.3.3",
+    "@cityofzion/neon-core": "^4.3.2",
     "@material-ui/core": "^3.6.2",
     "@material-ui/lab": "^3.0.0-alpha.25",
     "@sentry/browser": "^4.4.2",
@@ -80,11 +82,14 @@
     "react-router-dom": "^4.3.1",
     "recompose": "^0.27.1",
     "ripple-keypairs": "^0.11.0",
-    "ripple-lib": "^1.1.0",
+    "ripple-sign-keypairs": "^1.0.2",
     "thor-devkit": "git+https://github.com/imerkle/thor-devkit.js.git",
     "wallet-address-validator": "^0.2.0"
   },
   "browser": {
     "electron": false
-  }
+  },
+  "sideEffects": [
+    "*.css"
+  ]
 }

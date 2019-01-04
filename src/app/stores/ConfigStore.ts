@@ -1,8 +1,8 @@
 import { action, observable, runInAction } from "mobx";
 import Storage from "react-native-storage";
-
+import { C } from 'app/constants';
 export class ConfigStore {
-    @observable public config = {};
+    @observable public config: C = {};
     constructor() {
         this.init();
     }

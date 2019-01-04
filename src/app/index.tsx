@@ -43,13 +43,6 @@ jss.options.insertionPoint = "insertion-point-jss";
 const history = createBrowserHistory();
 const rootStore = createStores(history);
 
-export const App = hot(module)(() => (
-	<JssProvider jss={jss} generateClassName={generateClassName}>
-    	<Router history={history}>
-  			<AppFragment />
-  		</Router>
-  	</JssProvider>
-));
 
 const styleSheet = (theme) => ({
   overlay: {},
@@ -80,7 +73,7 @@ const styleSheet = (theme) => ({
 });
 
 // @ts-ignore
-@withRouter
+//@withRouter
 @compose(withStyles(styleSheet))
 @observer
 class AppFragment extends React.Component<any, any> {
@@ -120,25 +113,33 @@ class AppFragment extends React.Component<any, any> {
 		  <MuiThemeProvider theme={this.theme} >
 		  	<CssBaseline />
 				<Provider {...this.props} rootStore={rootStore} errorStore={this.errorStore} >
-		  	<Sentry
-		  	   className={cx(
-		  	   	styles.app_container,
-                classes.app_container,
-                {DARK_THEME: rootStore.appStore.theme === 0},
-                {LIGHT_THEME: rootStore.appStore.theme === 1},
-              )}
-		  	>
-			  	<Error overlayClassName={classes.overlay} />
-		  		<AppWrapper>
-			      <Switch>
-						<Route path="/" exact={true} component={Home} />
-						<Route path="/coin/:base/:rel" component={Exchange} />
-						<Route path="/coin/:base" component={CoinFake} />
-			      </Switch>
-		  		</AppWrapper>
-			</Sentry>
+					<Router history={history}>
+						<Sentry
+							className={cx(
+								styles.app_container,
+										classes.app_container,
+										{DARK_THEME: rootStore.appStore.theme === 0},
+										{LIGHT_THEME: rootStore.appStore.theme === 1},
+									)}
+						>
+							<Error overlayClassName={classes.overlay} />
+							<AppWrapper>
+								<Switch>
+								<Route path="/" exact={true} component={Home} />
+								<Route path="/coin/:base/:rel" component={Exchange} />
+								<Route path="/coin/:base" component={CoinFake} />
+								</Switch>
+							</AppWrapper>
+					</Sentry>
+				</Router>
 			</Provider>
 		  </MuiThemeProvider>
 		);
 	}
 }
+
+export const App = hot(module)(() => (
+	<JssProvider jss={jss} generateClassName={generateClassName}>
+			<AppFragment />
+	</JssProvider>
+));

@@ -68,7 +68,7 @@ class Exchange extends React.Component<any, any> {
     amountField: "",
     addressError: false,
   };
-  public componentWillReceiveProps() {
+  public componentDidUpdate(prevProps, prevState, snapshot) {
     this.init();
   }
   public componentDidMount() {
@@ -95,9 +95,8 @@ class Exchange extends React.Component<any, any> {
     }
     const balance = coinStore.balances[rel] || {balance: 0, pending: 0};
     const balance_usd = priceStore.getFiatPrice(rel) * balance.balance;
-    const { explorer } = getConfig(config, rel, base);
+    const { explorer } = getConfig(config, {rel, base});
     const txs = toJS(_txs);
-    console.log(base, rel, txs);
   	 return (
       <FaDiv c={true}>
         <FaDiv>
@@ -149,7 +148,7 @@ class Exchange extends React.Component<any, any> {
               value={addressField}
               onChange={(e) => {
                   let _addressError = false;
-                  if (!isValidAddress(config, e.target.value, rel, base)) {
+                  if (!isValidAddress(config, e.target.value, {rel, base})) {
                     _addressError = true;
                   }
                   this.setState({addressField: e.target.value, addressError: _addressError });
@@ -166,7 +165,7 @@ class Exchange extends React.Component<any, any> {
                 type="text"
                 fullWidth={true} />
                 <IconButton onClick={() => {
-                this.setState({ amountField: balance.balance - (exchangeStore.fees / getAtomicValue(config, rel, base))});
+                this.setState({ amountField: balance.balance - (exchangeStore.fees / getAtomicValue(config, {rel, base}))});
                 }} color="primary" ><Icon style={{fontSize: 14}} className={cx(classes.icon)}>call_made</Icon></IconButton>
             </FaDiv>
           </FaDiv>
@@ -217,7 +216,7 @@ class Exchange extends React.Component<any, any> {
     const balance = coinStore.balances[rel];
     return new Promise(async (resolve, reject) => {
         const amt = parseFloat(amountField);
-        const fees = exchangeStore.fees / getAtomicValue(config, rel, base);
+        const fees = exchangeStore.fees / getAtomicValue(config, {rel, base});
 
         if (addressError || !addressField) {
           appStore.setSnackMsg("Invalid Bitcoin Address");
@@ -237,7 +236,7 @@ class Exchange extends React.Component<any, any> {
         }
         appStore.setSnackMsg("Transaction is being broadcasted!");
         try {
-          const {txid} = await exchangeStore.send(addressField, amt);
+          const txid = await exchangeStore.send(addressField, amt);
           appStore.setSnackMsg(`Transaction broadcast completed. tx: ${txid}`);
           this.setState({
             addressField: "",
