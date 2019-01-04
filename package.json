@@ -84,7 +84,7 @@
     "ripple-keypairs": "^0.11.0",
     "ripple-sign-keypairs": "^1.0.2",
     "thor-devkit": "git+https://github.com/imerkle/thor-devkit.js.git",
-    "wallet-address-validator": "^0.2.0"
+    "wallet-address-validator": "^0.2.4"
   },
   "browser": {
     "electron": false
