@@ -4,11 +4,6 @@
 	color: #FFF;
 	transition: .15s linear all;
 }
-.root{
-	position: relative;
-	z-index: auto;
-	color: #FFF;
-}
 .fabdiv{
 	margin: 10px 0;
 }
@@ -40,7 +35,7 @@
 
 .mid_bar{
 	background: #292726;	
-	width: 300px;
+	min-width: 300px;
 }
 .top_bar{
 	flex: 1;
@@ -137,12 +132,13 @@
 	margin-left: -372px;
 }
 .slide_bar{
-    justify-content: center;
+	justify-content: center;
     background: #292929;
-    display: none;
+	display: none;
 }
 .slide_bar.visible{
-    display: flex;
+	opacity: 1;
+	display: flex;
 }
 .assets_menu_container{
 	height: 0px;

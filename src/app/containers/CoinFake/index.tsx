@@ -14,7 +14,6 @@ class CoinFake extends React.Component<any, any> {
     public init = () => {
         const { exchangeStore } = this.props.rootStore;
         const { base } = this.props.match.params;
-        console.log(base)
         exchangeStore.setBase(base);
         exchangeStore.setRel(null);
     }

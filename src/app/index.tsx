@@ -58,6 +58,7 @@ const styleSheet = (theme) => ({
     },
   },
   app_container: {
+		color: "#FFF",
     "&$dark_invisible": {
       "& $overlay": {
         transform: "scale(0)",

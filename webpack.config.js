@@ -12,6 +12,7 @@ var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var WebpackCleanupPlugin = require('webpack-cleanup-plugin');
 var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 var BrotliPlugin = require('brotli-webpack-plugin');
+var HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 
 let plugins = [];
 if (isProduction){
@@ -128,6 +129,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: 'assets/index.html'
     }),
+    new HardSourceWebpackPlugin(),
     ...plugins,
   ],
   devServer: {

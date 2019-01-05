@@ -15,6 +15,7 @@ class SentryBoundary extends React.Component<any, any> {
     }
 
     public componentDidCatch(error, errorInfo) {
+      console.log(error, errorInfo)
       Sentry.withScope((scope) => {
         Object.keys(errorInfo).forEach((key) => {
           scope.setExtra(key, errorInfo[key]);
