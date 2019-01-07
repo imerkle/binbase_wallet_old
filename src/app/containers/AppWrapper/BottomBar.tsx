@@ -14,16 +14,16 @@ class BottomBar extends React.Component<any, any> {
         const label = !appStore.slideLeft ? "Hide Sidebar" : "Show Sidebar";
         const icon_label = !appStore.slideLeft ? "arrow_back_io" : "arrow_forward";
         return (
-            <FaDiv vcenter={true} className={cx(styles.bottom_bar)}>
+            <FaDiv vcenter={true} className={cx(styles.col2_bottom)}>
                 <Tooltip title={label} aria-label={label}>
-                    <Fa fa={true} onClick={this.toggleSlide}>
+                    <Fa fa={true} onClick={appStore.toggleSlide}>
                         <IconButton color="primary" >
                             <Icon style={icon_style}>{icon_label}</Icon>
                         </IconButton>
                     </Fa>
                 </Tooltip>
                 <Tooltip title={"Settings"} aria-label={"Settings"}>
-                    <Fa fa={true} onClick={this.openSettings}>
+                    <Fa fa={true} onClick={appStore.toggleSettings}>
                         <IconButton color="primary" >
                             <Icon style={icon_style}>settings</Icon>
                         </IconButton>
@@ -31,11 +31,6 @@ class BottomBar extends React.Component<any, any> {
                 </Tooltip>                
             </FaDiv>
         )
-    }
-    openSettings = (): void => {}
-    toggleSlide = (): void => {
-        const { appStore } = this.props.rootStore;
-        appStore.toggleSlide();
     }
 }
 export default BottomBar;

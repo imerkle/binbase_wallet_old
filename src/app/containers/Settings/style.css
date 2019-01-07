@@ -1,0 +1,7 @@
+@import  "../../variables.pcss";
+.root{
+    @extend %abs;
+    @extend %max;
+    background: #303030;
+    padding: 50px;
+}

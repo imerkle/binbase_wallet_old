@@ -16,6 +16,7 @@ import * as stylesg from "../..//style.css";
 import * as styles from "./style.css";
 import Slider from './Slider';
 import BottomBar from './BottomBar';
+import Settings from 'app/containers/Settings';
 
 const arrows = ["Coin", "Price"];
 @inject("rootStore")
@@ -33,9 +34,9 @@ class AppWrapper extends React.Component<any, any> {
             open={appStore.snackopen}
             onClose={() => {appStore.snackOpen(false); }}
           />
-  				<FaDiv fa={true} className={cx(stylesg._100vh)}>
+         <div className={cx(styles.root, stylesg._100vh)}>
 
-  					<FaDiv c={true} className={cx(styles.left_bar, {[styles.slideLeft]: appStore.slideLeft})}>
+  					<FaDiv c={true} className={cx(styles.col1, {[styles.slideLeft]: appStore.slideLeft})}>
                 <Link onClick={() => {
                   exchangeStore.setBase("");
                   exchangeStore.setRel("");
@@ -64,13 +65,12 @@ class AppWrapper extends React.Component<any, any> {
                 })}
   					</FaDiv>
 
-  					<FaDiv c={true} className={cx(styles.mid_bar)}>
-  						<FaDiv className={cx(styles.top_bar)}>
+            <FaDiv className={cx(styles.col2)}>
                 {!base &&
                   <List component="nav" style={{padding: 0, width: "100%"}} >
                     <Link clearfix={true} to="/">
                       <ListItem button={true}>
-                        <ListItemText primary="Home" secondary="Generate, Restore or Export Wallet" />
+                        <ListItemText primary="Home" secondary="News, Changelog" />
                       </ListItem>
                     </Link>
                   </List>
@@ -125,16 +125,13 @@ class AppWrapper extends React.Component<any, any> {
                   </FaDiv>
                 }
   						</FaDiv>
-              
-              <BottomBar />
-
-	  			  </FaDiv>
-
+            <BottomBar />
             <Slider />
-            <Fa fs={true} className={cx(stylesg.mar_20, styles.scrollable)}>
+           <Fa fs={true} className={cx(styles.col3, stylesg.mar_20, styles.scrollable)}>
               {children}
             </Fa>
-  			</FaDiv>
+            {appStore.settingsOpen && <Settings />}
+         </div>
       </>
   		);
   }

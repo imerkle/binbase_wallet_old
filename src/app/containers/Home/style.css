@@ -1,4 +1,22 @@
 .cover{
     background-size: cover;
-    height: 300px;
+    height: 200px;
+    position: relative;
+    border-radius: 8px;
+}
+.bottomShadow{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0,0,0,.5);
+    height: 100%;
+    mask: linear-gradient(180deg,transparent,#000 95%);    
+}
+.bottomTitle{
+    position: absolute;
+    padding: 40px;
+    font-size: 24px;
+    z-index: 2;
+    bottom: 0;    
 }

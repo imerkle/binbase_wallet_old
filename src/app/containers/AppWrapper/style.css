@@ -1,9 +1,27 @@
-.left_bar{
+@import  "../../variables.pcss";
+.root{
+	display: grid;
+	grid-template-columns: 75px 22% auto;
+	grid-template-rows: 90% 10%;
+}
+.col1{
 	padding: 5px 10px 5px 0px;
-	background: #1a1818;
+	background: var(--primary-bg-darkest);
 	color: #FFF;
 	transition: .15s linear all;
+	grid-area: 1/1/3/2;
 }
+.col2{
+	background: #292726;	
+	grid-area: 1/2/2/3;
+}
+.col2_bottom{
+	grid-area: 2/2/3/3;
+}
+.col3{
+	grid-area: 1/3/3/4;
+}
+
 .fabdiv{
 	margin: 10px 0;
 }
@@ -32,18 +50,6 @@
 	opacity: 1;
 }
 
-
-.mid_bar{
-	background: #292726;	
-	min-width: 300px;
-}
-.top_bar{
-	flex: 1;
-}
-.bottom_bar{
-	flex-shrink: 0;
-	padding: 10px;
-}
 .username{
 	color: #fbfbfb;
 }

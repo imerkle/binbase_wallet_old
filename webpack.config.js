@@ -59,9 +59,10 @@ module.exports = {
           ? 'ts-loader'
           : ['babel-loader?plugins=react-hot-loader/babel', 'ts-loader']
       },
-      // css
+      // css, pcss, sass, scss
       {
-        test: /\.css$/,
+        //test: /\.css$/,
+        test: /\.(p|sa|sc|c)ss$/,
         use: ExtractTextPlugin.extract({
           fallback: 'style-loader',
           use: [
@@ -77,16 +78,9 @@ module.exports = {
             {
               loader: 'postcss-loader',
               options: {
-                ident: 'postcss',
-                plugins: [
-                  require('postcss-import')({ addDependencyTo: webpack }),
-                  require('postcss-url')(),
-                  require('postcss-cssnext')(),
-                  require('postcss-reporter')(),
-                  require('postcss-browser-reporter')({
-                    disabled: isProduction
-                  })
-                ]
+                config: {
+                  path: __dirname + '/postcss.config.js'
+                },
               }
             }
           ]
