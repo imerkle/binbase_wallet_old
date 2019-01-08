@@ -6,6 +6,7 @@ import { inject, observer } from "mobx-react";
 import * as React from "react";
 import * as stylesg from "../../style.css";
 import * as styles from "./style.css";
+import { Scrollbars } from "react-custom-scrollbars";
 
 const settingMenu = [
     "My Account",
@@ -60,6 +61,7 @@ class Settings extends React.Component<any, any> {
                         })}
                     </List>
                 </FaDiv>
+                <Scrollbars>
                 <div className={cx(styles.col2)}>
                     {selectedIndex == 0 && !coinStore.isUnlocked &&
                         <>
@@ -93,10 +95,10 @@ class Settings extends React.Component<any, any> {
 
                             {this.state.mnemonic_copy &&
                                 <Div>
-                                    <Typography variant="h5">Generated Mnemonic</Typography>
-                                    <Typography variant="caption">Backup this 24 word mnemonic phrase carefully</Typography>
+                                <Typography className={cx(stylesg.h5)} variant="h5">Generated Mnemonic</Typography>
+                                <Typography className={cx(stylesg.caption)} variant="caption">Backup this 24 word mnemonic phrase carefully</Typography>
                                     <FaDiv vcenter={true}>
-                                        <Paper className={cx(stylesg.mar_10_0)}>{this.state.mnemonic_copy}</Paper>
+                                    <Paper className={cx(stylesg.mar_10_0, stylesg.pad_20)}>{this.state.mnemonic_copy}</Paper>
                                         <TextField
                                             className={cx(stylesg.invisible)}
                                             value={mnemonic_copy}
@@ -151,6 +153,7 @@ class Settings extends React.Component<any, any> {
                     </>
                     }
             </div>
+            </Scrollbars>
             <div className={cx(styles.col3)}>
                 <Tooltip title={"Close Settings"} aria-label={"Close Settings"}>
                     <IconButton className={cx(stylesg.icon_border)} onClick={appStore.toggleSettings}>

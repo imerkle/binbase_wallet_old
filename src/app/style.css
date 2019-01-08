@@ -56,6 +56,16 @@
 	text-transform: uppercase;
 	font-weight: bold;	
 }
+.h5{
+	text-transform: uppercase;
+	color: #bec0c4;
+	font-size: 12px;	
+	font-weight: bold;	
+}
+.caption{
+	color: #71757c;
+	font-size: 14px;
+}
 .divider{
 	margin: 40px 0;
 	background-color: rgba(123, 127, 134, 0.3);

@@ -74,7 +74,7 @@ const styleSheet = (theme) => ({
 });
 
 // @ts-ignore
-//@withRouter
+@withRouter
 @compose(withStyles(styleSheet))
 @observer
 class AppFragment extends React.Component<any, any> {
@@ -114,7 +114,6 @@ class AppFragment extends React.Component<any, any> {
 		  <MuiThemeProvider theme={this.theme} >
 		  	<CssBaseline />
 				<Provider {...this.props} rootStore={rootStore} errorStore={this.errorStore} >
-					<Router history={history}>
 						<Sentry
 							className={cx(
 								styles.app_container,
@@ -132,7 +131,6 @@ class AppFragment extends React.Component<any, any> {
 								</Switch>
 							</AppWrapper>
 					</Sentry>
-				</Router>
 			</Provider>
 		  </MuiThemeProvider>
 		);
@@ -141,6 +139,8 @@ class AppFragment extends React.Component<any, any> {
 
 export const App = hot(module)(() => (
 	<JssProvider jss={jss} generateClassName={generateClassName}>
+		<Router history={history}>
 			<AppFragment />
+		</Router>
 	</JssProvider>
 ));
