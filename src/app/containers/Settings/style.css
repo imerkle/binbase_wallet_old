@@ -3,5 +3,24 @@
     @extend %abs;
     @extend %max;
     background: #303030;
-    padding: 50px;
+    display: grid;
+    grid-template-columns: 30% 50% 20%;
+}
+.col1, .col2, .col3{
+    padding: 65px 25px 60px 25px;
+}
+.col1{
+    grid-area: 1/1/2/2;
+    background-color: var(--primary-bg-darker);
+    justify-content: right;
+}
+.col2{
+    grid-area: 1/2/1/3;
+}
+.col3{
+    grid-area: 1/3/1/4;
+}
+.listitem{
+    border-radius: 4px;
+    margin-bottom: 8px;
 }

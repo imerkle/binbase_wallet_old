@@ -7,19 +7,21 @@ import { withStyles } from "@material-ui/core/styles";
 
 export const styleSheet = (theme) => ({
   disabled: {},
+  /*
   underline: {
     "&:hover:not($disabled):before": {
       backgroundColor: theme.palette.primary.main,
       height: 1,
     },
   },
+  */
 });
 
 class TextFieldX extends React.Component<any> {
 
   public render() {
     const {
-      withUnderline,
+      //withUnderline,
       classes,
       InputProps,
       children,
@@ -41,10 +43,11 @@ class TextFieldX extends React.Component<any> {
               classes: {
                 ...classesInputProps,
                 disabled: classes.disabled,
-                underline: classes.underline,
+                //underline: classes.underline,
               },
               ...otherInputProps,
             }}
+          variant="outlined"
          {...other}
          >
         {children}

@@ -1,19 +1,24 @@
-var webpack = require('webpack');
-var path = require('path');
+//const webpack = require('webpack');
+const path = require('path');
 
 // variables
-var isProduction = process.argv.indexOf('-p') >= 0;
-var sourcePath = path.join(__dirname, './src');
-var outPath = path.join(__dirname, './dist');
+const isProduction = process.argv.indexOf('-p') >= 0;
+const sourcePath = path.join(__dirname, './src');
+const outPath = path.join(__dirname, './dist');
+const glob = require('glob');
 
 // plugins
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var WebpackCleanupPlugin = require('webpack-cleanup-plugin');
-var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-var BrotliPlugin = require('brotli-webpack-plugin');
-var HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const WebpackCleanupPlugin = require('webpack-cleanup-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const BrotliPlugin = require('brotli-webpack-plugin');
+const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
+const PurgecssPlugin = require('purgecss-webpack-plugin');
 
+const PATHS = {
+  src: path.join(__dirname, 'src')
+}
 let plugins = [];
 if (isProduction){
   plugins = [
@@ -120,6 +125,9 @@ module.exports = {
       filename: 'styles.css',
       disable: !isProduction
     }),
+    new PurgecssPlugin({
+      paths: glob.sync(`${PATHS.src}/*`)
+    }),    
     new HtmlWebpackPlugin({
       template: 'assets/index.html'
     }),

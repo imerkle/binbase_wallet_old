@@ -1,8 +1,14 @@
+@import  "./variables.pcss";
+
 .pad_50{ padding: 50px; }
 
 .mar_20{ margin: 20px; }
 .mar_0_20{ margin: 0px 20px; }
 .mar_20_0{ margin: 20px 0px; }
+
+.mar_10{ margin: 10px; }
+.mar_0_10{ margin: 0px 10px; }
+.mar_10_0{ margin: 10px 0px; }
 
 .pad_20{ padding: 20px; }
 .pad_0_20{ padding: 0px 20px; }
@@ -37,4 +43,20 @@
 	position: absolute;
 	opacity: 0;
 	z-index: -1;
+}
+.icon{
+	font-size: 14px;
+	color: var(--icon-color);
+}
+.icon_border{
+	border: 1px solid var(--icon-color);
+}
+.h4{
+	font-size: 20px;
+	text-transform: uppercase;
+	font-weight: bold;	
+}
+.divider{
+	margin: 40px 0;
+	background-color: rgba(123, 127, 134, 0.3);
 }

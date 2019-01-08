@@ -14,7 +14,6 @@ import {toJS} from  "mobx";
 import { Scrollbars } from "react-custom-scrollbars";
 import * as stylesg from "../..//style.css";
 import * as styles from "./style.css";
-import Slider from './Slider';
 import BottomBar from './BottomBar';
 import Settings from 'app/containers/Settings';
 
@@ -36,7 +35,7 @@ class AppWrapper extends React.Component<any, any> {
           />
          <div className={cx(styles.root, stylesg._100vh)}>
 
-  					<FaDiv c={true} className={cx(styles.col1, {[styles.slideLeft]: appStore.slideLeft})}>
+  					<FaDiv c={true} className={cx(styles.col1)}>
                 <Link onClick={() => {
                   exchangeStore.setBase("");
                   exchangeStore.setRel("");
@@ -67,7 +66,7 @@ class AppWrapper extends React.Component<any, any> {
 
             <FaDiv className={cx(styles.col2)}>
                 {!base &&
-                  <List component="nav" style={{padding: 0, width: "100%"}} >
+                  <List style={{padding: 0, width: "100%"}} >
                     <Link clearfix={true} to="/">
                       <ListItem button={true}>
                         <ListItemText primary="Home" secondary="News, Changelog" />
@@ -126,12 +125,11 @@ class AppWrapper extends React.Component<any, any> {
                 }
   						</FaDiv>
             <BottomBar />
-            <Slider />
-           <Fa fs={true} className={cx(styles.col3, stylesg.mar_20, styles.scrollable)}>
+           <Fa fs={true} className={cx(styles.col3, styles.scrollable)}>
               {children}
             </Fa>
-            {appStore.settingsOpen && <Settings />}
          </div>
+        {appStore.settingsOpen && <Settings />}
       </>
   		);
   }

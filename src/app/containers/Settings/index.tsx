@@ -1,5 +1,5 @@
 // @flow
-import { Icon, IconButton, Paper, Typography } from "@material-ui/core";
+import { Divider, List, ListItem, ListItemText,Icon, IconButton, Paper, Typography, Tooltip } from "@material-ui/core";
 import { AButton, Div, Fa, FaDiv, TextField } from "app/components";
 import cx from "classnames";
 import { inject, observer } from "mobx-react";
@@ -7,6 +7,10 @@ import * as React from "react";
 import * as stylesg from "../../style.css";
 import * as styles from "./style.css";
 
+const settingMenu = [
+    "My Account",
+    "Backup & Restore",
+];
 @inject("rootStore")
 @observer
 class Settings extends React.Component<any, any> {
@@ -16,6 +20,7 @@ class Settings extends React.Component<any, any> {
         mnemonic_paste: "",
         passphrase_paste: "",
         passphrase_unlock: "",
+        selectedIndex: 0, 
     };
     public unlockWallet = async () => {
         await this.props.rootStore.coinStore.generateKeys(false, this.state.passphrase_unlock);
@@ -30,20 +35,37 @@ class Settings extends React.Component<any, any> {
         const mnemonic = await this.props.rootStore.coinStore.generateKeys(false, this.state.passphrase_paste, this.state.mnemonic_paste);
         this.props.rootStore.appStore.setSnackMsg("Wallet restored!");
     }
+    handleListItemClick = (e, i) => {
+        this.setState({selectedIndex: i})
+    }
     public render() {
         const { appStore, coinStore } = this.props.rootStore;
-        const { mnemonic_copy } = this.state;
+        const { mnemonic_copy, selectedIndex } = this.state;
         return (
-            <FaDiv className={cx(styles.root)} fs={true} c={true}>
-                <FaDiv className={cx(styles.left_bar)}>
-                    
+            <div className={cx(styles.root)}>
+                <FaDiv className={cx(styles.col1)}>
+                    <List>
+                        {settingMenu.map((o, i)=>{
+                            return (
+                                <ListItem
+                                    className={cx(styles.listitem)}
+                                    button
+                                    selected={this.state.selectedIndex === i}
+                                    onClick={event => this.handleListItemClick(event, i)}
+                                    key={i}
+                                >
+                                    <ListItemText primary={o} />
+                                </ListItem>
+                            )
+                        })}
+                    </List>
                 </FaDiv>
-                <FaDiv className={cx(styles.right_bar)}>
-                    {!coinStore.isUnlocked &&
-                        <FaDiv fs={true} c={true} className={cx(stylesg.mar_20)}>
-                            <Typography variant="h4">Unlock Wallet</Typography>
+                <div className={cx(styles.col2)}>
+                    {selectedIndex == 0 && !coinStore.isUnlocked &&
+                        <>
+                            <Typography className={cx(stylesg.h4)} variant="h4">Unlock Wallet</Typography>
                             <TextField
-                                className={cx(stylesg.mar_20_0)}
+                                className={cx(stylesg.mar_10_0)}
                                 value={this.state.passphrase_unlock}
                                 onChange={(e) => { this.setState({ passphrase_unlock: e.target.value }); }}
                                 label={`Your Passphrase`}
@@ -51,16 +73,17 @@ class Settings extends React.Component<any, any> {
                                 fullWidth={true}
                             />
                             <AButton
-                                className={cx(stylesg.mar_20_0, stylesg.pad_20)}
+                                className={cx(stylesg.mar_10_0)}
                                 variant="contained" color="secondary"
                                 onClick={this.unlockWallet}>Unlock Wallet</AButton>
-                        </FaDiv>
+                        </>
                     }
-                    <FaDiv>
-                        <FaDiv fs={true} c={true} className={cx(stylesg.mar_0_20)} style={{ flex: 0.5 }}>
-                            <Typography variant="h4">Generate New Wallet</Typography>
+                    {selectedIndex == 1 &&
+                    <>
+                        <>
+                            <Typography className={cx(stylesg.h4)} variant="h4">Generate New Wallet</Typography>
                             <TextField
-                                className={cx(stylesg.mar_20_0)}
+                                className={cx(stylesg.mar_10_0)}
                                 value={this.state.passphrase}
                                 onChange={(e) => { this.setState({ passphrase: e.target.value }); }}
                                 label={`New Passphrase`}
@@ -73,7 +96,7 @@ class Settings extends React.Component<any, any> {
                                     <Typography variant="h5">Generated Mnemonic</Typography>
                                     <Typography variant="caption">Backup this 24 word mnemonic phrase carefully</Typography>
                                     <FaDiv vcenter={true}>
-                                        <Paper className={cx(stylesg.mar_20_0, stylesg.pad_20)}>{this.state.mnemonic_copy}</Paper>
+                                        <Paper className={cx(stylesg.mar_10_0)}>{this.state.mnemonic_copy}</Paper>
                                         <TextField
                                             className={cx(stylesg.invisible)}
                                             value={mnemonic_copy}
@@ -88,19 +111,22 @@ class Settings extends React.Component<any, any> {
                                             window.getSelection().addRange(range);
                                             document.execCommand("copy");
                                             appStore.setSnackMsg("Mnemonic phrase copied to clipboard");
-                                        }} color="primary" ><Icon style={{ fontSize: 14 }} >file_copy</Icon></IconButton>
+                                        }}>
+                                            <Icon className={cx(stylesg.icon)}>file_copy</Icon>
+                                        </IconButton>
                                     </FaDiv>
                                 </Div>
                             }
                             <AButton
-                                className={cx(stylesg.mar_20_0, stylesg.pad_20)}
+                                className={cx(stylesg.mar_10_0)}
                                 variant="contained" color="primary"
                                 onClick={this.generateNewWallet}>Generate New Wallet</AButton>
-                        </FaDiv>
-                        <FaDiv fs={true} c={true} style={{ flex: 0.5 }}>
-                            <Typography variant="h4">Restore Wallet</Typography>
+                        </>
+                        <Divider className={cx(stylesg.divider)} />
+                        <>
+                            <Typography className={cx(stylesg.h4)} variant="h4">Restore Wallet</Typography>
                             <TextField
-                                className={cx(stylesg.mar_20_0)}
+                                className={cx(stylesg.mar_10_0)}
                                 rowsMax="4"
                                 value={this.state.mnemonic_paste}
                                 onChange={(e) => { this.setState({ mnemonic_paste: e.target.value }); }}
@@ -110,7 +136,7 @@ class Settings extends React.Component<any, any> {
                                 fullWidth={true}
                             />
                             <TextField
-                                className={cx(stylesg.mar_20_0)}
+                                className={cx(stylesg.mar_10_0)}
                                 value={this.state.passphrase_paste}
                                 onChange={(e) => { this.setState({ passphrase_paste: e.target.value }); }}
                                 label={`Your Passphrase`}
@@ -118,13 +144,21 @@ class Settings extends React.Component<any, any> {
                                 fullWidth={true}
                             />
                             <AButton
-                                className={cx(stylesg.mar_20_0, stylesg.pad_20)}
+                                className={cx(stylesg.mar_10_0)}
                                 variant="contained" color="secondary"
                                 onClick={this.restoreWallet}>Restore Wallet</AButton>
-                        </FaDiv>
-                    </FaDiv>
-            </FaDiv>
-        </FaDiv>
+                        </>
+                    </>
+                    }
+            </div>
+            <div className={cx(styles.col3)}>
+                <Tooltip title={"Close Settings"} aria-label={"Close Settings"}>
+                    <IconButton className={cx(stylesg.icon_border)} onClick={appStore.toggleSettings}>
+                            <Icon className={cx(stylesg.icon)} style={{fontSize: 24,}}>close</Icon>
+                    </IconButton>
+                </Tooltip>
+            </div>
+        </div>
         );
     }
 }
