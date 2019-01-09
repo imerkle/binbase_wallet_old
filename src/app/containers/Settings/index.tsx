@@ -27,6 +27,10 @@ class Settings extends React.Component<any, any> {
         await this.props.rootStore.coinStore.generateKeys(false, this.state.passphrase_unlock);
         this.props.rootStore.appStore.setSnackMsg("Wallet unlocked!");
     }
+    public lockWallet = async () => {
+        await this.props.rootStore.coinStore.emptyKeys();
+        this.props.rootStore.appStore.setSnackMsg("Wallet locked!");
+    }
     public generateNewWallet = async () => {
         const mnemonic = await this.props.rootStore.coinStore.generateKeys(true, this.state.passphrase);
         this.props.rootStore.appStore.setSnackMsg("New Wallet Generated!");
@@ -79,6 +83,9 @@ class Settings extends React.Component<any, any> {
                                 variant="contained" color="secondary"
                                 onClick={this.unlockWallet}>Unlock Wallet</AButton>
                         </>
+                    }
+                    {selectedIndex == 0 && coinStore.isUnlocked &&
+                        <AButton className={cx(stylesg.mar_10_0)} variant="contained" color="secondary" onClick={this.lockWallet}>Lock Wallet</AButton>
                     }
                     {selectedIndex == 1 &&
                     <>
