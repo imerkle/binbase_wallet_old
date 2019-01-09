@@ -5,6 +5,7 @@
     background: #303030;
     display: grid;
     grid-template-columns: 30% 50% 20%;
+    z-index: 10;
 }
 .col1, .col2, .col3{
     padding: 65px 25px 60px 25px;

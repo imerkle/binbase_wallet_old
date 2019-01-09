@@ -19,6 +19,7 @@
 }
 .col3{
 	grid-area: 1/3/3/4;
+	padding: 10px 30px;
 }
 
 .fabdiv{
@@ -128,11 +129,6 @@
 .li{}
 .li:hover,.li.selected{
 	background: #383838;
-}
-.scrollable{
-	overflow: auto;
-	height: 100vh;
-	padding: 10px 30px;
 }
 .assets_menu_container{
 	height: 0px;

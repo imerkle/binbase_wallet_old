@@ -26,7 +26,24 @@ class AppWrapper extends React.Component<any, any> {
     const { appStore, exchangeStore, priceStore, coinStore, configStore } = this.props.rootStore;
     const { base, rel} = exchangeStore;
     const {config} = configStore;
-    const sorter = {value: 1, dir: 1};
+    let coinlist = base ? ([base]).concat(toJS(config)[base].forks || [], Object.keys(config[base].assets || {})) : [];
+    if(appStore.sort_type == 0 && appStore.sort_direction == 0){
+      coinlist.sort((a,b)=>{if(a < b){ return -1 } if (a > b){return 1} return 0})
+    }else if(appStore.sort_type == 0 && appStore.sort_direction == 1){
+      coinlist.sort((b,a)=>{if(a < b){ return -1 } if (a > b){return 1} return 0})
+    }else if(appStore.sort_type == 1 && appStore.sort_direction == 0){
+      coinlist.sort((a,b)=>{
+        const ap = priceStore.getFiatPrice(a) * (coinStore.balances[a] || {balance: 0}).balance;
+        const bp = priceStore.getFiatPrice(b) * (coinStore.balances[b] || {balance: 0}).balance;
+        if(bp < ap){ return -1 } if (a > b){return 1} return 0
+      })
+    }else if(appStore.sort_type == 1 && appStore.sort_direction == 1){
+      coinlist.sort((b,a)=>{
+        const ap = priceStore.getFiatPrice(a) * (coinStore.balances[a] || {balance: 0}).balance;
+        const bp = priceStore.getFiatPrice(b) * (coinStore.balances[b] || {balance: 0}).balance;
+        if(bp < ap){ return -1 } if (a > b){return 1} return 0
+      })
+    }
   	 return (
       <>
           <Snackbar message={appStore.snackmsg} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
@@ -82,12 +99,15 @@ class AppWrapper extends React.Component<any, any> {
                     <FaDiv>
                       {arrows.map((o, i) => {
                         return (
-                          <FaDiv key={i} button={true} onClick={() => { exchangeStore.toggleSort(i); }} fs={true} vcenter={true} className={cx(styles.sorter, {[styles.selected]: sorter.value == i})}><Icon className={cx(styles.arrow)} style={{fontSize: "10px", paddingRight: "3px"}}>{sorter.dir ? "arrow_upward" : "arrow_downward"}</Icon><Fa fs={true} tcenter={true}>{o}</Fa></FaDiv>
+                          <FaDiv key={i} button={true} onClick={() => { appStore.toggleSort(i) }} fs={true} vcenter={true} className={cx(styles.sorter, {[styles.selected]: appStore.sort_type == i})}>
+                              <Icon className={cx(styles.arrow)} style={{fontSize: "10px", paddingRight: "3px"}}>{appStore.sort_direction ? "arrow_upward" : "arrow_downward"}</Icon>
+                              <Fa fs={true} tcenter={true}>{o}</Fa>
+                          </FaDiv>
                           );
                       })}
                     </FaDiv>
                     <Scrollbars className={cx(styles.assets_menu_container)}>
-                      { ([base]).concat(toJS(config)[base].forks || [], Object.keys(config[base].assets || {})).map((ox, i) =>  {
+                      { coinlist.map((ox, i) =>  {
                         const balance = coinStore.balances[ox] || {balance: 0};
                         const price_usd = priceStore.getFiatPrice(ox);
                         if (!(balance.balance > 0 || base == ox)) {
@@ -125,9 +145,9 @@ class AppWrapper extends React.Component<any, any> {
                 }
   						</FaDiv>
             <BottomBar />
-           <Fa fs={true} className={cx(styles.col3, styles.scrollable)}>
-              {children}
-            </Fa>
+           <Scrollbars className={cx(styles.col3)}>
+             <div style={{padding: "10px 30px"}}>{children}</div>
+           </Scrollbars>
          </div>
         {appStore.settingsOpen && <Settings />}
       </>

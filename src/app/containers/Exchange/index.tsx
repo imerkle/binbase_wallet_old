@@ -97,7 +97,7 @@ class Exchange extends React.Component<any, any> {
     const balance_usd = priceStore.getFiatPrice(rel) * balance.balance;
     const { explorer } = getConfig(config, {rel, base});
     const txs = toJS(_txs);
-  	 return (
+     return (
       <FaDiv c={true}>
         <FaDiv>
           <FaDiv fs={true} c={true}>
@@ -161,7 +161,7 @@ class Exchange extends React.Component<any, any> {
                 className={cx(stylesg.mar_20)}
                 value={amountField}
                 onChange={(e) => { this.setState({amountField: e.target.value }); }}
-                label={`${rel} Amount to Send`}
+                label={`${rel} Amount`}
                 type="text"
                 fullWidth={true} />
                 <IconButton onClick={() => {

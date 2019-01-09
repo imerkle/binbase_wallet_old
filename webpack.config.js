@@ -125,9 +125,11 @@ module.exports = {
       filename: 'styles.css',
       disable: !isProduction
     }),
+    /*
     new PurgecssPlugin({
       paths: glob.sync(`${PATHS.src}/*`)
-    }),    
+    }),
+    */
     new HtmlWebpackPlugin({
       template: 'assets/index.html'
     }),

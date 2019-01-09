@@ -61,8 +61,8 @@ class Settings extends React.Component<any, any> {
                         })}
                     </List>
                 </FaDiv>
-                <Scrollbars>
-                <div className={cx(styles.col2)}>
+                <Scrollbars className={cx(styles.col2)}>
+                    <div style={{ padding: "65px 25px 60px 25px"}}>
                     {selectedIndex == 0 && !coinStore.isUnlocked &&
                         <>
                             <Typography className={cx(stylesg.h4)} variant="h4">Unlock Wallet</Typography>
