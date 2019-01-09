@@ -1,5 +1,5 @@
 // @flow
-import { Divider, List, ListItem, ListItemText,Icon, IconButton, Paper, Typography, Tooltip } from "@material-ui/core";
+import { Checkbox, FormGroup, FormControlLabel, Divider, List, ListItem, ListItemText,Icon, IconButton, Paper, Typography, Tooltip } from "@material-ui/core";
 import { AButton, Div, Fa, FaDiv, TextField } from "app/components";
 import cx from "classnames";
 import { inject, observer } from "mobx-react";
@@ -12,6 +12,32 @@ const settingMenu = [
     "My Account",
     "Backup & Restore",
 ];
+const CheckboxDiv = (props) => {
+return (
+    <FormGroup row>
+        <FormControlLabel
+          control={
+            <Checkbox
+                checked={props.rMnemonic}
+                onChange={props.handleChange('rMnemonic')}
+                value="rMnemonic"
+            />
+          }
+          label="Remember Mnemonic"
+        />
+        <FormControlLabel
+            control={
+                <Checkbox
+                    checked={props.rPassphrase}
+                    onChange={props.handleChange('rPassphrase')}
+                    value="rPassphrase"
+                />
+            }
+            label="Remember Passphrase (not recommended)"
+        />                                
+    </FormGroup>    
+    )
+}
 @inject("rootStore")
 @observer
 class Settings extends React.Component<any, any> {
@@ -22,27 +48,39 @@ class Settings extends React.Component<any, any> {
         passphrase_paste: "",
         passphrase_unlock: "",
         selectedIndex: 0, 
+
+        rMnemonic: false,
+        rPassphrase: false,
     };
     public unlockWallet = async () => {
-        await this.props.rootStore.coinStore.generateKeys(false, this.state.passphrase_unlock);
+        try{
+            await this.props.rootStore.coinStore.generateKeys({_new: false, _passphrase: this.state.passphrase_unlock, });
+        }catch(e){console.log(e)}
         this.props.rootStore.appStore.setSnackMsg("Wallet unlocked!");
     }
     public lockWallet = async () => {
         await this.props.rootStore.coinStore.emptyKeys();
         this.props.rootStore.appStore.setSnackMsg("Wallet locked!");
     }
+    public forgetWallet = async () => {
+        await this.props.rootStore.coinStore.emptyKeys(true);
+        this.props.rootStore.appStore.setSnackMsg("Wallet forgotten!");
+    }
     public generateNewWallet = async () => {
-        const mnemonic = await this.props.rootStore.coinStore.generateKeys(true, this.state.passphrase);
+        const mnemonic = await this.props.rootStore.coinStore.generateKeys({_new: true, _passphrase: this.state.passphrase, store_passphrase: this.state.rPassphrase, store_mnemonic: this.state.rMnemonic});
         this.props.rootStore.appStore.setSnackMsg("New Wallet Generated!");
         this.setState({ mnemonic_copy: mnemonic });
     }
     public restoreWallet = async () => {
-        const mnemonic = await this.props.rootStore.coinStore.generateKeys(false, this.state.passphrase_paste, this.state.mnemonic_paste);
+        const mnemonic = await this.props.rootStore.coinStore.generateKeys({_new: false, _passphrase: this.state.passphrase_paste, _mnemonic: this.state.mnemonic_paste, store_passphrase: this.state.rPassphrase, store_mnemonic: this.state.rMnemonic});
         this.props.rootStore.appStore.setSnackMsg("Wallet restored!");
     }
     handleListItemClick = (e, i) => {
         this.setState({selectedIndex: i})
     }
+    handleChange = name => event => {
+        this.setState({ [name]: event.target.checked });
+    };    
     public render() {
         const { appStore, coinStore } = this.props.rootStore;
         const { mnemonic_copy, selectedIndex } = this.state;
@@ -85,7 +123,15 @@ class Settings extends React.Component<any, any> {
                         </>
                     }
                     {selectedIndex == 0 && coinStore.isUnlocked &&
-                        <AButton className={cx(stylesg.mar_10_0)} variant="contained" color="secondary" onClick={this.lockWallet}>Lock Wallet</AButton>
+                        <>
+                            <Typography className={cx(stylesg.h5)} variant="h5">Lock Wallet</Typography>
+                            <Typography className={cx(stylesg.caption)} variant="caption">Locking Wallet will not remove wallet data from local storage</Typography>
+                            <AButton className={cx(stylesg.mar_10_0)} variant="contained" color="secondary" onClick={this.lockWallet}>Lock Wallet</AButton>
+                            <Divider className={cx(stylesg.divider)} />
+                            <Typography className={cx(stylesg.h5)} variant="h5">Forget Wallet</Typography>
+                            <Typography className={cx(stylesg.caption)} variant="caption">It will completely remove wallet credentials from local storage</Typography>                            
+                            <AButton className={cx(stylesg.mar_10_0)} variant="contained" color="secondary" onClick={this.forgetWallet}>Forget Wallet</AButton>                            
+                        </>
                     }
                     {selectedIndex == 1 &&
                     <>
@@ -99,7 +145,7 @@ class Settings extends React.Component<any, any> {
                                 type="text"
                                 fullWidth={true}
                             />
-
+                            <CheckboxDiv rMnemonic={this.state.rMnemonic} rPassphrase={this.state.rPassphrase} handleChange={this.handleChange} />
                             {this.state.mnemonic_copy &&
                                 <Div>
                                 <Typography className={cx(stylesg.h5)} variant="h5">Generated Mnemonic</Typography>
@@ -152,6 +198,7 @@ class Settings extends React.Component<any, any> {
                                 type="text"
                                 fullWidth={true}
                             />
+                            <CheckboxDiv rMnemonic={this.state.rMnemonic} rPassphrase={this.state.rPassphrase} handleChange={this.handleChange} />                            
                             <AButton
                                 className={cx(stylesg.mar_10_0)}
                                 variant="contained" color="secondary"
