@@ -46,15 +46,17 @@ class Settings extends React.Component<any, any> {
         mnemonic_copy: "",
         mnemonic_paste: "",
         passphrase_paste: "",
-        passphrase_unlock: "",
         selectedIndex: 0, 
 
         rMnemonic: false,
         rPassphrase: false,
     };
+    componentDidMount(){
+        this.props.rootStore.coinStore.init();
+    }
     public unlockWallet = async () => {
         try{
-            await this.props.rootStore.coinStore.generateKeys({_new: false, _passphrase: this.state.passphrase_unlock, });
+            await this.props.rootStore.coinStore.generateKeys({ _new: false, _passphrase: this.props.rootStore.coinStore.p_local, });
         }catch(e){console.log(e)}
         this.props.rootStore.appStore.setSnackMsg("Wallet unlocked!");
     }
@@ -105,13 +107,13 @@ class Settings extends React.Component<any, any> {
                 </FaDiv>
                 <Scrollbars className={cx(styles.col2)}>
                     <div style={{ padding: "65px 25px 60px 25px"}}>
-                    {selectedIndex == 0 && !coinStore.isUnlocked &&
+                        {selectedIndex == 0 && !coinStore.isUnlocked && coinStore.isUnlockable &&
                         <>
                             <Typography className={cx(stylesg.h4)} variant="h4">Unlock Wallet</Typography>
                             <TextField
                                 className={cx(stylesg.mar_10_0)}
-                                value={this.state.passphrase_unlock}
-                                onChange={(e) => { this.setState({ passphrase_unlock: e.target.value }); }}
+                                value={coinStore.p_local}
+                                onChange={(e) => { coinStore.set_p_local(e.target.value) }}
                                 label={`Your Passphrase`}
                                 type="text"
                                 fullWidth={true}
@@ -122,7 +124,7 @@ class Settings extends React.Component<any, any> {
                                 onClick={this.unlockWallet}>Unlock Wallet</AButton>
                         </>
                     }
-                    {selectedIndex == 0 && coinStore.isUnlocked &&
+                    {selectedIndex == 0 && coinStore.isUnlocked && coinStore.isUnlockable &&
                         <>
                             <Typography className={cx(stylesg.h5)} variant="h5">Lock Wallet</Typography>
                             <Typography className={cx(stylesg.caption)} variant="caption">Locking Wallet will not remove wallet data from local storage</Typography>
@@ -132,6 +134,12 @@ class Settings extends React.Component<any, any> {
                             <Typography className={cx(stylesg.caption)} variant="caption">It will completely remove wallet credentials from local storage</Typography>                            
                             <AButton className={cx(stylesg.mar_10_0)} variant="contained" color="secondary" onClick={this.forgetWallet}>Forget Wallet</AButton>                            
                         </>
+                    }
+                    {selectedIndex == 0 && !coinStore.isUnlockable &&
+                    <>
+                        <Typography className={cx(stylesg.h5)} variant="h5">Wallet</Typography>
+                        <Typography className={cx(stylesg.caption)} variant="caption">No wallet exists. Please generate a new one or restore from mnemonic</Typography>
+                    </>
                     }
                     {selectedIndex == 1 &&
                     <>
