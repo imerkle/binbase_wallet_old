@@ -75,6 +75,7 @@
     "mobx-react": "^4.4.2",
     "mobx-react-router": "^4.0.1",
     "nanocurrency": "^2.0.4",
+    "phoenix": "^1.4.0",
     "react": "^16.2.0",
     "react-custom-scrollbars": "^4.2.1",
     "react-dom": "^16.2.0",
