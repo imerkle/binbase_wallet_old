@@ -7,7 +7,7 @@ const outPath = path.join(__dirname, './dist');
 
 // plugins
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const WebpackCleanupPlugin = require('webpack-cleanup-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const BrotliPlugin = require('brotli-webpack-plugin');
@@ -53,46 +53,43 @@ module.exports = {
       // .ts, .tsx
       {
         test: /\.tsx?$/,
-        use: isProduction
-          ? 'ts-loader'
-          : ['babel-loader?plugins=react-hot-loader/babel', 'ts-loader']
+        use: [
+          !isProduction && {
+            loader: 'babel-loader',
+            options: { plugins: ['react-hot-loader/babel'] }
+          },
+          'ts-loader'
+        ].filter(Boolean)
       },
       // css, pcss, sass, scss
       {
-        //test: /\.css$/,
         test: /\.(p|sa|sc|c)ss$/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: [
-            {
-              loader: 'css-loader',
-              query: {
-                modules: true,
-                sourceMap: !isProduction,
-                importLoaders: 1,
-                localIdentName: '[local]__[hash:base64:5]'
-              }
-            },
-            {
-              loader: 'postcss-loader',
-              options: {
-                config: {
-                  path: __dirname + '/postcss.config.js'
-                },
-              }
+        use: [
+          isProduction ? MiniCssExtractPlugin.loader : 'style-loader',
+          {
+            loader: 'css-loader',
+            query: {
+              modules: true,
+              sourceMap: !isProduction,
+              importLoaders: 1,
+              localIdentName: isProduction ? '[hash:base64:5]' : '[local]__[hash:base64:5]'
             }
-          ]
-        })
-      },
-      // static assets
-      { test: /\.html$/, use: 'html-loader' },
-      { test: /\.png$/, use: 'url-loader?limit=10000' },
-      { test: /\.jpg$/, use: 'file-loader' },
-			{
-				test: /\.woff2?$|\.ttf$|\.eot$|\.svg$/,
-				exclude: /node_modules/,
-				loader: 'file-loader',
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              config: {
+                path: __dirname + '/postcss.config.js'
+              },
+            }
+          }
+        ]
       },      
+      // static assets
+
+      { test: /\.html$/, use: 'html-loader' },
+      { test: /\.(a?png|svg)$/, use: 'url-loader?limit=10000' },
+      { test: /\.(jpe?g|gif|bmp|mp3|mp4|ogg|wav|eot|ttf|woff|woff2)$/, use: 'file-loader' }
     ]
   },
   optimization: {
@@ -114,8 +111,8 @@ module.exports = {
   },
   plugins: [
     new WebpackCleanupPlugin(),
-    new ExtractTextPlugin({
-      filename: 'styles.css',
+    new MiniCssExtractPlugin({
+      filename: '[contenthash].css',
       disable: !isProduction
     }),
     new HtmlWebpackPlugin({
@@ -133,6 +130,7 @@ module.exports = {
     },
     stats: 'minimal',
     disableHostCheck: true,
+    clientLogLevel: 'warning',    
   },
   devtool: isProduction ? false : 'cheap-module-eval-source-map',
   node: {
@@ -144,5 +142,5 @@ module.exports = {
   },
   watchOptions: {
     poll: true
-  }  
+  },
 };
