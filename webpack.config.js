@@ -1,11 +1,9 @@
-//const webpack = require('webpack');
 const path = require('path');
 
 // variables
 const isProduction = process.argv.indexOf('-p') >= 0;
 const sourcePath = path.join(__dirname, './src');
 const outPath = path.join(__dirname, './dist');
-const glob = require('glob');
 
 // plugins
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -14,11 +12,7 @@ const WebpackCleanupPlugin = require('webpack-cleanup-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const BrotliPlugin = require('brotli-webpack-plugin');
 const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
-const PurgecssPlugin = require('purgecss-webpack-plugin');
 
-const PATHS = {
-  src: path.join(__dirname, 'src')
-}
 let plugins = [];
 if (isProduction){
   plugins = [
@@ -31,9 +25,9 @@ if (isProduction){
     }),
   ]
 }
+
 module.exports = {
   context: sourcePath,
-  devtool: "",
   mode: isProduction ? "production" : "development",
   entry: {
     main: './main.tsx'
@@ -52,7 +46,6 @@ module.exports = {
     mainFields: ['module', 'browser', 'main'],
     alias: {
       'app': path.resolve(__dirname, 'src/app/'),
-      'cc-icons': path.resolve(__dirname, 'src/cc-icons/svg/'),
     }
   },
   module: {
@@ -125,11 +118,6 @@ module.exports = {
       filename: 'styles.css',
       disable: !isProduction
     }),
-    /*
-    new PurgecssPlugin({
-      paths: glob.sync(`${PATHS.src}/*`)
-    }),
-    */
     new HtmlWebpackPlugin({
       template: 'assets/index.html'
     }),
