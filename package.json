@@ -36,7 +36,7 @@
     "postcss-loader": "^2.1.1",
     "postcss-preset-env": "^6.5.0",
     "postcss-url": "^7.3.1",
-    "prettier": "^1.11.1",
+    "prettier": "^1.16.4",
     "react-hot-loader": "^4.0.0",
     "style-loader": "^0.20.2",
     "ts-jest": "^23.10.4",
